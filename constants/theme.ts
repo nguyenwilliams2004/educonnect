@@ -1,12 +1,12 @@
-// ===== DESIGN TOKENS — FORMAL PROFESSIONAL PALETTE =====
+// ===== DESIGN TOKENS — EDUCONNECT (TOPCV STYLE) PALETTE =====
 
 export const Colors = {
   // Primary palette
-  primary: '#1A2B4A',       // Navy deep
-  primaryLight: '#2E4A7A',
-  accent: '#2E6FD8',        // Professional blue
-  accentLight: '#4B8AEF',
-  accentMuted: '#EBF2FF',
+  primary: '#00B14F',       // TopCV Green
+  primaryLight: '#E5F7ED',
+  accent: '#009D45',        // Slightly darker green
+  accentLight: '#33C172',
+  accentMuted: '#F0FDF4',
 
   // Status colors
   success: '#1B8A5A',
@@ -77,24 +77,24 @@ export const Radius = {
 
 export const Shadow = {
   sm: {
-    shadowColor: '#1A2B4A',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
     elevation: 2,
   },
   md: {
-    shadowColor: '#1A2B4A',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.09,
-    shadowRadius: 10,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 4,
   },
   lg: {
-    shadowColor: '#1A2B4A',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.12,
-    shadowRadius: 20,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 16,
     elevation: 8,
   },
 };
