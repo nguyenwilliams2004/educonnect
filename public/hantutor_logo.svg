@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 120" width="840" height="240" fill="none">
+  <defs>
+    <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#4f46e5" />
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#06b6d4" />
+      <stop offset="100%" stop-color="#3b82f6" />
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000000" flood-opacity="0.12" />
+    </filter>
+  </defs>
+  <g transform="translate(10, 10)">
+    <g filter="url(#shadow)">
+      <path d="M25 25 C25 20, 32 15, 42 20 L42 80 C32 85, 25 80, 25 75 Z" fill="url(#primaryGrad)" />
+      <path d="M75 25 C75 20, 68 15, 58 20 L58 80 C68 85, 75 80, 75 75 Z" fill="url(#accentGrad)" />
+      <path d="M40 46 L60 46 L60 54 L40 54 Z" fill="url(#primaryGrad)" opacity="0.9" />
+      <path d="M50 10 L70 23 L50 36 L30 23 Z" fill="url(#goldGrad)" />
+      <path d="M70 23 L75 38 L70 40 L65 38 Z" fill="#d97706" />
+    </g>
+    <text x="115" y="68" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="54" font-weight="800" letter-spacing="-1.5">
+      <tspan fill="#0f172a">Han</tspan><tspan fill="#2563eb">tutor</tspan>
+    </text>
+  </g>
+</svg>
