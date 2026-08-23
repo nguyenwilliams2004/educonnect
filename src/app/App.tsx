@@ -1272,7 +1272,7 @@ function TutorCard({ tutor }: { tutor: any }) {
     : 95;
 
   return (
-    <div className="group relative bg-[#f4f5f7] hover:bg-[#ebedf1] rounded-3xl p-5 sm:p-6 border border-slate-200/80 hover:border-slate-300 shadow-2xs hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between overflow-hidden min-h-[300px]">
+    <div className="group relative bg-[#f4f5f7] hover:bg-[#ebedf1] rounded-3xl p-4 sm:p-5 border border-slate-200/80 hover:border-slate-300 shadow-2xs hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between overflow-hidden min-h-[320px]">
       {/* Click overlay link to open teacher profile in new tab */}
       <Link 
         to={`/giao-vien/${tutor.id}`} 
@@ -1283,60 +1283,63 @@ function TutorCard({ tutor }: { tutor: any }) {
       />
 
       {/* Right Side: Portrait Half-Body Photo (Crisp rounded photo clearly positioned on the right) */}
-      <div className="absolute right-3.5 top-5 bottom-16 w-[40%] max-w-[130px] flex items-center justify-end pointer-events-none z-0 overflow-hidden select-none">
+      <div className="absolute right-3 top-4 bottom-20 w-[42%] max-w-[125px] flex items-center justify-end pointer-events-none z-0 overflow-hidden select-none">
         <img 
           src={tutor.avatar} 
           alt={tutor.name} 
-          className="w-full h-full max-h-[160px] object-cover object-top rounded-2xl group-hover:scale-105 transition-transform duration-300 drop-shadow-md border border-white"
+          className="w-full h-full max-h-[155px] object-cover object-top rounded-2xl group-hover:scale-105 transition-transform duration-300 drop-shadow-md border border-white"
         />
       </div>
 
-      {/* Top Left: Slogan & Short Bio (Width strictly 50% with padding so text is 100% readable and never clipped) */}
-      <div className="relative z-10 w-[50%] max-w-[50%] pr-1">
-        <h3 className="font-extrabold text-base sm:text-lg text-slate-900 leading-snug line-clamp-2 mb-2 group-hover:text-blue-600 transition-colors">
+      {/* Top Left: Slogan & Short Bio (Fixed height so all cards align perfectly) */}
+      <div className="relative z-10 w-[52%] max-w-[52%] h-[120px] flex flex-col justify-start">
+        <h3 className="font-extrabold text-sm sm:text-base text-slate-900 leading-snug line-clamp-2 mb-1.5 group-hover:text-blue-600 transition-colors h-10 overflow-hidden">
           {tutor.headline || tutor.title}
         </h3>
-        <p className="text-xs text-slate-500 line-clamp-3 leading-relaxed">
+        <p className="text-xs text-slate-500 line-clamp-3 leading-relaxed overflow-hidden text-ellipsis">
           {tutor.shortBio || tutor.teachingMethod || tutor.title}
         </p>
       </div>
 
-      {/* Bottom Area: Teacher Name (Left) & Dark Subject Badge Pill (Right) */}
-      <div className="relative z-20 flex items-end justify-between pt-6 mt-auto">
-        <div>
-          <span className="text-[11px] text-slate-400 font-medium block leading-none mb-1">
+      {/* Middle/Bottom Area: Teacher Name (Left) & Dark Subject Badge Pill (Right) - Uniform Baseline */}
+      <div className="relative z-20 flex items-center justify-between pt-2 mt-auto h-12">
+        <div className="min-w-0 pr-2">
+          <span className="text-[10px] text-slate-400 font-medium block leading-none mb-0.5 truncate">
             {tutor.rolePrefix || (tutor.type === 'Giáo viên' ? (tutor.name.includes('Cô') ? 'Cô' : 'Thầy') : 'Gia sư')}
           </span>
-          <span className="font-bold text-sm sm:text-base text-slate-800 tracking-tight block">
+          <span className="font-bold text-xs sm:text-sm text-slate-900 tracking-tight block truncate">
             {tutor.displayName || tutor.name.replace(/^(Cô|Thầy|HLV|Gia sư)\s+/i, '')}
           </span>
         </div>
 
-        <div className="relative z-20">
-          <span className="bg-slate-900 text-white font-bold text-xs px-3.5 py-1 rounded-full shadow-sm tracking-wide shrink-0">
+        <div className="shrink-0">
+          <span className="bg-slate-900 text-white font-bold text-[11px] px-3 py-1 rounded-full shadow-sm tracking-wide shrink-0 inline-block text-center whitespace-nowrap">
             {tutor.badgeSubject || tutor.subjects?.[0] || 'Môn học'}
           </span>
         </div>
       </div>
 
-      {/* Quick Action Footer: Highlighted Success Rate & Solid Star Rating (Solid layer at bottom) */}
-      <div className="relative z-30 pt-3 border-t border-slate-200/80 mt-3 flex items-center justify-between gap-2 bg-[#f4f5f7]">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-slate-800 whitespace-nowrap">
+      {/* Quick Action Footer: Highlighted Success Rate & Solid Star Rating (Generous spacing, NO text clipping) */}
+      <div className="relative z-30 pt-2.5 border-t border-slate-200/80 mt-2.5 flex items-center justify-between gap-1.5 bg-[#f4f5f7]">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs font-bold text-slate-900 whitespace-nowrap">
               {tutor.hourlyRate}đ<span className="text-[10px] font-normal text-slate-400">/{tutor.priceUnit || 'giờ'}</span>
             </span>
-            <span className="inline-flex items-center gap-0.5 text-xs font-semibold text-slate-700">
+            <span className="inline-flex items-center gap-0.5 text-xs font-semibold text-slate-700 shrink-0">
               <svg className="w-3.5 h-3.5 fill-amber-400 text-amber-400" viewBox="0 0 20 20">
                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
               </svg>
               {tutor.rating}
             </span>
           </div>
-          <span className="inline-block text-[11px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-md mt-1 shadow-2xs">
-            Tỷ lệ nhận lớp: <strong>{successRate}%</strong>
-          </span>
+          <div className="mt-1">
+            <span className="inline-block text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-1.5 py-0.5 rounded-md shadow-2xs whitespace-nowrap">
+              Tỷ lệ nhận lớp: <strong>{successRate}%</strong>
+            </span>
+          </div>
         </div>
+
         <button
           type="button"
           onClick={(e) => {
@@ -1344,7 +1347,7 @@ function TutorCard({ tutor }: { tutor: any }) {
             e.stopPropagation();
             openContactZaloModal(tutor);
           }}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition-all shadow-sm cursor-pointer whitespace-nowrap shrink-0"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-2 rounded-xl text-xs transition-all shadow-sm cursor-pointer whitespace-nowrap shrink-0 text-center"
         >
           Liên hệ ngay
         </button>
