@@ -1283,16 +1283,16 @@ function TutorCard({ tutor }: { tutor: any }) {
       />
 
       {/* Right Side: Portrait Half-Body Photo (Crisp rounded photo clearly positioned on the right) */}
-      <div className="absolute right-3.5 top-5 bottom-16 w-[42%] flex items-center justify-end pointer-events-none z-0 overflow-hidden select-none">
+      <div className="absolute right-3.5 top-5 bottom-16 w-[40%] max-w-[130px] flex items-center justify-end pointer-events-none z-0 overflow-hidden select-none">
         <img 
           src={tutor.avatar} 
           alt={tutor.name} 
-          className="w-full h-full max-h-[165px] object-cover object-top rounded-2xl group-hover:scale-105 transition-transform duration-300 drop-shadow-md border border-white"
+          className="w-full h-full max-h-[160px] object-cover object-top rounded-2xl group-hover:scale-105 transition-transform duration-300 drop-shadow-md border border-white"
         />
       </div>
 
-      {/* Top Left: Slogan & Short Bio (Width strictly 54% so text is 100% readable and never covered) */}
-      <div className="relative z-10 w-[54%] max-w-[54%]">
+      {/* Top Left: Slogan & Short Bio (Width strictly 50% with padding so text is 100% readable and never clipped) */}
+      <div className="relative z-10 w-[50%] max-w-[50%] pr-1">
         <h3 className="font-extrabold text-base sm:text-lg text-slate-900 leading-snug line-clamp-2 mb-2 group-hover:text-blue-600 transition-colors">
           {tutor.headline || tutor.title}
         </h3>
