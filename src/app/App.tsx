@@ -1282,21 +1282,17 @@ function TutorCard({ tutor }: { tutor: any }) {
         title={`Xem chi tiết hồ sơ ${tutor.name} (Mở tab mới)`}
       />
 
-      {/* Right Side: Portrait Half-Body Photo (Original style, positioned cleanly on the right) */}
-      <div className="absolute right-0 bottom-14 w-32 sm:w-36 h-44 sm:h-48 flex items-end justify-end pointer-events-none z-0 overflow-hidden select-none">
+      {/* Right Side: Portrait Half-Body Photo (Crisp rounded photo clearly positioned on the right) */}
+      <div className="absolute right-3.5 top-5 bottom-16 w-[42%] flex items-center justify-end pointer-events-none z-0 overflow-hidden select-none">
         <img 
           src={tutor.avatar} 
           alt={tutor.name} 
-          className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300 drop-shadow-md rounded-br-2xl"
-          style={{
-            maskImage: 'linear-gradient(to top, black 85%, transparent 100%), linear-gradient(to left, black 75%, transparent 100%)',
-            WebkitMaskImage: 'linear-gradient(to top, rgba(0,0,0,1) 85%, rgba(0,0,0,0) 100%), linear-gradient(to left, rgba(0,0,0,1) 75%, rgba(0,0,0,0) 100%)'
-          }}
+          className="w-full h-full max-h-[165px] object-cover object-top rounded-2xl group-hover:scale-105 transition-transform duration-300 drop-shadow-md border border-white"
         />
       </div>
 
-      {/* Top Left: Slogan & Short Bio (Width constrained to 58% so text is 100% clear and never obscured) */}
-      <div className="relative z-10 w-[58%] sm:w-[60%]">
+      {/* Top Left: Slogan & Short Bio (Width strictly 54% so text is 100% readable and never covered) */}
+      <div className="relative z-10 w-[54%] max-w-[54%]">
         <h3 className="font-extrabold text-base sm:text-lg text-slate-900 leading-snug line-clamp-2 mb-2 group-hover:text-blue-600 transition-colors">
           {tutor.headline || tutor.title}
         </h3>
