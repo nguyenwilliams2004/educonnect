@@ -46,24 +46,136 @@ export function MessengerLogoIcon({ className = "w-full h-full" }: { className?:
   );
 }
 
+// System instruction chứa toàn bộ tri thức nghiệp vụ HanTutor
+function getHanTutorSystemInstruction(tutors: any[]) {
+  const tutorsSummary = tutors.map(t => ({
+    id: t.id,
+    name: t.name,
+    type: t.type,
+    subjects: t.subjects,
+    badgeSubject: t.badgeSubject,
+    hourlyRate: t.hourlyRate,
+    location: t.location,
+    headline: t.headline,
+    title: t.title,
+    successRate: t.trialStats?.totalTrials > 0 
+      ? Math.round((t.trialStats.officialEnrolled / t.trialStats.totalTrials) * 100) 
+      : 95
+  }));
+
+  return `Bạn là Trợ lý AI HanTutor thông minh và chuyên nghiệp, đại diện cho nền tảng kết nối Giáo viên & Gia sư chất lượng cao tại Hà Nội (HanTutor - fasttryon.com).
+
+NHIỆM VỤ CHÍNH:
+1. Tư vấn quy trình kết nối & học thử:
+   - Học sinh tìm giáo viên theo môn/khu vực tại Hà Nội.
+   - Bấm "Liên hệ ngay" để nhận Zalo/SĐT trực tiếp và nhận email thông báo xác nhận.
+   - Hai bên thống nhất lịch học thử 1-1 miễn phí 01 buổi.
+   - Sau học thử: học sinh xác nhận "Đăng ký học chính thức" nếu hài lòng, hoặc "Không tiếp tục" (hệ thống tự động giảm tỷ lệ nhận lớp của giáo viên để đảm bảo tính khách quan).
+2. Chính sách tài chính minh bạch:
+   - Thu 30% học phí tháng đầu cho trung tâm và 70% trả cho giáo viên sau khi hoàn thành giảng dạy.
+   - Cam kết hoàn tiền 100% nếu học sinh không hài lòng.
+3. Kiểm duyệt KYC:
+   - 100% giáo viên được đối soát CCCD 2 mặt và bằng cấp sư phạm / chứng chỉ chuyên môn.
+4. DANH SÁCH GIÁO VIÊN VÀ GIA SƯ HIỆN CÓ TRÊN HỆ THỐNG:
+${JSON.stringify(tutorsSummary, null, 2)}
+
+NGUYÊN TẮC TRẢ LỜI:
+- Luôn trả lời bằng tiếng Việt, ngắn gọn, lịch sự, chuẩn xác, không dài dòng.
+- TUYỆT ĐỐI KHÔNG sử dụng icon hoặc emoji trang trí rườm rà.
+- Khi người dùng tìm môn cụ thể (Toán, Văn, Anh, Hóa, Lập trình, Bơi lội, Đàn...), hãy gợi ý đích danh các giáo viên trong danh sách trên kèm môn, mức học phí và link hồ sơ /giao-vien/{id}.`;
+}
+
+// Hàm gọi API Google Gemini (Ưu tiên Gemini 3.7 Flash)
+async function callGeminiApi(
+  apiKey: string,
+  userMessage: string,
+  history: ChatMessage[],
+  tutorsList: any[]
+): Promise<string> {
+  const modelsToTry = [
+    'gemini-3.7-flash',
+    'gemini-2.5-flash',
+    'gemini-2.0-flash',
+    'gemini-1.5-flash'
+  ];
+
+  const contents = [
+    ...history.filter(m => m.id !== 'welcome').slice(-6).map(msg => ({
+      role: msg.sender === 'user' ? 'user' : 'model',
+      parts: [{ text: msg.text }]
+    })),
+    {
+      role: 'user',
+      parts: [{ text: userMessage }]
+    }
+  ];
+
+  const systemInstructionText = getHanTutorSystemInstruction(tutorsList);
+  let lastErrorMsg = '';
+
+  for (const model of modelsToTry) {
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey.trim()}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            contents,
+            systemInstruction: {
+              parts: [{ text: systemInstructionText }]
+            },
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 1000
+            }
+          })
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        const candidateText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (candidateText) {
+          return candidateText;
+        }
+      } else {
+        const errData = await response.json().catch(() => ({}));
+        lastErrorMsg = errData.error?.message || `Lỗi HTTP ${response.status}`;
+      }
+    } catch (e: any) {
+      lastErrorMsg = e.message || 'Lỗi kết nối mạng tới Google Gemini';
+    }
+  }
+
+  throw new Error(lastErrorMsg || "Không thể nhận phản hồi từ mô hình Gemini 3.7 Flash");
+}
+
 // Các câu hỏi gợi ý nhanh (Không chứa icon rườm rà)
 const QUICK_PROMPTS = [
   "Quy trình kết nối và học thử như thế nào?",
   "Tìm giáo viên Toán luyện thi tại Hà Nội",
   "Tỷ lệ nhận lớp thành công là gì?",
-  "Hướng dẫn đăng ký trở thành gia sư"
+  "Chính sách bảo vệ học viên 30%/70%"
 ];
 
 export default function AiChatWidget({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const { tutors } = useData();
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [apiKey, setApiKey] = useState(() => {
+    return localStorage.getItem('hantutor_gemini_api_key') || (import.meta as any).env?.VITE_GEMINI_API_KEY || '';
+  });
+  const [isSettingKey, setIsSettingKey] = useState(false);
+  const [tempKey, setTempKey] = useState('');
   
   const [messages, setMessages] = useState<ChatMessage[]>(() => [
     {
       id: 'welcome',
       sender: 'ai',
-      text: `Xin chào! Tôi là Trợ lý AI HanTutor.\n\nTôi có thể hỗ trợ bạn:\n- Quy trình học thử và kết nối giáo viên\n- Tìm kiếm gia sư và giáo viên theo môn học tại Hà Nội\n- Tìm hiểu về tỷ lệ nhận lớp thành công và xác thực KYC\n- Hướng dẫn đăng ký giảng dạy trên hệ thống\n\nBạn cần hỗ trợ thông tin gì hôm nay?`,
+      text: `Xin chào! Tôi là Trợ lý AI HanTutor (Sử dụng mô hình Gemini 3.7 Flash).\n\nTôi có thể hỗ trợ bạn:\n- Quy trình học thử 1-1 miễn phí và kết nối giáo viên\n- Tìm kiếm gia sư và giáo viên theo môn học tại Hà Nội\n- Chính sách bảo vệ học viên 30%/70% và kiểm duyệt KYC\n- Hướng dẫn đăng ký giảng dạy trên hệ thống\n\nBạn cần hỗ trợ thông tin gì hôm nay?`,
       timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
     }
   ]);
@@ -76,82 +188,25 @@ export default function AiChatWidget({ isOpen, onClose }: { isOpen: boolean; onC
     }
   }, [messages, isOpen]);
 
-  // Bộ phân tích nghiệp vụ HanTutor chuyên sâu (Không cần nhập API key)
-  const generateHanTutorResponse = (query: string): { text: string; recommendedTutors?: any[] } => {
-    const q = query.toLowerCase().trim();
-
-    // 1. Quy trình học thử
-    if (q.includes('quy trình') || q.includes('học thử') || q.includes('kết nối') || q.includes('liên hệ')) {
-      return {
-        text: `### Quy trình kết nối & học thử tại HanTutor:\n\n1. Bước 1: Chọn giáo viên phù hợp trên danh sách theo môn học và quận tại Hà Nội.\n2. Bước 2: Bấm nút "Liên hệ ngay" để nhận số Zalo/SĐT chính thức của giáo viên và trao đổi lịch học.\n3. Bước 3: Học sinh và giáo viên thực hiện buổi học thử 1-1 miễn phí.\n4. Bước 4: Sau buổi học thử:\n   - Nếu tiếp tục: Học sinh chọn "Đăng ký học chính thức" trên hệ thống.\n   - Nếu không tiếp tục: Học sinh chọn "Không tiếp tục", lớp học thử sẽ được đóng và hệ thống tự động cập nhật giảm tỷ lệ nhận lớp của giáo viên để đảm bảo tính khách quan.`
-      };
+  const handleSaveApiKey = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (tempKey.trim()) {
+      localStorage.setItem('hantutor_gemini_api_key', tempKey.trim());
+      setApiKey(tempKey.trim());
+      setIsSettingKey(false);
+      alert("Đã lưu Google Gemini API Key thành công! Chatbot sẽ gọi trực tiếp mô hình Gemini 3.7 Flash.");
     }
-
-    // 2. Tỷ lệ nhận lớp thành công
-    if (q.includes('tỷ lệ') || q.includes('nhận lớp') || q.includes('thành công') || q.includes('chốt học')) {
-      return {
-        text: `### Tỷ lệ nhận lớp thành công là gì?\n\n- Định nghĩa: Tỷ lệ phần trăm số học viên quyết định đăng ký học chính thức sau khi hoàn thành buổi học thử (Số học viên chốt học / Tổng số lượt học thử).\n- Cơ chế tự động:\n  - Khi học sinh bấm "Liên hệ ngay", lượt học thử được ghi nhận.\n  - Khi học sinh bấm "Đăng ký học chính thức", tỷ lệ nhận lớp tăng lên.\n  - Khi học sinh chọn "Không tiếp tục", tỷ lệ nhận lớp tự động giảm xuống.\n\nChỉ số này giúp phụ huynh đánh giá chính xác độ uy tín và chất lượng giảng dạy của giáo viên.`
-      };
-    }
-
-    // 3. Đăng ký làm giáo viên / KYC
-    if (q.includes('đăng ký') && (q.includes('gia sư') || q.includes('giáo viên') || q.includes('dạy') || q.includes('kyc'))) {
-      return {
-        text: `### Hướng dẫn đăng ký trở thành Giáo viên / Gia sư:\n\n1. Đăng ký tài khoản: Bấm "Đăng ký ngay" ở góc trên cùng và chọn vai trò "Giáo viên / Gia sư" (hoặc vào mục Đăng ký gia sư).\n2. Điền thông tin hồ sơ: Học vấn, môn giảng dạy, khu vực tại Hà Nội và mức học phí mong muốn.\n3. Xác thực hồ sơ KYC: Tải lên ảnh CCCD (2 mặt) và bằng tốt nghiệp/chứng chỉ chuyên môn.\n4. Phê duyệt: Ban quản trị kiểm duyệt hồ sơ và duyệt kích hoạt hiển thị trực tiếp lên hệ thống.`
-      };
-    }
-
-    // 4. Tìm kiếm giáo viên theo môn học
-    const subjectKeywords: { [key: string]: string[] } = {
-      'Toán': ['toán', 'toan', 'math'],
-      'Ngữ văn': ['văn', 'ngữ văn', 'van'],
-      'Tiếng Anh': ['anh', 'tiếng anh', 'english', 'ielts', 'toeic'],
-      'Hóa học': ['hóa', 'hoa', 'chemistry'],
-      'Địa lí': ['địa', 'dia', 'geography'],
-      'Sinh học': ['sinh', 'biology'],
-      'Lập trình': ['lập trình', 'code', 'cntt', 'tin học', 'python'],
-      'Năng khiếu': ['đàn', 'nhạc', 'vẽ', 'bơi', 'võ', 'cờ vua']
-    };
-
-    let matchedSubject = '';
-    for (const [sub, keys] of Object.entries(subjectKeywords)) {
-      if (keys.some(k => q.includes(k))) {
-        matchedSubject = sub;
-        break;
-      }
-    }
-
-    let matchedTutors = tutors.filter((t: any) => {
-      if (matchedSubject && t.subjects?.some((s: string) => s.toLowerCase().includes(matchedSubject.toLowerCase()))) {
-        return true;
-      }
-      return false;
-    });
-
-    if (matchedTutors.length === 0 && (q.includes('giáo viên') || q.includes('gia sư') || q.includes('tìm'))) {
-      matchedTutors = tutors.slice(0, 3);
-    }
-
-    if (matchedTutors.length > 0) {
-      const tutorListMarkdown = matchedTutors.map((t: any) => 
-        `- **${t.name}** (${t.subjects?.join(', ')}): ${t.title || t.headline} — Học phí: **${t.hourlyRate}đ/giờ** (Tỷ lệ nhận lớp: **${t.trialStats?.totalTrials > 0 ? Math.round((t.trialStats.officialEnrolled / t.trialStats.totalTrials) * 100) : 96}%**)`
-      ).join('\n');
-
-      return {
-        text: `### Danh sách giáo viên phù hợp:\n\n${tutorListMarkdown}\n\nBạn có thể bấm vào thẻ giáo viên để xem chi tiết bằng cấp và bấm "Liên hệ ngay" để bắt đầu học thử.`,
-        recommendedTutors: matchedTutors
-      };
-    }
-
-    // 5. Mặc định
-    return {
-      text: `HanTutor là nền tảng kết nối trực tiếp Phụ huynh và Học sinh với Giáo viên, Gia sư chất lượng cao tại Hà Nội.\n\n- Tìm kiếm giáo viên theo môn học và quận huyện trên thanh tìm kiếm.\n- Bấm "Liên hệ ngay" để kết nối Zalo và hẹn lịch học thử 1-1 miễn phí.\n- Ban quản trị kiểm duyệt 100% bằng cấp và chứng chỉ của giáo viên.\n\nĐể trao đổi trực tiếp với bộ phận hỗ trợ, bạn có thể bấm vào nút Facebook Messenger ở góc dưới màn hình.`
-    };
   };
 
   const handleSendMessage = async (textToSend?: string) => {
     const messageText = textToSend || inputMessage;
     if (!messageText.trim()) return;
+
+    // Nếu chưa có API key, mở form nhập key
+    if (!apiKey.trim()) {
+      setIsSettingKey(true);
+      return;
+    }
 
     const userMsg: ChatMessage = {
       id: `user_${Date.now()}`,
@@ -164,45 +219,139 @@ export default function AiChatWidget({ isOpen, onClose }: { isOpen: boolean; onC
     if (!textToSend) setInputMessage('');
     setIsLoading(true);
 
-    setTimeout(() => {
-      const responseData = generateHanTutorResponse(messageText);
+    try {
+      // Gọi trực tiếp Google Gemini API (Gemini 3.7 Flash)
+      const aiResponseText = await callGeminiApi(apiKey, messageText.trim(), messages, tutors);
+
+      // Trích xuất giáo viên gợi ý nếu có nhắc đến tên
+      const matchedTutors = tutors.filter((t: any) => 
+        aiResponseText.toLowerCase().includes(t.name.toLowerCase())
+      );
+
       const aiMsg: ChatMessage = {
         id: `ai_${Date.now()}`,
         sender: 'ai',
-        text: responseData.text,
-        recommendedTutors: responseData.recommendedTutors,
+        text: aiResponseText,
+        recommendedTutors: matchedTutors.length > 0 ? matchedTutors : undefined,
         timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
       };
       setMessages(prev => [...prev, aiMsg]);
+    } catch (err: any) {
+      const errorMsg: ChatMessage = {
+        id: `err_${Date.now()}`,
+        sender: 'ai',
+        text: `Lỗi kết nối Gemini 3.7 Flash: ${err.message || 'Vui lòng kiểm tra lại API Key hoặc kết nối mạng.'}\n\nBạn có thể bấm vào nút "API Key" ở góc trên bên phải để cập nhật API key mới.`,
+        timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+      };
+      setMessages(prev => [...prev, errorMsg]);
+    } finally {
       setIsLoading(false);
-    }, 450);
+    }
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed bottom-24 right-4 sm:right-6 z-50 w-[92vw] sm:w-[400px] h-[550px] max-h-[82vh] bg-white rounded-3xl shadow-2xl border border-slate-200/90 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200 select-text">
-      {/* Header tinh gọn: Không có icon thừa, không có dán API */}
-      <div className="bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 p-4 text-white flex items-center justify-between shadow-md shrink-0">
+    <div className="fixed bottom-24 right-4 sm:right-6 z-50 w-[92vw] sm:w-[410px] h-[560px] max-h-[82vh] bg-white rounded-3xl shadow-2xl border border-slate-200/90 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200 select-text">
+      {/* Header tinh gọn: Hiển thị mô hình Gemini 3.7 Flash & nút quản lý Key */}
+      <div className="bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 p-3.5 text-white flex items-center justify-between shadow-md shrink-0">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-2xl bg-white p-1 shadow-sm shrink-0 flex items-center justify-center">
-            <AiChatLogoIcon className="w-8 h-8" />
+          <div className="w-9 h-9 rounded-xl bg-white p-0.5 shadow-sm shrink-0 flex items-center justify-center">
+            <AiChatLogoIcon className="w-7 h-7" />
           </div>
           <div className="min-w-0">
-            <h3 className="font-extrabold text-sm tracking-tight text-white truncate">Trợ lý AI HanTutor</h3>
-            <p className="text-[11px] text-orange-100 truncate mt-0.5">Tư vấn nghiệp vụ & kết nối giáo viên</p>
+            <div className="flex items-center gap-1.5">
+              <h3 className="font-extrabold text-xs sm:text-sm tracking-tight text-white truncate">Trợ lý HanTutor AI</h3>
+              <span className="bg-white/20 text-white font-bold text-[9px] px-1.5 py-0.2 rounded-md shrink-0">
+                Gemini 3.7 Flash
+              </span>
+            </div>
+            <p className="text-[10px] text-orange-100 truncate">Gọi trực tiếp Google Gemini API</p>
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={onClose}
-          className="p-2 hover:bg-white/20 rounded-xl text-white transition-colors cursor-pointer"
-          title="Đóng"
-        >
-          <X className="w-4 h-4" />
-        </button>
+        <div className="flex items-center gap-1 shrink-0">
+          <button
+            type="button"
+            onClick={() => {
+              setTempKey(apiKey);
+              setIsSettingKey(!isSettingKey);
+            }}
+            className="p-1.5 hover:bg-white/20 rounded-xl text-white transition-colors cursor-pointer text-[10px] font-bold flex items-center gap-1 bg-black/15 px-2.5"
+            title="Cài đặt Google Gemini API Key"
+          >
+            {apiKey ? 'Key: Đã lưu' : 'Nhập API Key'}
+          </button>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-1.5 hover:bg-white/20 rounded-xl text-white transition-colors cursor-pointer"
+            title="Đóng"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
       </div>
+
+      {/* Modal/Banner nhập API Key khi chưa có hoặc muốn thay đổi */}
+      {isSettingKey && (
+        <div className="bg-slate-900 text-white p-4 border-b border-slate-800 animate-in slide-in-from-top-2 duration-150 shrink-0">
+          <div className="flex items-center justify-between mb-2">
+            <span className="font-bold text-xs text-amber-400">Google Gemini API Key (Gemini 3.7 Flash)</span>
+            <button 
+              type="button" 
+              onClick={() => setIsSettingKey(false)}
+              className="text-slate-400 hover:text-white text-xs"
+            >
+              Đóng
+            </button>
+          </div>
+          <p className="text-[11px] text-slate-300 mb-2.5 leading-relaxed">
+            Nhập Google Gemini API Key của bạn để chatbot gửi yêu cầu và nhận phản hồi trực tiếp từ mô hình <strong>Gemini 3.7 Flash</strong>.
+          </p>
+          <form onSubmit={handleSaveApiKey} className="space-y-2">
+            <input
+              type="password"
+              value={tempKey}
+              onChange={e => setTempKey(e.target.value)}
+              placeholder="Dán mã API Key (AIzaSy...)"
+              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder:text-slate-500 outline-none focus:border-amber-400"
+              required
+            />
+            <div className="flex items-center justify-between pt-1">
+              <a
+                href="https://aistudio.google.com/app/apikey"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[10px] text-amber-400 hover:underline"
+              >
+                Lấy API key miễn phí tại Google AI Studio →
+              </a>
+              <button
+                type="submit"
+                className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs transition-colors cursor-pointer"
+              >
+                Lưu Key
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Thông báo nếu chưa có Key */}
+      {!apiKey && !isSettingKey && (
+        <div className="bg-amber-50 border-b border-amber-200 p-2.5 px-4 flex items-center justify-between text-xs text-amber-900 shrink-0">
+          <span>Chưa cấu hình Gemini API Key.</span>
+          <button
+            type="button"
+            onClick={() => setIsSettingKey(true)}
+            className="font-bold underline text-amber-800 hover:text-amber-950 cursor-pointer"
+          >
+            Nhập Key ngay
+          </button>
+        </div>
+      )}
 
       {/* Message Thread */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3.5 bg-slate-50/50">
