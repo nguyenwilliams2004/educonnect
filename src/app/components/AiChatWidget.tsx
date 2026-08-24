@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
 import { Send, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { useData } from '../App';
 
 export interface ChatMessage {
@@ -58,8 +58,8 @@ function getHanTutorSystemInstruction(tutors: any[]) {
     location: t.location,
     headline: t.headline,
     title: t.title,
-    successRate: t.trialStats?.totalTrials > 0 
-      ? Math.round((t.trialStats.officialEnrolled / t.trialStats.totalTrials) * 100) 
+    successRate: t.trialStats?.totalTrials > 0
+      ? Math.round((t.trialStats.officialEnrolled / t.trialStats.totalTrials) * 100)
       : 95
   }));
 
@@ -142,7 +142,7 @@ function generateHanTutorDomainResponse(query: string, tutors: any[]): { text: s
   }
 
   if (matchedTutors.length > 0) {
-    const tutorListMarkdown = matchedTutors.map((t: any) => 
+    const tutorListMarkdown = matchedTutors.map((t: any) =>
       `- **${t.name}** (${t.subjects?.join(', ')}): ${t.title || t.headline} — Học phí: **${t.hourlyRate}đ/giờ**`
     ).join('\n');
 
@@ -173,10 +173,8 @@ async function callGeminiApi(
   ];
 
   const modelsToTry = [
-    'gemini-3.7-flash',
     'gemini-2.5-flash',
-    'gemini-2.0-flash',
-    'gemini-1.5-flash'
+    'gemini-2.0-flash'
   ];
 
   const contents = [
@@ -250,8 +248,8 @@ const QUICK_PROMPTS = [
 // Khóa kết nối Google Gemini API
 const getEffectiveApiKey = () => {
   return (
-    localStorage.getItem('hantutor_gemini_api_key') || 
-    (import.meta as any).env?.VITE_GEMINI_API_KEY || 
+    localStorage.getItem('hantutor_gemini_api_key') ||
+    (import.meta as any).env?.VITE_GEMINI_API_KEY ||
     (typeof window !== 'undefined' && window.atob ? window.atob('QVEuQWI4Uk42SzB0a3ZJMkRYb3Qta2IwQ1RaOEtaVXBOMjFzTE85RFJvZ29SeUtrc0h1Rmc=') : '')
   );
 };
@@ -261,7 +259,7 @@ export default function AiChatWidget({ isOpen, onClose }: { isOpen: boolean; onC
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const apiKey = getEffectiveApiKey();
-  
+
   const [messages, setMessages] = useState<ChatMessage[]>(() => [
     {
       id: 'welcome',
@@ -299,7 +297,7 @@ export default function AiChatWidget({ isOpen, onClose }: { isOpen: boolean; onC
       const aiResponseText = await callGeminiApi(apiKey || DEFAULT_GEMINI_API_KEY, messageText.trim(), messages, tutors);
 
       // Trích xuất giáo viên gợi ý nếu có nhắc đến tên
-      const matchedTutors = tutors.filter((t: any) => 
+      const matchedTutors = tutors.filter((t: any) =>
         aiResponseText.toLowerCase().includes(t.name.toLowerCase())
       );
 
@@ -358,11 +356,10 @@ export default function AiChatWidget({ isOpen, onClose }: { isOpen: boolean; onC
             className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}
           >
             <div
-              className={`max-w-[85%] rounded-2xl p-3.5 text-xs leading-relaxed shadow-2xs ${
-                msg.sender === 'user'
+              className={`max-w-[85%] rounded-2xl p-3.5 text-xs leading-relaxed shadow-2xs ${msg.sender === 'user'
                   ? 'bg-blue-600 text-white rounded-br-xs'
                   : 'bg-white text-slate-800 border border-slate-200/80 rounded-bl-xs'
-              }`}
+                }`}
             >
               {/* Markdown Content rendering */}
               <div className="space-y-1.5 whitespace-pre-wrap">

@@ -1570,13 +1570,13 @@ function TutorCard({ tutor }: { tutor: any }) {
         </div>
       </Link>
 
-      {/* Quick Action Footer: Học phí + Rating 2 dòng rõ ràng, nút Liên hệ ngay KHÔNG BAO GIỜ che chữ /giờ */}
-      <div className="relative z-30 pt-3 border-t border-slate-200/80 mt-auto flex items-center justify-between gap-1.5 bg-[#f4f5f7]">
-        <div className="flex flex-col min-w-0 flex-1 pr-1">
-          <div className="text-xs sm:text-[13px] font-extrabold text-slate-900 leading-tight">
+      {/* Quick Action Footer: Học phí 100% trên CÙNG 1 DÒNG (không bao giờ ngắt dòng) */}
+      <div className="relative z-30 pt-3 border-t border-slate-200/80 mt-auto flex items-center justify-between gap-1 bg-[#f4f5f7]">
+        <div className="min-w-0 flex-1 pr-1">
+          <div className="text-[11px] sm:text-xs font-extrabold text-slate-900 whitespace-nowrap leading-tight">
             {tutor.hourlyRate}đ<span className="text-[10px] font-normal text-slate-500">/{tutor.priceUnit || 'giờ'}</span>
           </div>
-          <div className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-700 mt-1">
+          <div className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-700 mt-0.5 whitespace-nowrap">
             <svg className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" viewBox="0 0 20 20">
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
             </svg>
@@ -1591,7 +1591,7 @@ function TutorCard({ tutor }: { tutor: any }) {
             e.stopPropagation();
             openContactZaloModal(tutor);
           }}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-extrabold px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl text-xs transition-all shadow-sm hover:shadow-md cursor-pointer whitespace-nowrap shrink-0 text-center"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-extrabold px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl text-xs transition-all shadow-xs hover:shadow-md cursor-pointer whitespace-nowrap shrink-0 text-center"
         >
           Liên hệ ngay
         </button>
