@@ -3113,6 +3113,7 @@ function TutorRegistrationPage() {
 
   const [achievementFile, setAchievementFile] = useState<File | null>(null);
   const [achievementPreview, setAchievementPreview] = useState<string>('');
+  const [showSampleModal, setShowSampleModal] = useState(false);
 
   // Bank account for receiving tutor payment (70%)
   const [bankName, setBankName] = useState('');
@@ -3540,17 +3541,12 @@ function TutorRegistrationPage() {
                 </div>
               </div>
 
-              {/* Avatar Uploader: 4x6 với Ảnh Mẫu chuẩn bên cạnh */}
+              {/* Avatar Uploader: Ảnh chân dung rõ mặt với Ảnh Mẫu chuẩn bên cạnh (click để phóng to) */}
               <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100">
-                <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-                  <label className="block text-sm font-bold text-slate-800">Ảnh chân dung 4x6 (nền trắng) *</label>
-                  <span className="text-[11px] font-semibold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200/80">
-                    Định dạng chuẩn 4:6 • Nền trắng
-                  </span>
-                </div>
+                <label className="block text-sm font-bold text-slate-800 mb-3">Ảnh chân dung rõ mặt *</label>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
-                  {/* Left: User 4x6 Upload Box */}
+                  {/* Left: User Upload Box */}
                   <div className="flex items-center gap-3.5">
                     <div className="w-20 h-28 sm:w-24 sm:h-32 rounded-xl bg-slate-100 border-2 border-slate-200 shadow-inner flex-shrink-0 overflow-hidden relative flex flex-col items-center justify-center">
                       {avatarPreview ? (
@@ -3558,7 +3554,7 @@ function TutorRegistrationPage() {
                       ) : (
                         <div className="flex flex-col items-center justify-center text-slate-400 p-2 text-center">
                           <Users className="w-7 h-7 mb-1" />
-                          <span className="text-[9px] font-bold uppercase tracking-wider">Khung 4x6</span>
+                          <span className="text-[9px] font-bold uppercase tracking-wider">Khung ảnh</span>
                         </div>
                       )}
                     </div>
@@ -3574,27 +3570,42 @@ function TutorRegistrationPage() {
                         />
                       </label>
                       <p className="text-[11px] text-slate-500 mt-1.5 leading-relaxed">
-                        Ảnh chụp chính diện rõ mặt, nền trắng, trang phục lịch sự. Tối đa 5MB.
+                        Ảnh chụp chính diện rõ mặt, phông nền trắng hoặc xanh nước biển. Tối đa 5MB.
                       </p>
                     </div>
                   </div>
 
-                  {/* Right: Reference Sample Photo (Ảnh mẫu chuẩn 4x6) */}
+                  {/* Right: Reference Sample Photo (Click để phóng to xem kĩ) */}
                   <div className="flex items-center gap-3 bg-amber-50/70 border border-amber-200/80 rounded-xl p-3">
-                    <div className="w-16 h-24 sm:w-20 sm:h-28 rounded-lg overflow-hidden border-2 border-white shadow-xs flex-shrink-0 bg-white">
+                    <button
+                      type="button"
+                      onClick={() => setShowSampleModal(true)}
+                      className="relative group w-16 h-24 sm:w-20 sm:h-28 rounded-lg overflow-hidden border-2 border-white shadow-xs flex-shrink-0 bg-white cursor-pointer transition-all hover:scale-105 hover:ring-2 hover:ring-amber-400"
+                      title="Nhấp để phóng to ảnh mẫu"
+                    >
                       <img 
                         src="/sample-avatar-4x6.png" 
-                        alt="Ảnh mẫu 4x6 nền trắng" 
+                        alt="Ảnh mẫu chân dung chuẩn" 
                         className="w-full h-full object-cover object-top"
                       />
-                    </div>
+                      <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                        <Eye className="w-5 h-5 drop-shadow-md" />
+                      </div>
+                    </button>
                     <div className="min-w-0 flex-1">
                       <div className="inline-flex items-center gap-1 bg-amber-200/80 text-amber-950 font-extrabold text-[10px] px-2 py-0.5 rounded-md mb-1 uppercase tracking-wider">
-                        ★ Ảnh mẫu chuẩn 4x6
+                        ★ Ảnh mẫu chuẩn
                       </div>
                       <p className="text-[11px] text-slate-600 leading-snug">
-                        Chụp thẳng mặt, phông nền trắng sáng, mặc áo sơ mi sáng màu lịch sự như ảnh mẫu.
+                        Chụp thẳng mặt, phông nền trắng hoặc xanh nước biển như ảnh mẫu.
                       </p>
+                      <button
+                        type="button"
+                        onClick={() => setShowSampleModal(true)}
+                        className="text-[11px] font-bold text-amber-800 hover:text-amber-950 hover:underline mt-1 inline-flex items-center gap-1 cursor-pointer"
+                      >
+                        <Eye className="w-3.5 h-3.5" /> Xem phóng to ảnh mẫu
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -4106,6 +4117,51 @@ function TutorRegistrationPage() {
           </div>
         </div>
       </div>
+
+      {/* Modal Phóng to Xem Kĩ Ảnh Mẫu Chuẩn */}
+      {showSampleModal && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"
+          onClick={() => setShowSampleModal(false)}
+        >
+          <div 
+            className="bg-white rounded-3xl p-5 sm:p-6 max-w-sm w-full shadow-2xl relative animate-in zoom-in-95 duration-200 flex flex-col items-center text-center"
+            onClick={e => e.stopPropagation()}
+          >
+            <button 
+              onClick={() => setShowSampleModal(false)} 
+              className="absolute top-4 right-4 p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors cursor-pointer"
+              title="Đóng"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="inline-flex items-center gap-1.5 bg-amber-100 text-amber-900 text-xs font-extrabold px-3 py-1 rounded-full mb-3">
+              ★ Ảnh mẫu chân dung chuẩn
+            </div>
+
+            <div className="w-52 sm:w-60 h-72 sm:h-80 rounded-2xl overflow-hidden shadow-md border-4 border-slate-100 bg-white mb-3 flex items-center justify-center">
+              <img 
+                src="/sample-avatar-4x6.png" 
+                alt="Ảnh mẫu chân dung chuẩn" 
+                className="w-full h-full object-cover object-top"
+              />
+            </div>
+
+            <p className="text-xs text-slate-600 leading-relaxed font-medium">
+              Chụp thẳng mặt rõ nét, phông nền trắng hoặc xanh nước biển như ảnh mẫu.
+            </p>
+
+            <button
+              type="button"
+              onClick={() => setShowSampleModal(false)}
+              className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-xs transition-colors cursor-pointer shadow-xs"
+            >
+              Đã hiểu & Đóng
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
