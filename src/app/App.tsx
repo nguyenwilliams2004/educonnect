@@ -3245,7 +3245,7 @@ function TutorRegistrationPage() {
       const phoneRegex = /^(0|\+84)[3|5|7|8|9][0-9]{8}$/;
       if (!phoneRegex.test(phone)) return "Số điện thoại không đúng định dạng. Vui lòng nhập SĐT Việt Nam hợp lệ (VD: 0912345678)";
 
-      if (!avatarFile && !avatarPreview) return "Vui lòng tải lên Ảnh chân dung rõ mặt";
+      if (!avatarFile && !avatarPreview) return "Vui lòng tải lên Ảnh thẻ chân dung 4x6 (nền trắng)";
 
       if (!title.trim()) return "Vui lòng nhập Tiêu đề hồ sơ / Chức danh";
       if (!experience || parseInt(experience) < 0) return "Vui lòng nhập Số năm kinh nghiệm";
@@ -3540,30 +3540,62 @@ function TutorRegistrationPage() {
                 </div>
               </div>
 
-              {/* Avatar Uploader */}
+              {/* Avatar Uploader: 4x6 với Ảnh Mẫu chuẩn bên cạnh */}
               <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100">
-                <label className="block text-sm font-bold text-slate-800 mb-3">Ảnh chân dung rõ mặt *</label>
-                <div className="flex flex-col sm:flex-row items-center gap-4">
-                  <div className="w-20 h-20 rounded-full bg-slate-200 border-2 border-white shadow-md flex-shrink-0 overflow-hidden relative flex items-center justify-center">
-                    {avatarPreview ? (
-                      <img src={avatarPreview} alt="Avatar Preview" className="w-full h-full object-cover" />
-                    ) : (
-                      <Users className="w-9 h-9 text-slate-400" />
-                    )}
+                <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                  <label className="block text-sm font-bold text-slate-800">Ảnh chân dung 4x6 (nền trắng) *</label>
+                  <span className="text-[11px] font-semibold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200/80">
+                    Định dạng chuẩn 4:6 • Nền trắng
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
+                  {/* Left: User 4x6 Upload Box */}
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-20 h-28 sm:w-24 sm:h-32 rounded-xl bg-slate-100 border-2 border-slate-200 shadow-inner flex-shrink-0 overflow-hidden relative flex flex-col items-center justify-center">
+                      {avatarPreview ? (
+                        <img src={avatarPreview} alt="Avatar Preview" className="w-full h-full object-cover object-top" />
+                      ) : (
+                        <div className="flex flex-col items-center justify-center text-slate-400 p-2 text-center">
+                          <Users className="w-7 h-7 mb-1" />
+                          <span className="text-[9px] font-bold uppercase tracking-wider">Khung 4x6</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <label className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 transition-colors shadow-xs">
+                        <UploadCloud className="w-4 h-4" />
+                        <span>Chọn ảnh tải lên</span>
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          onChange={e => handleFileChange(e, 'avatar')} 
+                          className="hidden" 
+                        />
+                      </label>
+                      <p className="text-[11px] text-slate-500 mt-1.5 leading-relaxed">
+                        Ảnh chụp chính diện rõ mặt, nền trắng, trang phục lịch sự. Tối đa 5MB.
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-center sm:text-left flex-1">
-                    <label className="cursor-pointer bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold inline-block transition-colors shadow-sm">
-                      Chọn ảnh tải lên
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        onChange={e => handleFileChange(e, 'avatar')} 
-                        className="hidden" 
+
+                  {/* Right: Reference Sample Photo (Ảnh mẫu chuẩn 4x6) */}
+                  <div className="flex items-center gap-3 bg-amber-50/70 border border-amber-200/80 rounded-xl p-3">
+                    <div className="w-16 h-24 sm:w-20 sm:h-28 rounded-lg overflow-hidden border-2 border-white shadow-xs flex-shrink-0 bg-white">
+                      <img 
+                        src="/sample-avatar-4x6.png" 
+                        alt="Ảnh mẫu 4x6 nền trắng" 
+                        className="w-full h-full object-cover object-top"
                       />
-                    </label>
-                    <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                      Ảnh chụp chính diện rõ mặt, trang phục lịch sự. Tối đa 5MB.
-                    </p>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="inline-flex items-center gap-1 bg-amber-200/80 text-amber-950 font-extrabold text-[10px] px-2 py-0.5 rounded-md mb-1 uppercase tracking-wider">
+                        ★ Ảnh mẫu chuẩn 4x6
+                      </div>
+                      <p className="text-[11px] text-slate-600 leading-snug">
+                        Chụp thẳng mặt, phông nền trắng sáng, mặc áo sơ mi sáng màu lịch sự như ảnh mẫu.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -3667,18 +3699,18 @@ function TutorRegistrationPage() {
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Thành tích nổi bật của học sinh cũ</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Thành tích nổi bật</label>
                   <textarea 
                     rows={3}
                     value={achievements}
                     onChange={e => setAchievements(e.target.value)}
                     className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-sm resize-none" 
-                    placeholder="Mô tả thành tích tiêu biểu của học sinh cũ (VD: Giúp em B tăng điểm Toán từ 5.0 lên 8.5; Dạy kèm em C đạt IELTS 7.0...)"
+                    placeholder="Mô tả thành tích tiêu biểu (VD: Giải thưởng chuyên môn, huy chương thể thao, chứng chỉ âm nhạc/nghệ thuật, hoặc thành tích tiến bộ của học sinh cũ...)"
                   />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Ảnh minh chứng thành tích (bảng điểm, tin nhắn, chứng chỉ...)</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Ảnh minh chứng thành tích (giải thưởng, chứng chỉ, bảng điểm, huy chương...)</label>
                   <div className="relative border-2 border-dashed border-slate-200 rounded-2xl p-4 text-center hover:bg-slate-50 hover:border-blue-300 transition-colors cursor-pointer min-h-[110px] flex flex-col justify-center items-center bg-slate-50/50">
                     <input 
                       type="file" 
