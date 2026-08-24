@@ -40,6 +40,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { mockTutors, mockPendingTutors, mockAdminStats, TutorType } from './data';
+import FloatingContactDock from './components/FloatingContactDock';
 
 export interface StudentTrialItem {
   tutorId: string | number;
@@ -3784,6 +3785,9 @@ function AppLayout({
           onOpenEnrollment={(tutor) => setEnrollmentModalTutor(tutor)}
         />
       )}
+
+      {/* Floating Action Buttons: AI Chat & Facebook Messenger */}
+      {!isAdmin && <FloatingContactDock />}
     </div>
   );
 }
