@@ -1552,37 +1552,35 @@ function TutorCard({ tutor }: { tutor: any }) {
           </div>
         </div>
 
-        {/* Right Side: 100% Clear Portrait Photo with Subject Badge pill centered underneath (KHÔNG ĐÈ LÊN ẢNH) */}
+        {/* Right Side: Portrait Photo with Subject Badge pill at bottom edge (là 1 phần của ảnh luôn) */}
         <div className="relative shrink-0 w-28 sm:w-32 flex flex-col items-center">
-          <div className="w-full h-32 sm:h-36 rounded-2xl overflow-hidden shadow-xs border border-slate-200/80 bg-slate-200">
+          <div className="w-full h-36 sm:h-40 rounded-2xl overflow-hidden shadow-xs border-2 border-white bg-slate-200">
             <img 
               src={tutor.avatar} 
               alt={tutor.name} 
               className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
             />
           </div>
-          {/* Môn học ở chính giữa dưới của bức ảnh - hoàn toàn không che ảnh */}
-          <div className="mt-2 z-20 w-full flex justify-center">
-            <span className="bg-slate-900 text-white font-extrabold text-[11px] px-3.5 py-1 rounded-full shadow-xs tracking-wide text-center whitespace-nowrap block">
+          {/* Môn học nằm ngay chính giữa dưới (là 1 phần của ảnh luôn) */}
+          <div className="-mt-3.5 z-20">
+            <span className="bg-slate-900 text-white font-extrabold text-[11px] px-3.5 py-1 rounded-full shadow-md tracking-wide text-center whitespace-nowrap block">
               {tutor.badgeSubject || tutor.subjects?.[0] || 'Môn học'}
             </span>
           </div>
         </div>
       </Link>
 
-      {/* Quick Action Footer: Bỏ tỉ lệ nhận lớp ở mục giáo viên, chỉ hiển thị học phí, đánh giá sao và nút Liên hệ ngay */}
-      <div className="relative z-30 pt-3 border-t border-slate-200/80 mt-auto flex items-center justify-between gap-2 bg-[#f4f5f7]">
-        <div className="min-w-0">
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-xs sm:text-sm font-extrabold text-slate-900 whitespace-nowrap">
-              {tutor.hourlyRate}đ<span className="text-[10px] font-normal text-slate-500">/{tutor.priceUnit || 'giờ'}</span>
-            </span>
-            <span className="inline-flex items-center gap-0.5 text-xs font-bold text-slate-700">
-              <svg className="w-3.5 h-3.5 fill-amber-400 text-amber-400" viewBox="0 0 20 20">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-              </svg>
-              {tutor.rating}
-            </span>
+      {/* Quick Action Footer: Học phí + Rating 2 dòng rõ ràng, nút Liên hệ ngay KHÔNG BAO GIỜ che chữ /giờ */}
+      <div className="relative z-30 pt-3 border-t border-slate-200/80 mt-auto flex items-center justify-between gap-1.5 bg-[#f4f5f7]">
+        <div className="flex flex-col min-w-0 flex-1 pr-1">
+          <div className="text-xs sm:text-[13px] font-extrabold text-slate-900 leading-tight">
+            {tutor.hourlyRate}đ<span className="text-[10px] font-normal text-slate-500">/{tutor.priceUnit || 'giờ'}</span>
+          </div>
+          <div className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-700 mt-1">
+            <svg className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" viewBox="0 0 20 20">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+            <span>{tutor.rating}</span>
           </div>
         </div>
 
@@ -1593,7 +1591,7 @@ function TutorCard({ tutor }: { tutor: any }) {
             e.stopPropagation();
             openContactZaloModal(tutor);
           }}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-extrabold px-4 py-2.5 rounded-xl text-xs transition-all shadow-sm hover:shadow-md cursor-pointer whitespace-nowrap shrink-0 text-center"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-extrabold px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl text-xs transition-all shadow-sm hover:shadow-md cursor-pointer whitespace-nowrap shrink-0 text-center"
         >
           Liên hệ ngay
         </button>
