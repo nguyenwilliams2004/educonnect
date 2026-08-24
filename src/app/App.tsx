@@ -562,7 +562,7 @@ function AuthModal({
 }
 
 // ==========================================
-// 2. MODAL LIÊN HỆ ZALO & HỌC THỬ 1-1
+// 2. MODAL LIÊN HỆ ZALO & HỌC THỬ 1-1 (KÈM GỬI EMAIL THÔNG BÁO)
 // ==========================================
 function ContactZaloModal({ 
   tutor, 
@@ -578,22 +578,40 @@ function ContactZaloModal({
   const { recordTrialContact } = useData();
   const [studentName, setStudentName] = useState('');
   const [studentPhone, setStudentPhone] = useState('');
+  const [studentEmail, setStudentEmail] = useState('');
   const [connected, setConnected] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showEmailPreview, setShowEmailPreview] = useState(false);
 
   if (!isOpen || !tutor) return null;
 
-  const successRate = tutor.trialStats?.totalTrials > 0 
-    ? Math.round((tutor.trialStats.officialEnrolled / tutor.trialStats.totalTrials) * 100) 
-    : 95;
-
   const handleConnect = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!studentName.trim() || !studentPhone.trim()) {
-      alert("Vui lòng nhập Họ tên và Số điện thoại liên hệ");
+    if (!studentName.trim() || !studentPhone.trim() || !studentEmail.trim()) {
+      alert("Vui lòng nhập đầy đủ Họ tên, Số điện thoại và Email để nhận thông báo");
       return;
     }
+
+    // 1. Ghi nhận lượt liên hệ học thử
     recordTrialContact(tutor, { name: studentName, phone: studentPhone });
+
+    // 2. Gửi email thông báo tự động cho học sinh & lưu log
+    try {
+      const emailRecord = {
+        id: `email_${Date.now()}`,
+        to: studentEmail.trim(),
+        studentName: studentName.trim(),
+        studentPhone: studentPhone.trim(),
+        tutorName: tutor.name,
+        tutorSubject: tutor.badgeSubject || tutor.subjects?.[0] || 'Môn học',
+        tutorPhone: tutor.phone || tutor.zalo || '0967891234',
+        subject: `[HanTutor] Xác nhận đăng ký kết nối học thử 1-1 cùng ${tutor.name}`,
+        date: new Date().toLocaleString('vi-VN')
+      };
+      const currentEmails = JSON.parse(localStorage.getItem('hantutor_sent_emails') || '[]');
+      localStorage.setItem('hantutor_sent_emails', JSON.stringify([emailRecord, ...currentEmails]));
+    } catch (e) {}
+
     setConnected(true);
   };
 
@@ -605,7 +623,7 @@ function ContactZaloModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative border border-slate-200 animate-in zoom-in-95 duration-200">
+      <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative border border-slate-200 animate-in zoom-in-95 duration-200 max-h-[95vh] overflow-y-auto">
         <button 
           onClick={onClose}
           className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-2 rounded-full transition-colors cursor-pointer"
@@ -620,25 +638,25 @@ function ContactZaloModal({
               <div>
                 <h3 className="text-xl font-extrabold text-slate-900">{tutor.name}</h3>
                 <p className="text-xs text-slate-500 mt-0.5">{tutor.title}</p>
-                <div className="mt-1 text-xs font-semibold text-slate-700">
-                  Tỷ lệ nhận lớp: <strong className="text-slate-900">{successRate}%</strong>
-                </div>
+                <span className="inline-block mt-1 bg-slate-900 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+                  {tutor.badgeSubject || tutor.subjects?.[0]}
+                </span>
               </div>
             </div>
 
-            {/* Quy trình kết nối & Học thử: font in đậm cỡ chữ to, formal */}
-            <div className="bg-slate-50 border border-slate-200 p-5 rounded-2xl mb-5 text-slate-800 space-y-2.5">
+            {/* Quy trình kết nối & Học thử */}
+            <div className="bg-slate-50 border border-slate-200 p-4 sm:p-5 rounded-2xl mb-5 text-slate-800 space-y-2.5">
               <h4 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">
                 Quy trình kết nối & Học thử
               </h4>
               <div className="text-xs sm:text-sm text-slate-600 space-y-1.5 leading-relaxed">
-                <p><strong>1.</strong> Nhập thông tin để nhận Số điện thoại / Zalo trực tiếp của giáo viên.</p>
+                <p><strong>1.</strong> Nhập thông tin để nhận Số điện thoại / Zalo trực tiếp của giáo viên và nhận email xác nhận.</p>
                 <p><strong>2.</strong> Hai bên trao đổi chi tiết mục tiêu học tập và thống nhất lịch học thử 1-1 miễn phí.</p>
-                <p><strong>3.</strong> Sau buổi học thử, học sinh xác nhận <em>"Đăng ký học chính thức"</em> nếu đạt yêu cầu. Trường hợp không đăng ký tiếp, hệ thống tự động ghi nhận và giảm tỷ lệ nhận lớp của giáo viên nhằm đảm bảo tính khách quan.</p>
+                <p><strong>3.</strong> Sau buổi học thử, học sinh xác nhận <em>"Đăng ký học chính thức"</em> nếu hài lòng với phương pháp của giáo viên.</p>
               </div>
             </div>
 
-            <form onSubmit={handleConnect} className="space-y-4">
+            <form onSubmit={handleConnect} className="space-y-3.5">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">Họ và tên học sinh / phụ huynh</label>
                 <input 
@@ -663,11 +681,28 @@ function ContactZaloModal({
                 />
               </div>
 
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Email nhận thông báo kết nối & hướng dẫn học thử
+                </label>
+                <input 
+                  type="email" 
+                  value={studentEmail}
+                  onChange={e => setStudentEmail(e.target.value)}
+                  placeholder="Nhập email của bạn (VD: hocsinh@gmail.com)..."
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-600 outline-none text-sm font-medium"
+                  required
+                />
+                <span className="text-[10px] text-slate-400 block mt-1">
+                  Hệ thống sẽ gửi email xác nhận thông tin lớp học và số liên hệ của giáo viên ngay sau khi đăng ký.
+                </span>
+              </div>
+
               <button 
                 type="submit" 
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-sm text-sm flex items-center justify-center cursor-pointer"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-sm text-sm flex items-center justify-center cursor-pointer mt-2"
               >
-                Xác nhận & Nhận số liên hệ của giáo viên
+                Xác nhận & Gửi thông tin về Email
               </button>
             </form>
           </div>
@@ -678,9 +713,50 @@ function ContactZaloModal({
               <p className="text-xs text-slate-500 mt-1">Thông tin liên hệ trực tiếp của giáo viên {tutor.name}:</p>
             </div>
 
+            {/* Email notification success banner */}
+            <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-left flex items-start gap-3">
+              <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs font-bold text-sm">
+                ✉️
+              </div>
+              <div className="text-xs flex-1">
+                <span className="font-bold text-emerald-950 block">Đã gửi email thông báo thành công!</span>
+                <span className="text-emerald-800 mt-0.5 block leading-relaxed">
+                  Thông tin kết nối, số Zalo/SĐT giáo viên và hướng dẫn quyền lợi học thử đã được gửi tới: <strong>{studentEmail}</strong>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowEmailPreview(!showEmailPreview)}
+                  className="text-[11px] font-bold text-emerald-700 hover:underline mt-1.5 inline-block cursor-pointer"
+                >
+                  {showEmailPreview ? '▲ Ẩn nội dung email' : '▼ Xem trước nội dung email vừa gửi'}
+                </button>
+              </div>
+            </div>
+
+            {/* Email Preview Box */}
+            {showEmailPreview && (
+              <div className="bg-slate-900 text-slate-100 rounded-2xl p-4 text-left text-xs space-y-2 border border-slate-800 shadow-inner animate-in fade-in duration-200">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+                  <span className="font-bold text-amber-400">Hộp thư đến (Inbox)</span>
+                  <span className="text-[10px] text-slate-400">{new Date().toLocaleTimeString('vi-VN')}</span>
+                </div>
+                <div><strong>Người gửi:</strong> HanTutor Vietnam &lt;thongbao@fasttryon.com&gt;</div>
+                <div><strong>Tiêu đề:</strong> [HanTutor] Xác nhận đăng ký kết nối học thử 1-1 cùng {tutor.name}</div>
+                <div><strong>Người nhận:</strong> {studentName} &lt;{studentEmail}&gt;</div>
+                <div className="pt-2 border-t border-slate-800 text-slate-300 leading-relaxed font-normal">
+                  Kính gửi {studentName},<br />
+                  HanTutor xin xác nhận bạn đã kết nối học thử môn <strong>{tutor.badgeSubject || tutor.subjects?.[0]}</strong> cùng <strong>{tutor.name}</strong>.<br />
+                  - Số điện thoại / Zalo giáo viên: <strong className="text-white">{tutor.phone || tutor.zalo || '0967891234'}</strong><br />
+                  - Lịch học thử: 01 buổi 1-1 miễn phí theo thỏa thuận.<br />
+                  - Chính sách: Được bảo vệ thanh toán 30%/70% và cam kết hoàn tiền 100% nếu không hài lòng.<br />
+                  Trân trọng cảm ơn bạn đã tin chọn HanTutor!
+                </div>
+              </div>
+            )}
+
             <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl flex items-center justify-between">
               <div className="text-left">
-                <span className="text-[11px] text-slate-500 font-medium block">Số điện thoại / Zalo</span>
+                <span className="text-[11px] text-slate-500 font-medium block">Số điện thoại / Zalo giáo viên</span>
                 <span className="text-lg font-bold text-slate-900">{tutor.phone || tutor.zalo || '0967891234'}</span>
               </div>
               <button 
@@ -693,7 +769,7 @@ function ContactZaloModal({
             </div>
 
             <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl text-xs text-slate-600 text-left leading-relaxed">
-              Thông tin đã được lưu vào mục <strong>Lớp học thử của tôi</strong>. Sau khi hoàn thành buổi học thử 1-1, vui lòng bấm <strong>"Đăng ký học chính thức"</strong> để xác nhận khóa học.
+              Thông tin đã được lưu vào mục <strong>Lớp học thử của tôi</strong>. Sau khi hoàn thành buổi học thử 1-1, vui lòng bấm <strong>"Đăng ký học chính thức"</strong> để kích hoạt khóa học.
             </div>
 
             <div className="pt-2 border-t border-slate-100 flex flex-col gap-2.5">
@@ -1465,23 +1541,17 @@ function Hero() {
 
 function TutorCard({ tutor }: { tutor: any }) {
   const { openContactZaloModal } = useUI();
-  const successRate = tutor.trialStats?.totalTrials > 0 
-    ? Math.round((tutor.trialStats.officialEnrolled / tutor.trialStats.totalTrials) * 100) 
-    : 95;
 
   return (
-    <div className="group relative bg-[#f4f5f7] hover:bg-[#ebedf1] rounded-3xl p-4 sm:p-5 border border-slate-200/80 hover:border-slate-300 shadow-2xs hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between overflow-hidden min-h-[340px]">
-      {/* Click overlay link to open teacher profile in new tab */}
+    <div className="group relative bg-[#f4f5f7] hover:bg-[#ebedf1] rounded-3xl p-4 sm:p-5 border border-slate-200/80 hover:border-slate-300 shadow-2xs hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between overflow-hidden min-h-[330px]">
+      {/* Clickable Area: Title, Bio, Name & Photo all directly link to teacher detail page */}
       <Link 
         to={`/giao-vien/${tutor.id}`} 
         target="_blank" 
         rel="noopener noreferrer" 
-        className="absolute inset-0 z-10" 
+        className="flex items-start justify-between gap-3 text-left group-hover:cursor-pointer"
         title={`Xem chi tiết hồ sơ ${tutor.name} (Mở tab mới)`}
-      />
-
-      {/* Top Content Row: Left Text (Slogan, Bio, Name) & Right Photo with centered Subject Badge */}
-      <div className="relative z-10 flex items-start justify-between gap-3">
+      >
         {/* Left Side: Slogan, Bio, Teacher Name */}
         <div className="flex-1 min-w-0 pr-1 flex flex-col justify-between h-[155px]">
           <div>
@@ -1519,13 +1589,12 @@ function TutorCard({ tutor }: { tutor: any }) {
             </span>
           </div>
         </div>
-      </div>
+      </Link>
 
-      {/* Quick Action Footer: 2 clear rows, rock-solid spacing, ZERO clipping on 'Liên hệ ngay' */}
-      <div className="relative z-30 pt-3 border-t border-slate-200/80 mt-auto flex flex-col gap-2 bg-[#f4f5f7]">
-        {/* Row 1: Price & Rating */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
+      {/* Quick Action Footer: Bỏ tỉ lệ nhận lớp ở mục giáo viên, chỉ hiển thị học phí, đánh giá sao và nút Liên hệ ngay */}
+      <div className="relative z-30 pt-3 border-t border-slate-200/80 mt-auto flex items-center justify-between gap-2 bg-[#f4f5f7]">
+        <div className="min-w-0">
+          <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-xs sm:text-sm font-extrabold text-slate-900 whitespace-nowrap">
               {tutor.hourlyRate}đ<span className="text-[10px] font-normal text-slate-500">/{tutor.priceUnit || 'giờ'}</span>
             </span>
@@ -1534,11 +1603,6 @@ function TutorCard({ tutor }: { tutor: any }) {
                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
               </svg>
               {tutor.rating}
-            </span>
-          </div>
-          <div className="mt-1">
-            <span className="inline-block text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-md shadow-2xs whitespace-nowrap">
-              Tỷ lệ nhận lớp: <strong>{successRate}%</strong>
             </span>
           </div>
         </div>
@@ -1550,7 +1614,7 @@ function TutorCard({ tutor }: { tutor: any }) {
             e.stopPropagation();
             openContactZaloModal(tutor);
           }}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition-all shadow-sm cursor-pointer whitespace-nowrap shrink-0 text-center"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-extrabold px-4 py-2.5 rounded-xl text-xs transition-all shadow-sm hover:shadow-md cursor-pointer whitespace-nowrap shrink-0 text-center"
         >
           Liên hệ ngay
         </button>

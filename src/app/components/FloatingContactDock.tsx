@@ -9,13 +9,13 @@ export default function FloatingContactDock() {
       {/* Floating Action Buttons Dock - Bottom Right */}
       <div className="fixed bottom-6 right-5 sm:right-7 z-40 flex flex-col items-end gap-3.5 select-none">
         
-        {/* 1. Nút Facebook Messenger (Kích thước & vai trò tương đương) */}
+        {/* 1. Nút Facebook Messenger (Điều hướng trực tiếp đến chat Messenger) */}
         <a
-          href="https://www.facebook.com/profile.php?id=61593472564468"
+          href="https://m.me/61593472564468"
           target="_blank"
           rel="noopener noreferrer"
           className="group relative w-13 h-13 sm:w-14 sm:h-14 rounded-full shadow-lg hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center cursor-pointer p-0.5"
-          title="Nhắn tin trực tiếp với chúng tôi qua Facebook Messenger"
+          title="Nhắn tin trực tiếp qua Facebook Messenger"
         >
           {/* Logo Messenger */}
           <div className="w-full h-full rounded-full overflow-hidden flex items-center justify-center drop-shadow-md">
@@ -24,7 +24,7 @@ export default function FloatingContactDock() {
 
           {/* Hover Tooltip Label */}
           <span className="absolute right-full mr-3.5 bg-slate-900 text-white font-bold text-xs px-3.5 py-1.5 rounded-xl shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none hidden sm:inline-block">
-            💬 Nhắn tin Fanpage Facebook
+            💬 Nhắn tin qua Messenger
             <span className="absolute left-full top-1/2 -translate-y-1/2 border-4 border-transparent border-l-slate-900" />
           </span>
 
