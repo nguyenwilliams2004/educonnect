@@ -713,46 +713,21 @@ function ContactZaloModal({
               <p className="text-xs text-slate-500 mt-1">Thông tin liên hệ trực tiếp của giáo viên {tutor.name}:</p>
             </div>
 
-            {/* Email notification success banner */}
-            <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-left flex items-start gap-3">
-              <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs font-bold text-sm">
+            {/* Email notification success banner - Font chữ to, nổi bật, rõ ràng */}
+            <div className="bg-emerald-50 border-2 border-emerald-300 p-5 rounded-2xl text-left flex items-start gap-4 shadow-sm">
+              <div className="w-11 h-11 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-md text-xl font-bold">
                 ✉️
               </div>
-              <div className="text-xs flex-1">
-                <span className="font-bold text-emerald-950 block">Đã gửi email thông báo thành công!</span>
-                <span className="text-emerald-800 mt-0.5 block leading-relaxed">
-                  Thông tin kết nối, số Zalo/SĐT giáo viên và hướng dẫn quyền lợi học thử đã được gửi tới: <strong>{studentEmail}</strong>
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setShowEmailPreview(!showEmailPreview)}
-                  className="text-[11px] font-bold text-emerald-700 hover:underline mt-1.5 inline-block cursor-pointer"
-                >
-                  {showEmailPreview ? '▲ Ẩn nội dung email' : '▼ Xem trước nội dung email vừa gửi'}
-                </button>
+              <div className="flex-1 space-y-1">
+                <h4 className="text-base sm:text-lg font-extrabold text-emerald-950 leading-snug">
+                  Đã gửi email thông báo thành công!
+                </h4>
+                <p className="text-xs sm:text-sm text-emerald-900 leading-relaxed font-medium">
+                  Thông tin kết nối, số Zalo/SĐT giáo viên và hướng dẫn học thử đã được gửi trực tiếp tới hòm thư: <br />
+                  <strong className="text-slate-900 font-extrabold text-sm sm:text-base underline decoration-emerald-500 decoration-2">{studentEmail}</strong>
+                </p>
               </div>
             </div>
-
-            {/* Email Preview Box */}
-            {showEmailPreview && (
-              <div className="bg-slate-900 text-slate-100 rounded-2xl p-4 text-left text-xs space-y-2 border border-slate-800 shadow-inner animate-in fade-in duration-200">
-                <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-                  <span className="font-bold text-amber-400">Hộp thư đến (Inbox)</span>
-                  <span className="text-[10px] text-slate-400">{new Date().toLocaleTimeString('vi-VN')}</span>
-                </div>
-                <div><strong>Người gửi:</strong> HanTutor Vietnam &lt;thongbao@fasttryon.com&gt;</div>
-                <div><strong>Tiêu đề:</strong> [HanTutor] Xác nhận đăng ký kết nối học thử 1-1 cùng {tutor.name}</div>
-                <div><strong>Người nhận:</strong> {studentName} &lt;{studentEmail}&gt;</div>
-                <div className="pt-2 border-t border-slate-800 text-slate-300 leading-relaxed font-normal">
-                  Kính gửi {studentName},<br />
-                  HanTutor xin xác nhận bạn đã kết nối học thử môn <strong>{tutor.badgeSubject || tutor.subjects?.[0]}</strong> cùng <strong>{tutor.name}</strong>.<br />
-                  - Số điện thoại / Zalo giáo viên: <strong className="text-white">{tutor.phone || tutor.zalo || '0967891234'}</strong><br />
-                  - Lịch học thử: 01 buổi 1-1 miễn phí theo thỏa thuận.<br />
-                  - Chính sách: Được bảo vệ thanh toán 30%/70% và cam kết hoàn tiền 100% nếu không hài lòng.<br />
-                  Trân trọng cảm ơn bạn đã tin chọn HanTutor!
-                </div>
-              </div>
-            )}
 
             <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl flex items-center justify-between">
               <div className="text-left">
@@ -1360,13 +1335,17 @@ function HeroLeftIllustration() {
 
 function HeroRightIllustration() {
   return (
-    <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-32 h-32 lg:w-40 lg:h-40 drop-shadow-2xl select-none pointer-events-none">
-      <circle cx="100" cy="100" r="80" fill="#EFF6FF" />
-      <path d="M70 60 C70 50, 130 50, 130 60 L130 140 C130 150, 70 150, 70 140 Z" fill="#3B82F6" opacity="0.2"/>
-      <circle cx="100" cy="85" r="25" fill="#3B82F6" />
-      <path d="M60 145 C60 120, 140 120, 140 145 Z" fill="#1D4ED8" />
-      <circle cx="140" cy="60" r="15" fill="#FBBF24" />
-      <path d="M135 60 L145 60 M140 55 L140 65" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" />
+    <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-32 h-32 lg:w-48 lg:h-48 drop-shadow-2xl select-none pointer-events-none">
+      <path d="M100 40 L160 65 L100 90 L40 65 Z" fill="#2563EB" />
+      <path d="M60 75 L60 110 C60 120 100 130 100 130 C100 130 140 120 140 110 L140 75" fill="#1E40AF" />
+      <path d="M100 40 L160 65 L100 90 L40 65 Z" fill="#3B82F6" />
+      <path d="M100 65 L150 85 L150 115" stroke="#FBBF24" strokeWidth="4" fill="none" />
+      <circle cx="150" cy="115" r="5" fill="#F59E0B" />
+      <circle cx="100" cy="65" r="4" fill="#FDE68A" />
+      <rect x="50" y="130" width="100" height="30" rx="5" fill="#FFFFFF" stroke="#E2E8F0" strokeWidth="2" transform="rotate(-10 100 145)" />
+      <rect x="90" y="125" width="20" height="40" fill="#EF4444" transform="rotate(-10 100 145)" />
+      <path d="M30 140 L40 130 L50 140 L40 150 Z" fill="#93C5FD" />
+      <circle cx="170" cy="40" r="8" fill="#FDE68A" />
     </svg>
   );
 }
@@ -1527,7 +1506,7 @@ function Hero() {
               <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 pointer-events-none" />
             </div>
             <button 
-              type="submit"
+              type="submit" 
               className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-2xl font-bold transition-all shadow-md shadow-blue-200 md:w-auto w-full flex justify-center items-center gap-1.5 text-sm cursor-pointer"
             >
               Tìm kiếm
@@ -1553,7 +1532,7 @@ function TutorCard({ tutor }: { tutor: any }) {
         title={`Xem chi tiết hồ sơ ${tutor.name} (Mở tab mới)`}
       >
         {/* Left Side: Slogan, Bio, Teacher Name */}
-        <div className="flex-1 min-w-0 pr-1 flex flex-col justify-between h-[155px]">
+        <div className="flex-1 min-w-0 pr-1 flex flex-col justify-between min-h-[155px]">
           <div>
             <h3 className="font-extrabold text-sm sm:text-base text-slate-900 leading-snug line-clamp-2 mb-1.5 group-hover:text-blue-600 transition-colors">
               {tutor.headline || tutor.title}
@@ -1563,7 +1542,7 @@ function TutorCard({ tutor }: { tutor: any }) {
             </p>
           </div>
 
-          <div className="mt-auto pt-1">
+          <div className="mt-auto pt-2">
             <span className="text-[10px] text-slate-400 font-medium block leading-none mb-0.5">
               {tutor.rolePrefix || (tutor.type === 'Giáo viên' ? (tutor.name.includes('Cô') ? 'Cô' : 'Thầy') : 'Gia sư')}
             </span>
@@ -1573,18 +1552,18 @@ function TutorCard({ tutor }: { tutor: any }) {
           </div>
         </div>
 
-        {/* Right Side: 100% Clear Portrait Photo with Subject Badge pill centered at the bottom of the photo */}
+        {/* Right Side: 100% Clear Portrait Photo with Subject Badge pill centered underneath (KHÔNG ĐÈ LÊN ẢNH) */}
         <div className="relative shrink-0 w-28 sm:w-32 flex flex-col items-center">
-          <div className="w-full h-36 sm:h-40 rounded-2xl overflow-hidden shadow-xs border-2 border-white bg-slate-200">
+          <div className="w-full h-32 sm:h-36 rounded-2xl overflow-hidden shadow-xs border border-slate-200/80 bg-slate-200">
             <img 
               src={tutor.avatar} 
               alt={tutor.name} 
               className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
             />
           </div>
-          {/* Môn học ở chính giữa dưới của bức ảnh */}
-          <div className="-mt-3.5 z-20">
-            <span className="bg-slate-900 text-white font-extrabold text-[11px] px-3.5 py-1 rounded-full shadow-md tracking-wide text-center whitespace-nowrap block">
+          {/* Môn học ở chính giữa dưới của bức ảnh - hoàn toàn không che ảnh */}
+          <div className="mt-2 z-20 w-full flex justify-center">
+            <span className="bg-slate-900 text-white font-extrabold text-[11px] px-3.5 py-1 rounded-full shadow-xs tracking-wide text-center whitespace-nowrap block">
               {tutor.badgeSubject || tutor.subjects?.[0] || 'Môn học'}
             </span>
           </div>
