@@ -39,7 +39,7 @@ import {
   DollarSign
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { mockTutors, mockPendingTutors, mockAdminStats, TutorType } from './data';
+import { mockTutors, mockPendingTutors, mockAdminStats, TutorType, defaultTutorReviews, TutorReviewItem } from './data';
 import FloatingContactDock from './components/FloatingContactDock';
 
 export interface StudentTrialItem {
@@ -100,6 +100,7 @@ interface UIContextType {
   openCheckoutModal: (enrollmentId: string, amount: number, tutorId: string | number) => void;
   openTutorDetailModal: (tutor: any) => void;
   openMyTrialsModal: () => void;
+  openReviewModal: (tutor: any, defaultStage?: 'trial' | 'official') => void;
 }
 
 const UIContext = createContext<UIContextType | null>(null);
@@ -117,12 +118,14 @@ interface DataContextType {
   setPendingTutors: React.Dispatch<React.SetStateAction<any[]>>;
   adminStats: typeof mockAdminStats;
   myTrials: StudentTrialItem[];
+  reviews: TutorReviewItem[];
   recordTrialContact: (tutor: any, studentInfo?: { name?: string, phone?: string }) => void;
   recordOfficialEnrollment: (tutorId: any) => void;
   cancelTrialEnrollment: (tutorId: any) => void;
   approveTutorKyc: (tutorId: any) => void;
   rejectTutorKyc: (tutorId: any) => void;
   addMockTutor: (newTutor: any) => void;
+  addTutorReview: (review: Omit<TutorReviewItem, 'id' | 'date'>) => void;
 }
 
 export const DataContext = createContext<DataContextType | null>(null);
@@ -1006,7 +1009,7 @@ function MyTrialsModal({
                   </div>
 
                   {/* Hành động */}
-                  <div className="flex items-center gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-200">
+                  <div className="flex items-center gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-200 flex-wrap">
                     {item.phone && (
                       <a
                         href={`https://zalo.me/${item.zalo || item.phone}`}
@@ -1017,6 +1020,18 @@ function MyTrialsModal({
                         Zalo
                       </a>
                     )}
+
+                    {/* Nút Đánh giá giáo viên */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (fullTutor) openReviewModal(fullTutor, item.status === 'enrolled' ? 'official' : 'trial');
+                      }}
+                      className="px-3 py-2 bg-amber-50 text-amber-800 hover:bg-amber-100 rounded-xl text-xs font-bold transition-colors cursor-pointer whitespace-nowrap"
+                      title="Viết nhận xét & đánh giá giáo viên sau học thử hoặc thời gian học"
+                    >
+                      ⭐ Đánh giá
+                    </button>
 
                     {item.status === 'trial_in_progress' && (
                       <>
@@ -1083,119 +1098,33 @@ function HeroLeftIllustration() {
 
 function HeroRightIllustration() {
   return (
-    <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-32 h-32 lg:w-48 lg:h-48 drop-shadow-2xl select-none pointer-events-none">
-      <path d="M100 40 L160 65 L100 90 L40 65 Z" fill="#2563EB" />
-      <path d="M60 75 L60 110 C60 120 100 130 100 130 C100 130 140 120 140 110 L140 75" fill="#1E40AF" />
-      <path d="M100 40 L160 65 L100 90 L40 65 Z" fill="#3B82F6" />
-      <path d="M100 65 L150 85 L150 115" stroke="#FBBF24" strokeWidth="4" fill="none" />
-      <circle cx="150" cy="115" r="5" fill="#F59E0B" />
-      <circle cx="100" cy="65" r="4" fill="#FDE68A" />
-      <rect x="50" y="130" width="100" height="30" rx="5" fill="#FFFFFF" stroke="#E2E8F0" strokeWidth="2" transform="rotate(-10 100 145)" />
-      <rect x="90" y="125" width="20" height="40" fill="#EF4444" transform="rotate(-10 100 145)" />
-      <path d="M30 140 L40 130 L50 140 L40 150 Z" fill="#93C5FD" />
-      <circle cx="170" cy="40" r="8" fill="#FDE68A" />
+    <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-32 h-32 lg:w-40 lg:h-40 drop-shadow-2xl select-none pointer-events-none">
+      <circle cx="100" cy="100" r="80" fill="#EFF6FF" />
+      <path d="M70 60 C70 50, 130 50, 130 60 L130 140 C130 150, 70 150, 70 140 Z" fill="#3B82F6" opacity="0.2"/>
+      <circle cx="100" cy="85" r="25" fill="#3B82F6" />
+      <path d="M60 145 C60 120, 140 120, 140 145 Z" fill="#1D4ED8" />
+      <circle cx="140" cy="60" r="15" fill="#FBBF24" />
+      <path d="M135 60 L145 60 M140 55 L140 65" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }
 
-function Navbar() {
-  const { openAuthModal, openMyTrialsModal } = useUI();
-  const { myTrials } = useData();
-  const location = useLocation();
-
-  const activeTrialsCount = myTrials.filter(t => t.status === 'trial_in_progress').length;
-
-  const isActive = (path: string) => {
-    if (path === '/' && location.pathname === '/') return true;
-    if (path !== '/' && location.pathname.startsWith(path)) return true;
-    return false;
-  };
-
-  return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-2xs">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-3">
-          <Logo />
-        </Link>
-
-        <nav className="hidden md:flex items-center gap-8">
-          <Link 
-            to="/" 
-            className={`text-sm font-semibold transition-colors ${isActive('/') ? 'text-blue-600 font-bold' : 'text-slate-600 hover:text-blue-600'}`}
-          >
-            Trang chủ
-          </Link>
-          <Link 
-            to="/tim-gia-su" 
-            className={`text-sm font-semibold transition-colors ${isActive('/tim-gia-su') ? 'text-blue-600 font-bold' : 'text-slate-600 hover:text-blue-600'}`}
-          >
-            Tìm Gia Sư & Giáo Viên
-          </Link>
-          <button
-            type="button"
-            onClick={openMyTrialsModal}
-            className="text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors flex items-center gap-1.5 cursor-pointer"
-          >
-            Lớp học thử của tôi
-            {myTrials.length > 0 && (
-              <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${activeTrialsCount > 0 ? 'bg-amber-500 text-white animate-pulse' : 'bg-slate-200 text-slate-700'}`}>
-                {myTrials.length}
-              </span>
-            )}
-          </button>
-        </nav>
-
-        <div className="flex items-center gap-3.5">
-          <button 
-            type="button"
-            onClick={openMyTrialsModal}
-            className="md:hidden relative p-2 text-slate-600 hover:bg-slate-50 rounded-xl"
-            title="Lớp học thử của tôi"
-          >
-            <BookOpen className="w-5 h-5" />
-            {myTrials.length > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-amber-500 rounded-full"></span>
-            )}
-          </button>
-
-          <Link to="/tim-gia-su" className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-xl transition-colors">
-            <Search className="w-5 h-5" />
-          </Link>
-
-          <button 
-            onClick={() => openAuthModal('login')}
-            className="text-slate-700 hover:text-blue-600 font-bold text-sm px-2 py-2 cursor-pointer transition-colors"
-          >
-            Đăng nhập
-          </button>
-
-          <button 
-            onClick={() => openAuthModal('register', 'student')}
-            className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 sm:px-6 py-2.5 rounded-full transition-all text-sm shadow-md shadow-blue-200"
-          >
-            Đăng ký ngay
-          </button>
-        </div>
-      </div>
-    </header>
-  );
-}
-
 function Hero() {
-  const navigate = useNavigate();
   const [searchText, setSearchText] = useState('');
   const [selectedLoc, setSelectedLoc] = useState('');
+  const navigate = useNavigate();
 
-  const handleHeroSearch = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    navigate(`/tim-gia-su?search=${encodeURIComponent(searchText)}&location=${encodeURIComponent(selectedLoc)}`);
+  const handleHeroSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const params = new URLSearchParams();
+    if (searchText.trim()) params.set('q', searchText.trim());
+    if (selectedLoc) params.set('location', selectedLoc);
+    navigate(`/tim-gia-su?${params.toString()}`);
   };
 
   return (
-    <div className="relative bg-gradient-to-b from-blue-50/60 via-blue-50/20 to-white pt-10 pb-16 md:pt-14 md:pb-20 overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(#dbeafe_1px,transparent_1px)] [background-size:20px_20px] opacity-70"></div>
-      
-      <div className="hidden lg:block absolute left-8 xl:left-24 top-24">
+    <div className="relative bg-gradient-to-b from-blue-50/60 via-slate-50 to-white pt-10 pb-16 md:pt-16 md:pb-24 overflow-hidden">
+      <div className="hidden lg:block absolute left-8 xl:left-24 top-20">
         <HeroLeftIllustration />
       </div>
       <div className="hidden lg:block absolute right-8 xl:right-24 top-20">
@@ -1224,7 +1153,6 @@ function Hero() {
                 type="text" 
                 value={searchText}
                 onChange={e => setSearchText(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') handleHeroSearch(e); }}
                 placeholder="Môn học, lớp, kỹ năng (VD: Toán 10, Tiếng Anh, Piano, Bơi lội...)"
                 className="w-full pl-11 pr-4 py-3 rounded-2xl bg-slate-100/70 border border-transparent focus:border-blue-200 focus:bg-white transition-all text-slate-800 placeholder:text-slate-400 text-sm outline-none font-medium"
               />
@@ -1273,7 +1201,7 @@ function TutorCard({ tutor }: { tutor: any }) {
     : 95;
 
   return (
-    <div className="group relative bg-[#f4f5f7] hover:bg-[#ebedf1] rounded-3xl p-4 sm:p-5 border border-slate-200/80 hover:border-slate-300 shadow-2xs hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between overflow-hidden min-h-[330px]">
+    <div className="group relative bg-[#f4f5f7] hover:bg-[#ebedf1] rounded-3xl p-4 sm:p-5 border border-slate-200/80 hover:border-slate-300 shadow-2xs hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between overflow-hidden min-h-[340px]">
       {/* Click overlay link to open teacher profile in new tab */}
       <Link 
         to={`/giao-vien/${tutor.id}`} 
@@ -1283,7 +1211,7 @@ function TutorCard({ tutor }: { tutor: any }) {
         title={`Xem chi tiết hồ sơ ${tutor.name} (Mở tab mới)`}
       />
 
-      {/* Top Content Row: Left Text (Slogan, Bio, Name) & Right Clear Photo */}
+      {/* Top Content Row: Left Text (Slogan, Bio, Name) & Right Photo with centered Subject Badge */}
       <div className="relative z-10 flex items-start justify-between gap-3">
         {/* Left Side: Slogan, Bio, Teacher Name */}
         <div className="flex-1 min-w-0 pr-1 flex flex-col justify-between h-[155px]">
@@ -1306,31 +1234,33 @@ function TutorCard({ tutor }: { tutor: any }) {
           </div>
         </div>
 
-        {/* Right Side: 100% Clear Crisp Portrait Photo */}
-        <div className="relative shrink-0 w-28 sm:w-32 h-36 sm:h-40 rounded-2xl overflow-hidden shadow-sm border-2 border-white bg-slate-200">
-          <img 
-            src={tutor.avatar} 
-            alt={tutor.name} 
-            className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
-          />
+        {/* Right Side: 100% Clear Portrait Photo with Subject Badge pill centered at the bottom of the photo */}
+        <div className="relative shrink-0 w-28 sm:w-32 flex flex-col items-center">
+          <div className="w-full h-36 sm:h-40 rounded-2xl overflow-hidden shadow-xs border-2 border-white bg-slate-200">
+            <img 
+              src={tutor.avatar} 
+              alt={tutor.name} 
+              className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
+            />
+          </div>
+          {/* Môn học ở chính giữa dưới của bức ảnh */}
+          <div className="-mt-3.5 z-20">
+            <span className="bg-slate-900 text-white font-extrabold text-[11px] px-3.5 py-1 rounded-full shadow-md tracking-wide text-center whitespace-nowrap block">
+              {tutor.badgeSubject || tutor.subjects?.[0] || 'Môn học'}
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Center Bottom: Subject Badge Pill (Môn học ở chính giữa dưới) */}
-      <div className="relative z-20 flex justify-center items-center my-2">
-        <span className="bg-slate-900 text-white font-extrabold text-xs px-4 py-1 rounded-full shadow-sm tracking-wide text-center">
-          {tutor.badgeSubject || tutor.subjects?.[0] || 'Môn học'}
-        </span>
-      </div>
-
-      {/* Quick Action Footer: Highlighted Success Rate & Solid Star Rating (Unclipped button) */}
-      <div className="relative z-30 pt-2.5 border-t border-slate-200/80 mt-auto flex items-center justify-between gap-1.5 bg-[#f4f5f7]">
-        <div className="min-w-0 flex-1">
+      {/* Quick Action Footer: 2 clear rows, rock-solid spacing, ZERO clipping on 'Liên hệ ngay' */}
+      <div className="relative z-30 pt-3 border-t border-slate-200/80 mt-auto flex flex-col gap-2 bg-[#f4f5f7]">
+        {/* Row 1: Price & Rating */}
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
-            <span className="text-xs font-bold text-slate-900 whitespace-nowrap">
-              {tutor.hourlyRate}đ<span className="text-[10px] font-normal text-slate-400">/{tutor.priceUnit || 'giờ'}</span>
+            <span className="text-xs sm:text-sm font-extrabold text-slate-900 whitespace-nowrap">
+              {tutor.hourlyRate}đ<span className="text-[10px] font-normal text-slate-500">/{tutor.priceUnit || 'giờ'}</span>
             </span>
-            <span className="inline-flex items-center gap-0.5 text-xs font-semibold text-slate-700 shrink-0">
+            <span className="inline-flex items-center gap-0.5 text-xs font-bold text-slate-700">
               <svg className="w-3.5 h-3.5 fill-amber-400 text-amber-400" viewBox="0 0 20 20">
                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
               </svg>
@@ -1967,8 +1897,9 @@ function FindTutorsPage() {
 // TeacherDetailPage
 function TeacherDetailPage() {
   const { id } = useParams();
-  const { tutors, myTrials, cancelTrialEnrollment } = useData();
-  const { openContactZaloModal, openEnrollmentModal } = useUI();
+  const { tutors, myTrials, cancelTrialEnrollment, reviews } = useData();
+  const { openContactZaloModal, openEnrollmentModal, openReviewModal } = useUI();
+  const [reviewFilter, setReviewFilter] = useState<'all' | 'trial' | 'official'>('all');
 
   const tutor = tutors.find(t => String(t.id) === String(id)) || tutors[0];
 
@@ -1983,6 +1914,13 @@ function TeacherDetailPage() {
   const successRate = totalTrials > 0
     ? Math.round((officialEnrolled / totalTrials) * 100)
     : 95;
+
+  const tutorReviews = reviews.filter(r => String(r.tutorId) === String(tutor.id));
+  const displayedReviews = tutorReviews.filter(r => {
+    if (reviewFilter === 'trial') return r.stage === 'trial';
+    if (reviewFilter === 'official') return r.stage !== 'trial';
+    return true;
+  });
 
   return (
     <div className="bg-slate-50 min-h-screen py-10">
@@ -2138,6 +2076,166 @@ function TeacherDetailPage() {
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                   allowFullScreen
                 ></iframe>
+              </div>
+            </div>
+
+            {/* Student Reviews & Feedback Section */}
+            <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-sm space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-lg font-bold text-slate-900">
+                      Đánh giá & Nhận xét từ học viên
+                    </h2>
+                    <span className="bg-blue-50 text-blue-700 text-xs font-extrabold px-2.5 py-0.5 rounded-full">
+                      {tutorReviews.length} nhận xét
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Nhận xét thực tế từ phụ huynh & học sinh sau buổi học thử hoặc quá trình học chính thức
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => openReviewModal(tutor, trialItem?.status === 'enrolled' ? 'official' : 'trial')}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2.5 rounded-2xl text-xs transition-all shadow-md shadow-blue-200 cursor-pointer flex items-center justify-center gap-1.5 shrink-0"
+                >
+                  <Star className="w-3.5 h-3.5 fill-current" />
+                  Viết nhận xét & Đánh giá
+                </button>
+              </div>
+
+              {/* Rating Summary Card */}
+              <div className="bg-slate-50 rounded-2xl p-5 border border-slate-200/80 flex flex-col sm:flex-row items-center justify-between gap-6">
+                <div className="flex items-center gap-4">
+                  <div className="text-4xl font-extrabold text-slate-900 tracking-tight">
+                    {tutor.rating || 5.0}
+                    <span className="text-base text-slate-400 font-normal">/5</span>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1 text-amber-400">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <Star key={s} className="w-4 h-4 fill-amber-400" />
+                      ))}
+                    </div>
+                    <span className="text-xs text-slate-500 font-medium mt-1 block">
+                      Dựa trên {tutorReviews.length || tutor.reviews || 10} đánh giá đã xác minh
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="px-4 py-2 bg-emerald-50 text-emerald-800 rounded-xl border border-emerald-200 text-center">
+                    <span className="text-xs font-bold block">100% Hài lòng</span>
+                    <span className="text-[10px] text-emerald-600">Sau buổi học thử 1-1</span>
+                  </div>
+                  <div className="px-4 py-2 bg-blue-50 text-blue-800 rounded-xl border border-blue-200 text-center">
+                    <span className="text-xs font-bold block">96% Tiếp tục</span>
+                    <span className="text-[10px] text-blue-600">Đăng ký học chính thức</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Reviews Filter Tabs */}
+              <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                <button
+                  type="button"
+                  onClick={() => setReviewFilter('all')}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                    reviewFilter === 'all'
+                      ? 'bg-slate-900 text-white shadow-sm'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  Tất cả ({tutorReviews.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setReviewFilter('trial')}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                    reviewFilter === 'trial'
+                      ? 'bg-blue-600 text-white shadow-sm'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  Sau học thử 1-1 ({tutorReviews.filter(r => r.stage === 'trial').length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setReviewFilter('official')}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                    reviewFilter === 'official'
+                      ? 'bg-emerald-600 text-white shadow-sm'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  Đang học chính thức ({tutorReviews.filter(r => r.stage !== 'trial').length})
+                </button>
+              </div>
+
+              {/* Reviews List */}
+              <div className="space-y-3.5">
+                {displayedReviews.length === 0 ? (
+                  <div className="py-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200 space-y-2">
+                    <p className="text-xs text-slate-500">Chưa có nhận xét nào trong mục này.</p>
+                    <button
+                      type="button"
+                      onClick={() => openReviewModal(tutor, 'trial')}
+                      className="text-xs text-blue-600 font-bold hover:underline cursor-pointer"
+                    >
+                      Hãy là người đầu tiên gửi đánh giá cho {tutor.name} →
+                    </button>
+                  </div>
+                ) : (
+                  displayedReviews.map((rev) => (
+                    <div key={rev.id} className="bg-slate-50/70 hover:bg-slate-50 p-4 rounded-2xl border border-slate-200/80 transition-colors space-y-2.5">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          {rev.avatar ? (
+                            <img src={rev.avatar} alt={rev.studentName} className="w-10 h-10 rounded-full object-cover shadow-2xs shrink-0" />
+                          ) : (
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold text-sm flex items-center justify-center shrink-0 shadow-2xs">
+                              {rev.studentName.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-xs sm:text-sm text-slate-900 truncate">{rev.studentName}</span>
+                              {rev.verified && (
+                                <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 shrink-0">
+                                  <ShieldCheck className="w-3 h-3" /> Đã xác thực
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-[10px] text-slate-400 block mt-0.5">{rev.date}</span>
+                          </div>
+                        </div>
+
+                        {/* Stage Pill */}
+                        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg shrink-0 ${
+                          rev.stage === 'trial'
+                            ? 'bg-blue-100/80 text-blue-800 border border-blue-200'
+                            : 'bg-emerald-100/80 text-emerald-800 border border-emerald-200'
+                        }`}>
+                          {rev.stageText || (rev.stage === 'trial' ? 'Sau buổi học thử 1-1' : 'Đang học chính thức')}
+                        </span>
+                      </div>
+
+                      {/* Stars */}
+                      <div className="flex items-center gap-1 text-amber-400">
+                        {Array.from({ length: rev.rating || 5 }).map((_, i) => (
+                          <Star key={i} className="w-3.5 h-3.5 fill-amber-400" />
+                        ))}
+                      </div>
+
+                      {/* Comment text */}
+                      <p className="text-xs text-slate-700 leading-relaxed font-normal">
+                        {rev.comment}
+                      </p>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>
@@ -3710,7 +3808,9 @@ function AppLayout({
   checkoutModalState,
   setCheckoutModalState,
   isMyTrialsOpen,
-  setIsMyTrialsOpen
+  setIsMyTrialsOpen,
+  reviewModalState,
+  setReviewModalState
 }: any) {
   const location = useLocation();
   const isAdmin = location.pathname.startsWith('/admin');
@@ -3786,6 +3886,16 @@ function AppLayout({
         />
       )}
 
+      {/* Modal Nhận xét & Đánh giá giáo viên */}
+      {reviewModalState.isOpen && reviewModalState.tutor && (
+        <ReviewTutorModal
+          tutor={reviewModalState.tutor}
+          isOpen={reviewModalState.isOpen}
+          defaultStage={reviewModalState.defaultStage}
+          onClose={() => setReviewModalState({ ...reviewModalState, isOpen: false })}
+        />
+      )}
+
       {/* Floating Action Buttons: AI Chat & Facebook Messenger */}
       {!isAdmin && <FloatingContactDock />}
     </div>
@@ -3809,6 +3919,13 @@ export default function App() {
   });
   const [adminStats, setAdminStats] = useState(mockAdminStats);
   const [myTrials, setMyTrials] = useState<StudentTrialItem[]>(() => getStoredTrials());
+  const [reviews, setReviews] = useState<TutorReviewItem[]>(() => {
+    try {
+      const saved = localStorage.getItem('hantutor_tutor_reviews');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return defaultTutorReviews;
+  });
 
   const [authModalState, setAuthModalState] = useState<{ isOpen: boolean; view: 'login' | 'register'; defaultRole: 'student' | 'teacher' }>({
     isOpen: false,
@@ -3824,6 +3941,39 @@ export default function App() {
     tutorId: ''
   });
   const [isMyTrialsOpen, setIsMyTrialsOpen] = useState(false);
+  const [reviewModalState, setReviewModalState] = useState<{ isOpen: boolean; tutor: any; defaultStage: 'trial' | 'official' }>({
+    isOpen: false,
+    tutor: null,
+    defaultStage: 'trial'
+  });
+
+  const addTutorReview = (newReviewData: Omit<TutorReviewItem, 'id' | 'date'>) => {
+    const newReview: TutorReviewItem = {
+      ...newReviewData,
+      id: `rev_${Date.now()}`,
+      date: new Date().toLocaleDateString('vi-VN')
+    };
+
+    setReviews(prev => {
+      const updated = [newReview, ...prev];
+      try {
+        localStorage.setItem('hantutor_tutor_reviews', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+
+    setTutors(prev => prev.map(t => {
+      if (String(t.id) === String(newReview.tutorId)) {
+        const currentReviews = (t.reviews || 0) + 1;
+        return {
+          ...t,
+          reviews: currentReviews,
+          rating: 5.0
+        };
+      }
+      return t;
+    }));
+  };
 
   const addMockTutor = (newTutor: any) => {
     setPendingTutors(prev => {
@@ -3957,7 +4107,6 @@ export default function App() {
   };
 
   const cancelTrialEnrollment = (tutorId: any) => {
-    // Học sinh học thử xong không tiếp tục -> Xóa hoàn toàn khỏi danh sách lớp học thử (không để hàng chờ)
     setMyTrials(prev => {
       const updated = prev.filter(item => String(item.tutorId) !== String(tutorId));
       saveStoredTrials(updated);
@@ -4026,6 +4175,9 @@ export default function App() {
     },
     openMyTrialsModal: () => {
       setIsMyTrialsOpen(true);
+    },
+    openReviewModal: (tutor: any, defaultStage = 'trial') => {
+      setReviewModalState({ isOpen: true, tutor, defaultStage });
     }
   };
 
@@ -4036,12 +4188,14 @@ export default function App() {
     setPendingTutors,
     adminStats,
     myTrials,
+    reviews,
     recordTrialContact,
     recordOfficialEnrollment,
     cancelTrialEnrollment,
     approveTutorKyc,
     rejectTutorKyc,
-    addMockTutor
+    addMockTutor,
+    addTutorReview
   };
 
   return (
@@ -4061,6 +4215,8 @@ export default function App() {
             setCheckoutModalState={setCheckoutModalState}
             isMyTrialsOpen={isMyTrialsOpen}
             setIsMyTrialsOpen={setIsMyTrialsOpen}
+            reviewModalState={reviewModalState}
+            setReviewModalState={setReviewModalState}
           />
         </BrowserRouter>
       </UIContext.Provider>

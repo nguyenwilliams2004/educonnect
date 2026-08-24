@@ -1,3 +1,98 @@
+export interface TutorReviewItem {
+  id: string;
+  tutorId: string | number;
+  studentName: string;
+  avatar?: string;
+  rating: number;
+  date: string;
+  stage: 'trial' | 'official' | 'ongoing';
+  stageText: string;
+  comment: string;
+  likes?: number;
+  verified?: boolean;
+}
+
+export const defaultTutorReviews: TutorReviewItem[] = [
+  {
+    id: "r1",
+    tutorId: "t1",
+    studentName: "Phụ huynh em Tuấn Anh",
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop",
+    rating: 5,
+    date: "22/08/2026",
+    stage: "trial",
+    stageText: "Sau buổi học thử 1-1",
+    comment: "Cô Mai dạy rất tận tình và tâm lý. Trong buổi học thử, cô đã chỉ ra ngay các lỗi diễn đạt và cách mở bài sáng tạo khiến con rất hào hứng. Gia đình đã quyết định đăng ký học chính thức cùng cô ngay sau buổi học!",
+    likes: 12,
+    verified: true
+  },
+  {
+    id: "r2",
+    tutorId: "t1",
+    studentName: "Em Bảo Ngọc (Lớp 12)",
+    avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=200&auto=format&fit=crop",
+    rating: 5,
+    date: "15/08/2026",
+    stage: "official",
+    stageText: "Đang theo học 3 tháng",
+    comment: "Nhờ phương pháp sơ đồ tư duy cảm xúc của cô, em đã không còn sợ các câu nghị luận xã hội nữa. Điểm thi thử khảo sát của em từ 6.5 đã bứt phá lên 8.75 điểm. Em cảm ơn cô rất nhiều ạ!",
+    likes: 19,
+    verified: true
+  },
+  {
+    id: "r3",
+    tutorId: "t2",
+    studentName: "Nguyễn Minh Quân (Học sinh 12 chuyên)",
+    avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=200&auto=format&fit=crop",
+    rating: 5,
+    date: "20/08/2026",
+    stage: "official",
+    stageText: "Sau thời gian học chính thức",
+    comment: "Thầy Tài dạy cực kỳ cuốn hút và thực chiến! Bí kíp đọc Atlat và phân tích số liệu của thầy giúp em làm đúng 100% các câu thực hành mà không phải học vẹt một chữ nào.",
+    likes: 15,
+    verified: true
+  },
+  {
+    id: "r4",
+    tutorId: "t2",
+    studentName: "Phụ huynh bạn Khánh Linh",
+    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop",
+    rating: 5,
+    date: "16/08/2026",
+    stage: "trial",
+    stageText: "Sau buổi học thử 1-1",
+    comment: "Thầy có tác phong sư phạm rất chuyên nghiệp, đúng giờ và nhiệt tình. Bé nhà mình sau buổi học thử cảm thấy môn Địa rất thú vị và tự tin hơn hẳn.",
+    likes: 8,
+    verified: true
+  },
+  {
+    id: "r5",
+    tutorId: "t3",
+    studentName: "Hoàng Đức Duy (Lớp 12 A1)",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop",
+    rating: 5,
+    date: "19/08/2026",
+    stage: "official",
+    stageText: "Đang theo học 2 tháng",
+    comment: "Đúng như slogan 'Có thầy đơn giản Hóa', các bài tập este và bảo toàn electron hóc búa được thầy Thắng quy đổi và phân tích bản chất cực kỳ dễ hiểu. Rất khuyên các bạn khối A/B nên học thầy!",
+    likes: 24,
+    verified: true
+  },
+  {
+    id: "r6",
+    tutorId: "t4",
+    studentName: "Lê Phương Thảo (Luyện thi Y Hà Nội)",
+    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop",
+    rating: 5,
+    date: "17/08/2026",
+    stage: "trial",
+    stageText: "Sau buổi học thử 1-1",
+    comment: "Buổi học thử với thầy Kiên thật sự chất lượng. Thầy hướng dẫn cách giải bài tập Phả hệ và Di truyền quần thể bằng công thức tính nhanh chỉ mất chưa đầy 40 giây.",
+    likes: 11,
+    verified: true
+  }
+];
+
 export interface TutorType {
   id: string | number;
   slug?: string;

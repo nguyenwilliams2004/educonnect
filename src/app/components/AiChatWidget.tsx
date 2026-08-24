@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, X, Bot, RotateCcw, Sparkles, ExternalLink, Settings, MessageSquare } from 'lucide-react';
+import { Send, X } from 'lucide-react';
 import { useData } from '../App';
 
 export interface ChatMessage {
@@ -27,42 +27,35 @@ export function AiChatLogoIcon({ className = "w-full h-full" }: { className?: st
   );
 }
 
-// Messenger Icon chính hãng
+// Logo Facebook Messenger chính thức theo đúng ảnh người dùng gửi
 export function MessengerLogoIcon({ className = "w-full h-full" }: { className?: string }) {
   return (
     <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-      <defs>
-        <linearGradient id="messengerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#00C6FF" />
-          <stop offset="50%" stopColor="#0078FF" />
-          <stop offset="100%" stopColor="#A033FF" />
-        </linearGradient>
-      </defs>
-      <circle cx="50" cy="50" r="50" fill="url(#messengerGrad)" />
+      {/* Nền xanh dương Messenger */}
+      <circle cx="50" cy="50" r="50" fill="#0064FF" />
+      {/* Tia chớp Messenger màu trắng */}
       <path
-        d="M50 18 C31.77 18 17 31.62 17 48.42 C17 58.01 22.06 66.52 30 72.03 L30 83 L40.59 77.19 C43.59 78.02 46.74 78.47 50 78.47 C68.23 78.47 83 64.85 83 48.42 C83 31.62 68.23 18 50 18 Z"
-        fill="#ffffff"
+        d="M50 16 C30.67 16 15 30.5 15 48.4 C15 58.6 19.8 67.6 27.5 73.5 L27.5 84 L38.2 78 C41.9 79 45.8 79.6 50 79.6 C69.33 79.6 85 65.1 85 47.2 C85 29.3 69.33 16 50 16 Z"
+        fill="#0064FF"
       />
       <path
-        d="M33 55.5 L46 41.5 L53 49 L66.5 41.5 L53.5 55.5 L46.5 48 Z"
-        fill="url(#messengerGrad)"
+        d="M32 57.5 L46 42.5 L53.5 50.5 L68 42.5 L54 57.5 L46.5 49.5 Z"
+        fill="#ffffff"
       />
     </svg>
   );
 }
 
-// Các câu hỏi gợi ý nhanh (Đã loại bỏ câu 30%/70% theo yêu cầu của bạn)
+// Các câu hỏi gợi ý nhanh (Không chứa icon rườm rà)
 const QUICK_PROMPTS = [
-  "Quy trình kết nối & học thử như thế nào?",
+  "Quy trình kết nối và học thử như thế nào?",
   "Tìm giáo viên Toán luyện thi tại Hà Nội",
   "Tỷ lệ nhận lớp thành công là gì?",
-  "Làm thế nào để đăng ký trở thành gia sư?"
+  "Hướng dẫn đăng ký trở thành gia sư"
 ];
 
 export default function AiChatWidget({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const { tutors } = useData();
-  const [apiKey, setApiKey] = useState(() => localStorage.getItem('hantutor_gemini_api_key') || '');
-  const [showSettings, setShowSettings] = useState(false);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
@@ -70,7 +63,7 @@ export default function AiChatWidget({ isOpen, onClose }: { isOpen: boolean; onC
     {
       id: 'welcome',
       sender: 'ai',
-      text: `Xin chào! Tôi là **Trợ lý AI HanTutor** 🎓\n\nTôi có thể giúp bạn giải đáp mọi thắc mắc về:\n- 🎯 **Quy trình học thử & kết nối giáo viên**\n- 🔍 **Tìm kiếm gia sư/giáo viên** theo môn học, khu vực tại Hà Nội\n- 🌟 **Tỷ lệ nhận lớp thành công** & Chính sách xác thực KYC\n- 📝 **Hướng dẫn đăng ký giảng dạy** cho giáo viên & sinh viên\n\nBạn cần hỗ trợ thông tin gì hôm nay?`,
+      text: `Xin chào! Tôi là Trợ lý AI HanTutor.\n\nTôi có thể hỗ trợ bạn:\n- Quy trình học thử và kết nối giáo viên\n- Tìm kiếm gia sư và giáo viên theo môn học tại Hà Nội\n- Tìm hiểu về tỷ lệ nhận lớp thành công và xác thực KYC\n- Hướng dẫn đăng ký giảng dạy trên hệ thống\n\nBạn cần hỗ trợ thông tin gì hôm nay?`,
       timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
     }
   ]);
@@ -83,32 +76,32 @@ export default function AiChatWidget({ isOpen, onClose }: { isOpen: boolean; onC
     }
   }, [messages, isOpen]);
 
-  // Bộ phân tích & xử lý nghiệp vụ thông minh cho HanTutor (Smart Domain Inference Engine)
+  // Bộ phân tích nghiệp vụ HanTutor chuyên sâu (Không cần nhập API key)
   const generateHanTutorResponse = (query: string): { text: string; recommendedTutors?: any[] } => {
     const q = query.toLowerCase().trim();
 
-    // 1. Câu hỏi về quy trình học thử & kết nối
+    // 1. Quy trình học thử
     if (q.includes('quy trình') || q.includes('học thử') || q.includes('kết nối') || q.includes('liên hệ')) {
       return {
-        text: `### 📚 Quy trình Kết nối & Học thử tại HanTutor:\n\n1. **Bước 1: Chọn Giáo viên phù hợp**\n   Học sinh duyệt danh sách giáo viên/gia sư theo môn học, quận tại Hà Nội, xem hồ sơ học vấn, bằng cấp và tỷ lệ nhận lớp.\n\n2. **Bước 2: Ấn "Liên hệ ngay"**\n   Hệ thống sẽ cung cấp số Zalo & SĐT chính thức của giáo viên để 2 bên trực tiếp trao đổi lịch học và nhu cầu.\n\n3. **Bước 3: Buổi học thử 1-1**\n   Học sinh và giáo viên tiến hành buổi học thử để đánh giá mức độ tương thích và phương pháp giảng dạy.\n\n4. **Bước 4: Quyết định sau học thử**\n   - **Nếu tiếp tục:** Học sinh bấm *"Đăng ký học chính thức"* trên hệ thống.\n   - **Nếu không tiếp tục:** Học sinh có thể chọn *"Không tiếp tục"*, lớp học thử sẽ được xóa bỏ khỏi danh sách, và hệ thống tự động ghi nhận giảm tỷ lệ nhận lớp của giáo viên để đảm bảo tính khách quan.`
+        text: `### Quy trình kết nối & học thử tại HanTutor:\n\n1. Bước 1: Chọn giáo viên phù hợp trên danh sách theo môn học và quận tại Hà Nội.\n2. Bước 2: Bấm nút "Liên hệ ngay" để nhận số Zalo/SĐT chính thức của giáo viên và trao đổi lịch học.\n3. Bước 3: Học sinh và giáo viên thực hiện buổi học thử 1-1 miễn phí.\n4. Bước 4: Sau buổi học thử:\n   - Nếu tiếp tục: Học sinh chọn "Đăng ký học chính thức" trên hệ thống.\n   - Nếu không tiếp tục: Học sinh chọn "Không tiếp tục", lớp học thử sẽ được đóng và hệ thống tự động cập nhật giảm tỷ lệ nhận lớp của giáo viên để đảm bảo tính khách quan.`
       };
     }
 
-    // 2. Câu hỏi về tỷ lệ nhận lớp thành công
+    // 2. Tỷ lệ nhận lớp thành công
     if (q.includes('tỷ lệ') || q.includes('nhận lớp') || q.includes('thành công') || q.includes('chốt học')) {
       return {
-        text: `### 🌟 Tỷ lệ Nhận lớp Thành công là gì?\n\n- **Định nghĩa:** Đây là chỉ số minh bạch thể hiện tỷ lệ phần trăm số học viên quyết định **đăng ký học chính thức** sau khi đã hoàn thành buổi học thử với giáo viên (\`Số học viên chốt học / Tổng lượt học thử\`).\n\n- **Cơ chế tự động:**\n  - Khi học sinh bấm *"Liên hệ ngay"*, lượt học thử được ghi nhận.\n  - Nếu học sinh bấm *"Đăng ký học chính thức"*, tỷ lệ nhận lớp sẽ **tăng lên**.\n  - Nếu học sinh học thử xong nhưng chọn *"Không tiếp tục"*, tỷ lệ nhận lớp sẽ **tự động giảm xuống**.\n\nChỉ số này giúp phụ huynh và học sinh đánh giá chính xác chất lượng giảng dạy thực tế của giáo viên!`
+        text: `### Tỷ lệ nhận lớp thành công là gì?\n\n- Định nghĩa: Tỷ lệ phần trăm số học viên quyết định đăng ký học chính thức sau khi hoàn thành buổi học thử (Số học viên chốt học / Tổng số lượt học thử).\n- Cơ chế tự động:\n  - Khi học sinh bấm "Liên hệ ngay", lượt học thử được ghi nhận.\n  - Khi học sinh bấm "Đăng ký học chính thức", tỷ lệ nhận lớp tăng lên.\n  - Khi học sinh chọn "Không tiếp tục", tỷ lệ nhận lớp tự động giảm xuống.\n\nChỉ số này giúp phụ huynh đánh giá chính xác độ uy tín và chất lượng giảng dạy của giáo viên.`
       };
     }
 
-    // 3. Câu hỏi về đăng ký làm giáo viên / KYC
+    // 3. Đăng ký làm giáo viên / KYC
     if (q.includes('đăng ký') && (q.includes('gia sư') || q.includes('giáo viên') || q.includes('dạy') || q.includes('kyc'))) {
       return {
-        text: `### 👩‍🏫 Hướng dẫn Đăng ký trở thành Giáo viên / Gia sư:\n\n1. **Đăng ký tài khoản:** Bấm nút **"Đăng ký ngay"** ở góc phải trên cùng và chọn vai trò **"Giáo viên / Gia sư"** (hoặc truy cập trang \`/dang-ky-gia-su\`).\n2. **Điền thông tin & Hồ sơ:** Cung cấp học vấn, bằng cấp, môn giảng dạy, khu vực tại Hà Nội và học phí mong muốn.\n3. **Xác thực KYC minh bạch:** Tải lên ảnh CCCD (mặt trước/sau) và bằng tốt nghiệp đại học / chứng chỉ chuyên môn.\n4. **Phê duyệt nhanh:** Ban quản trị Admin sẽ kiểm duyệt hồ sơ. Sau khi duyệt, hồ sơ của bạn sẽ **hiển thị trực tiếp ngay trên trang chủ và trang tìm kiếm** HanTutor để học sinh kết nối!`
+        text: `### Hướng dẫn đăng ký trở thành Giáo viên / Gia sư:\n\n1. Đăng ký tài khoản: Bấm "Đăng ký ngay" ở góc trên cùng và chọn vai trò "Giáo viên / Gia sư" (hoặc vào mục Đăng ký gia sư).\n2. Điền thông tin hồ sơ: Học vấn, môn giảng dạy, khu vực tại Hà Nội và mức học phí mong muốn.\n3. Xác thực hồ sơ KYC: Tải lên ảnh CCCD (2 mặt) và bằng tốt nghiệp/chứng chỉ chuyên môn.\n4. Phê duyệt: Ban quản trị kiểm duyệt hồ sơ và duyệt kích hoạt hiển thị trực tiếp lên hệ thống.`
       };
     }
 
-    // 4. Tìm kiếm giáo viên theo môn học hoặc khu vực
+    // 4. Tìm kiếm giáo viên theo môn học
     const subjectKeywords: { [key: string]: string[] } = {
       'Toán': ['toán', 'toan', 'math'],
       'Ngữ văn': ['văn', 'ngữ văn', 'van'],
@@ -145,14 +138,14 @@ export default function AiChatWidget({ isOpen, onClose }: { isOpen: boolean; onC
       ).join('\n');
 
       return {
-        text: `### 🎯 Gợi ý Giáo viên / Gia sư phù hợp dành cho bạn:\n\n${tutorListMarkdown}\n\n👉 Bạn có thể bấm vào thẻ giáo viên trên màn hình để xem đầy đủ bằng cấp và bấm **"Liên hệ ngay"** để trao đổi Zalo học thử nhé!`,
+        text: `### Danh sách giáo viên phù hợp:\n\n${tutorListMarkdown}\n\nBạn có thể bấm vào thẻ giáo viên để xem chi tiết bằng cấp và bấm "Liên hệ ngay" để bắt đầu học thử.`,
         recommendedTutors: matchedTutors
       };
     }
 
-    // 5. Câu trả lời mặc định thông minh
+    // 5. Mặc định
     return {
-      text: `Cảm ơn câu hỏi của bạn! HanTutor là nền tảng kết nối trực tiếp giữa Phụ huynh/Học sinh và Giáo viên/Gia sư chất lượng cao tại Hà Nội.\n\n- Bạn có thể **tìm kiếm giáo viên** theo quận và môn học trên thanh tìm kiếm.\n- Bấm **"Liên hệ ngay"** tại hồ sơ giáo viên để kết nối Zalo và sắp xếp buổi học thử 1-1 miễn phí.\n- Đội ngũ Admin kiểm duyệt 100% hồ sơ CCCD & Bằng cấp.\n\nNếu bạn muốn kết nối trực tiếp với Đội ngũ Hỗ trợ HanTutor, hãy bấm vào nút **Facebook Messenger** màu xanh ở góc màn hình nhé!`
+      text: `HanTutor là nền tảng kết nối trực tiếp Phụ huynh và Học sinh với Giáo viên, Gia sư chất lượng cao tại Hà Nội.\n\n- Tìm kiếm giáo viên theo môn học và quận huyện trên thanh tìm kiếm.\n- Bấm "Liên hệ ngay" để kết nối Zalo và hẹn lịch học thử 1-1 miễn phí.\n- Ban quản trị kiểm duyệt 100% bằng cấp và chứng chỉ của giáo viên.\n\nĐể trao đổi trực tiếp với bộ phận hỗ trợ, bạn có thể bấm vào nút Facebook Messenger ở góc dưới màn hình.`
     };
   };
 
@@ -171,54 +164,6 @@ export default function AiChatWidget({ isOpen, onClose }: { isOpen: boolean; onC
     if (!textToSend) setInputMessage('');
     setIsLoading(true);
 
-    // Kiểm tra nếu có API Key Gemini hợp lệ
-    const activeKey = apiKey || (import.meta as any).env?.VITE_GEMINI_API_KEY;
-
-    if (activeKey) {
-      try {
-        const systemPrompt = `Bạn là Trợ lý AI thông minh của nền tảng gia sư HanTutor (fasttryon.com).
-Nhiệm vụ của bạn là tư vấn tận tình, lịch sự, chuẩn mực cho Phụ huynh và Học sinh về việc tìm gia sư, quy trình học thử, và chính sách của website.
-Kiến thức HanTutor:
-- Khu vực: Tập trung các quận tại TP. Hà Nội.
-- Môn học: Văn hóa (Toán, Văn, Anh, Lý, Hóa, Sinh, Sử, Địa) và Năng khiếu/Nghệ thuật (Đàn, Bơi, Võ, Cờ vua, Lập trình).
-- Quy trình: Học sinh chọn giáo viên -> Bấm "Liên hệ ngay" -> Lấy số Zalo -> Trao đổi và học thử 1-1 miễn phí -> Sau học thử: Nếu tiếp tục thì bấm "Đăng ký học chính thức"; nếu không tiếp tục thì lớp học thử bị xóa bỏ và tỷ lệ nhận lớp của giáo viên tự động giảm khách quan.
-- Xác thực KYC: Toàn bộ giáo viên được Admin duyệt CCCD 2 mặt và bằng cấp/chứng chỉ trước khi hiển thị lên web.
-Hãy trả lời ngắn gọn, rõ ràng, định dạng Markdown đẹp mắt bằng tiếng Việt.`;
-
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${activeKey}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [
-              {
-                role: 'user',
-                parts: [{ text: `${systemPrompt}\n\nNgười dùng hỏi: ${messageText}` }]
-              }
-            ]
-          })
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          const aiResponseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (aiResponseText) {
-            const aiMsg: ChatMessage = {
-              id: `ai_${Date.now()}`,
-              sender: 'ai',
-              text: aiResponseText,
-              timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
-            };
-            setMessages(prev => [...prev, aiMsg]);
-            setIsLoading(false);
-            return;
-          }
-        }
-      } catch (err) {
-        console.warn("Gemini API call error, using HanTutor built-in engine", err);
-      }
-    }
-
-    // Fallback: Sử dụng HanTutor Domain Knowledge Engine (Độ trễ tự nhiên 500ms)
     setTimeout(() => {
       const responseData = generateHanTutorResponse(messageText);
       const aiMsg: ChatMessage = {
@@ -230,95 +175,34 @@ Hãy trả lời ngắn gọn, rõ ràng, định dạng Markdown đẹp mắt b
       };
       setMessages(prev => [...prev, aiMsg]);
       setIsLoading(false);
-    }, 600);
-  };
-
-  const handleResetChat = () => {
-    setMessages([
-      {
-        id: `welcome_${Date.now()}`,
-        sender: 'ai',
-        text: `Đã làm mới cuộc hội thoại! Bạn có thắc mắc gì về quy trình học thử, giáo viên hoặc môn học tại HanTutor không?`,
-        timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
-      }
-    ]);
+    }, 450);
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed bottom-24 right-4 sm:right-6 z-50 w-[92vw] sm:w-[400px] h-[560px] max-h-[82vh] bg-white rounded-3xl shadow-2xl border border-slate-200/90 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200 select-text">
-      {/* Header */}
+    <div className="fixed bottom-24 right-4 sm:right-6 z-50 w-[92vw] sm:w-[400px] h-[550px] max-h-[82vh] bg-white rounded-3xl shadow-2xl border border-slate-200/90 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200 select-text">
+      {/* Header tinh gọn: Không có icon thừa, không có dán API */}
       <div className="bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 p-4 text-white flex items-center justify-between shadow-md shrink-0">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-10 h-10 rounded-2xl bg-white p-1 shadow-sm shrink-0 flex items-center justify-center">
             <AiChatLogoIcon className="w-8 h-8" />
           </div>
           <div className="min-w-0">
-            <div className="flex items-center gap-1.5">
-              <h3 className="font-extrabold text-sm tracking-tight text-white truncate">Trợ lý AI HanTutor</h3>
-              <span className="bg-white/25 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">AI 24/7</span>
-            </div>
-            <p className="text-[11px] text-orange-100 truncate mt-0.5">Am hiểu nghiệp vụ & kết nối giáo viên</p>
+            <h3 className="font-extrabold text-sm tracking-tight text-white truncate">Trợ lý AI HanTutor</h3>
+            <p className="text-[11px] text-orange-100 truncate mt-0.5">Tư vấn nghiệp vụ & kết nối giáo viên</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-1 shrink-0">
-          <button
-            type="button"
-            onClick={() => setShowSettings(!showSettings)}
-            className="p-2 hover:bg-white/20 rounded-xl text-white transition-colors cursor-pointer"
-            title="Cài đặt API"
-          >
-            <Settings className="w-4 h-4" />
-          </button>
-          <button
-            type="button"
-            onClick={handleResetChat}
-            className="p-2 hover:bg-white/20 rounded-xl text-white transition-colors cursor-pointer"
-            title="Làm mới đoạn chat"
-          >
-            <RotateCcw className="w-4 h-4" />
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-2 hover:bg-white/20 rounded-xl text-white transition-colors cursor-pointer"
-            title="Đóng"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="p-2 hover:bg-white/20 rounded-xl text-white transition-colors cursor-pointer"
+          title="Đóng"
+        >
+          <X className="w-4 h-4" />
+        </button>
       </div>
-
-      {/* Settings Modal Bar (Optional Gemini API key) */}
-      {showSettings && (
-        <div className="bg-orange-50/90 border-b border-orange-100 p-3 text-xs shrink-0">
-          <div className="flex justify-between items-center mb-1.5">
-            <span className="font-bold text-slate-800">Cấu hình Google Gemini API (Tùy chọn):</span>
-            <button
-              type="button"
-              onClick={() => setShowSettings(false)}
-              className="text-slate-400 hover:text-slate-600 font-bold"
-            >
-              ✕
-            </button>
-          </div>
-          <input
-            type="password"
-            placeholder="Dán Gemini API Key của bạn (hoặc để trống)"
-            value={apiKey}
-            onChange={(e) => {
-              setApiKey(e.target.value);
-              localStorage.setItem('hantutor_gemini_api_key', e.target.value);
-            }}
-            className="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-800 focus:outline-hidden focus:border-orange-500"
-          />
-          <p className="text-[10px] text-slate-500 mt-1">
-            * Mặc định hệ thống sử dụng Trợ lý nghiệp vụ chuyên sâu HanTutor tích hợp sẵn.
-          </p>
-        </div>
-      )}
 
       {/* Message Thread */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3.5 bg-slate-50/50">
@@ -338,9 +222,9 @@ Hãy trả lời ngắn gọn, rõ ràng, định dạng Markdown đẹp mắt b
               <div className="space-y-1.5 whitespace-pre-wrap">
                 {msg.text.split('\n').map((line, i) => {
                   if (line.startsWith('### ')) {
-                    return <div key={i} className="font-extrabold text-sm text-orange-600 mt-1 mb-1">{line.replace('### ', '')}</div>;
+                    return <div key={i} className="font-extrabold text-sm text-slate-900 mt-1 mb-1">{line.replace('### ', '')}</div>;
                   }
-                  if (line.startsWith('- **') || line.startsWith('1. **') || line.startsWith('2. **') || line.startsWith('3. **') || line.startsWith('4. **')) {
+                  if (line.startsWith('- **') || line.startsWith('1. ') || line.startsWith('2. ') || line.startsWith('3. ') || line.startsWith('4. ')) {
                     return <div key={i} className="pl-1 text-slate-700">{line}</div>;
                   }
                   return <div key={i}>{line}</div>;
@@ -364,7 +248,6 @@ Hãy trả lời ngắn gọn, rõ ràng, định dạng Markdown đẹp mắt b
                         <div className="font-bold text-[11px] text-slate-900 truncate group-hover:text-orange-600">{tutor.name}</div>
                         <div className="text-[10px] text-slate-500 truncate">{tutor.subjects?.join(', ')} • {tutor.hourlyRate}đ/h</div>
                       </div>
-                      <ExternalLink className="w-3.5 h-3.5 text-slate-400 group-hover:text-orange-600 shrink-0" />
                     </a>
                   ))}
                 </div>
@@ -376,8 +259,10 @@ Hãy trả lời ngắn gọn, rõ ràng, định dạng Markdown đẹp mắt b
 
         {isLoading && (
           <div className="flex items-center gap-2 p-3 bg-white border border-slate-200/80 rounded-2xl w-fit text-xs text-slate-500 shadow-2xs">
-            <Sparkles className="w-3.5 h-3.5 text-orange-500 animate-spin" />
-            <span>Trợ lý AI HanTutor đang soạn câu trả lời...</span>
+            <div className="w-2 h-2 rounded-full bg-orange-500 animate-bounce" />
+            <div className="w-2 h-2 rounded-full bg-orange-500 animate-bounce [animation-delay:0.2s]" />
+            <div className="w-2 h-2 rounded-full bg-orange-500 animate-bounce [animation-delay:0.4s]" />
+            <span className="ml-1">Đang soạn câu trả lời...</span>
           </div>
         )}
 
@@ -391,7 +276,7 @@ Hãy trả lời ngắn gọn, rõ ràng, định dạng Markdown đẹp mắt b
             key={idx}
             type="button"
             onClick={() => handleSendMessage(prompt)}
-            className="text-[11px] font-medium bg-slate-100 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 border border-slate-200/70 px-2.5 py-1 rounded-full whitespace-nowrap transition-colors cursor-pointer shrink-0"
+            className="text-[11px] font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/70 px-2.5 py-1 rounded-full whitespace-nowrap transition-colors cursor-pointer shrink-0"
           >
             {prompt}
           </button>
@@ -410,7 +295,7 @@ Hãy trả lời ngắn gọn, rõ ràng, định dạng Markdown đẹp mắt b
           type="text"
           value={inputMessage}
           onChange={(e) => setInputMessage(e.target.value)}
-          placeholder="Hỏi AI về giáo viên, học thử, môn học..."
+          placeholder="Hỏi về giáo viên, học thử, môn học..."
           className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-hidden focus:border-orange-500 focus:bg-white transition-all"
         />
         <button
