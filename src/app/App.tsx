@@ -1109,6 +1109,89 @@ function HeroRightIllustration() {
   );
 }
 
+function Navbar() {
+  const { openAuthModal, openMyTrialsModal } = useUI();
+  const { myTrials } = useData();
+  const location = useLocation();
+
+  const activeTrialsCount = myTrials.filter(t => t.status === 'trial_in_progress').length;
+
+  const isActive = (path: string) => {
+    if (path === '/' && location.pathname === '/') return true;
+    if (path !== '/' && location.pathname.startsWith(path)) return true;
+    return false;
+  };
+
+  return (
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-2xs">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+        <Link to="/" className="flex items-center gap-3">
+          <Logo />
+        </Link>
+
+        <nav className="hidden md:flex items-center gap-8">
+          <Link 
+            to="/" 
+            className={`text-sm font-semibold transition-colors ${isActive('/') ? 'text-blue-600 font-bold' : 'text-slate-600 hover:text-blue-600'}`}
+          >
+            Trang chủ
+          </Link>
+          <Link 
+            to="/tim-gia-su" 
+            className={`text-sm font-semibold transition-colors ${isActive('/tim-gia-su') ? 'text-blue-600 font-bold' : 'text-slate-600 hover:text-blue-600'}`}
+          >
+            Tìm Gia Sư & Giáo Viên
+          </Link>
+          <button
+            type="button"
+            onClick={openMyTrialsModal}
+            className="text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors flex items-center gap-1.5 cursor-pointer"
+          >
+            Lớp học thử của tôi
+            {myTrials.length > 0 && (
+              <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${activeTrialsCount > 0 ? 'bg-amber-500 text-white animate-pulse' : 'bg-slate-200 text-slate-700'}`}>
+                {myTrials.length}
+              </span>
+            )}
+          </button>
+        </nav>
+
+        <div className="flex items-center gap-3.5">
+          <button 
+            type="button"
+            onClick={openMyTrialsModal}
+            className="md:hidden relative p-2 text-slate-600 hover:bg-slate-50 rounded-xl"
+            title="Lớp học thử của tôi"
+          >
+            <BookOpen className="w-5 h-5" />
+            {myTrials.length > 0 && (
+              <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-amber-500 rounded-full"></span>
+            )}
+          </button>
+
+          <Link to="/tim-gia-su" className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-xl transition-colors">
+            <Search className="w-5 h-5" />
+          </Link>
+
+          <button 
+            onClick={() => openAuthModal('login')}
+            className="text-slate-700 hover:text-blue-600 font-bold text-sm px-2 py-2 cursor-pointer transition-colors"
+          >
+            Đăng nhập
+          </button>
+
+          <button 
+            onClick={() => openAuthModal('register', 'student')}
+            className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 sm:px-6 py-2.5 rounded-full transition-all text-sm shadow-md shadow-blue-200"
+          >
+            Đăng ký ngay
+          </button>
+        </div>
+      </div>
+    </header>
+  );
+}
+
 function Hero() {
   const [searchText, setSearchText] = useState('');
   const [selectedLoc, setSelectedLoc] = useState('');
