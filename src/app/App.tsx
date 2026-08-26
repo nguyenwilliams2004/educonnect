@@ -73,21 +73,28 @@ function saveStoredTrials(trials: StudentTrialItem[]) {
   localStorage.setItem('hantutor_student_trials', JSON.stringify(trials));
 }
 
-function Logo({ light = false }: { light?: boolean }) {
+function Logo({ light = false, size = "md" }: { light?: boolean; size?: "sm" | "md" | "lg" }) {
+  const iconSizeClass = size === "sm" ? "w-8 h-8" : size === "lg" ? "w-12 h-12" : "w-9 h-9 sm:w-10 sm:h-10";
+  const wordmarkHeightClass = size === "sm" ? "h-5" : size === "lg" ? "h-8" : "h-6 sm:h-7";
+
   return (
     <div className="flex items-center gap-2.5 cursor-pointer select-none">
-      <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-200">
-        <svg viewBox="0 0 100 100" className="w-6 h-6 fill-current">
-          <path d="M25 28 C25 23, 32 18, 42 23 L42 80 C32 85, 25 80, 25 75 Z" fill="#ffffff"/>
-          <path d="M75 28 C75 23, 68 18, 58 23 L58 80 C68 85, 75 80, 75 75 Z" fill="#ffffff" opacity="0.9"/>
-          <path d="M40 48 L60 48 L60 56 L40 56 Z" fill="#ffffff" opacity="0.8"/>
-          <path d="M50 12 L70 25 L50 38 L30 25 Z" fill="#f59e0b"/>
-          <path d="M70 25 L75 40 L70 42 L65 40 Z" fill="#d97706"/>
-        </svg>
-      </div>
-      <span className={`font-extrabold text-2xl tracking-tight ${light ? 'text-white' : 'text-slate-900'}`}>
-        Han<span className="text-blue-600">tutor</span>
-      </span>
+      <img 
+        src="/logo-icon.png" 
+        alt="HanTutor Icon" 
+        className={`${iconSizeClass} object-contain shrink-0 transition-transform duration-200 hover:scale-105`} 
+      />
+      {light ? (
+        <span className="font-extrabold text-2xl tracking-tight text-white flex items-center leading-none">
+          Han<span className="text-[#FF9000]">tutor</span>
+        </span>
+      ) : (
+        <img 
+          src="/logo-wordmark.png" 
+          alt="HanTutor" 
+          className={`${wordmarkHeightClass} object-contain shrink-0`} 
+        />
+      )}
     </div>
   );
 }
@@ -4171,22 +4178,19 @@ function Footer() {
   return (
     <footer className="bg-[#0d1424] text-slate-400 py-6 border-t border-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-        <Link to="/" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white">
-            <svg viewBox="0 0 100 100" className="w-5 h-5 fill-current">
-              <path d="M25 28 C25 23, 32 18, 42 23 L42 80 C32 85, 25 80, 25 75 Z" fill="#ffffff"/>
-              <path d="M75 28 C75 23, 68 18, 58 23 L58 80 C68 85, 75 80, 75 75 Z" fill="#ffffff" opacity="0.9"/>
-              <path d="M40 48 L60 48 L60 56 L40 56 Z" fill="#ffffff" opacity="0.8"/>
-              <path d="M50 12 L70 25 L50 38 L30 25 Z" fill="#f59e0b"/>
-            </svg>
-          </div>
-          <span className="font-extrabold text-xl tracking-tight text-white">
-            Han<span className="text-blue-500">tutor</span>
+        <Link to="/" className="flex items-center gap-2.5 group select-none">
+          <img 
+            src="/logo-icon.png" 
+            alt="HanTutor Icon" 
+            className="w-9 h-9 object-contain shrink-0 transition-transform duration-200 group-hover:scale-105" 
+          />
+          <span className="font-extrabold text-2xl tracking-tight text-white flex items-center leading-none">
+            Han<span className="text-[#FF9000]">tutor</span>
           </span>
         </Link>
 
         <div className="text-xs text-slate-400">
-          © 2026 Hantutor. Nền tảng kết nối gia sư thông minh.
+          © 2026 HanTutor. Nền tảng kết nối gia sư thông minh.
         </div>
       </div>
     </footer>
