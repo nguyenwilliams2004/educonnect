@@ -569,7 +569,7 @@ function AuthModal({
 }
 
 // ==========================================
-// 2. MODAL LIÊN HỆ ZALO & HỌC THỬ 1-1 (KÈM GỬI EMAIL THÔNG BÁO)
+// 2. MODAL LIÊN HỆ ZALO & HỌC THỬ 1-1 (MÃ QR ZALO TRỰC TIẾP)
 // ==========================================
 function ContactZaloModal({ 
   tutor, 
@@ -583,197 +583,109 @@ function ContactZaloModal({
   onOfficialEnroll: () => void; 
 }) {
   const { recordTrialContact } = useData();
-  const [studentName, setStudentName] = useState('');
-  const [studentPhone, setStudentPhone] = useState('');
-  const [studentEmail, setStudentEmail] = useState('');
-  const [connected, setConnected] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [showEmailPreview, setShowEmailPreview] = useState(false);
+
+  // Tự động ghi nhận lớp học thử vào "Lớp học thử của tôi" ngay khi học sinh bấm liên hệ
+  useEffect(() => {
+    if (isOpen && tutor) {
+      recordTrialContact(tutor);
+    }
+  }, [isOpen, tutor]);
 
   if (!isOpen || !tutor) return null;
 
-  const handleConnect = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!studentName.trim() || !studentPhone.trim() || !studentEmail.trim()) {
-      alert("Vui lòng nhập đầy đủ Họ tên, Số điện thoại và Email để nhận thông báo");
-      return;
-    }
-
-    // 1. Ghi nhận lượt liên hệ học thử
-    recordTrialContact(tutor, { name: studentName, phone: studentPhone });
-
-    // 2. Gửi email thông báo tự động cho học sinh & lưu log
-    try {
-      const emailRecord = {
-        id: `email_${Date.now()}`,
-        to: studentEmail.trim(),
-        studentName: studentName.trim(),
-        studentPhone: studentPhone.trim(),
-        tutorName: tutor.name,
-        tutorSubject: tutor.badgeSubject || tutor.subjects?.[0] || 'Môn học',
-        tutorPhone: tutor.phone || tutor.zalo || '0967891234',
-        subject: `[HanTutor] Xác nhận đăng ký kết nối học thử 1-1 cùng ${tutor.name}`,
-        date: new Date().toLocaleString('vi-VN')
-      };
-      const currentEmails = JSON.parse(localStorage.getItem('hantutor_sent_emails') || '[]');
-      localStorage.setItem('hantutor_sent_emails', JSON.stringify([emailRecord, ...currentEmails]));
-    } catch (e) {}
-
-    setConnected(true);
-  };
-
-  const copyPhoneNumber = () => {
-    navigator.clipboard.writeText(tutor.phone || tutor.zalo || '0967891234');
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
+  // Lấy SĐT / Zalo của giáo viên đã đăng ký để tạo link & mã QR Zalo
+  const rawPhone = tutor.zalo || tutor.phone || '0967891234';
+  const cleanPhone = rawPhone.replace(/[^0-9]/g, '');
+  const zaloUrl = `https://zalo.me/${cleanPhone}`;
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(zaloUrl)}&margin=10`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative border border-slate-200 animate-in zoom-in-95 duration-200 max-h-[95vh] overflow-y-auto">
+      <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl relative border border-slate-100 animate-in zoom-in-95 duration-200 max-h-[95vh] overflow-y-auto">
         <button 
           onClick={onClose}
-          className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-2 rounded-full transition-colors cursor-pointer"
+          className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-2 rounded-full transition-colors cursor-pointer"
+          title="Đóng"
         >
           <X className="w-5 h-5" />
         </button>
 
-        {!connected ? (
-          <div>
-            <div className="flex items-center gap-4 mb-5">
-              <img src={tutor.avatar} alt={tutor.name} className="w-16 h-16 rounded-2xl object-cover shadow-sm" />
-              <div>
-                <h3 className="text-xl font-extrabold text-slate-900">{tutor.name}</h3>
-                <p className="text-xs text-slate-500 mt-0.5">{tutor.title}</p>
-                <span className="inline-block mt-1 bg-slate-900 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full">
-                  {tutor.badgeSubject || tutor.subjects?.[0]}
-                </span>
-              </div>
+        <div className="text-center space-y-4">
+          {/* Header Thông tin Giáo viên */}
+          <div className="flex flex-col items-center">
+            <div className="relative mb-2">
+              <img 
+                src={tutor.avatar} 
+                alt={tutor.name} 
+                className="w-20 h-20 rounded-2xl object-cover shadow-sm border-2 border-slate-100" 
+              />
+              <span className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-2 border-white rounded-full flex items-center justify-center text-[10px] text-white" title="Trực tuyến">
+                ✓
+              </span>
             </div>
-
-            {/* Quy trình kết nối & Học thử */}
-            <div className="bg-slate-50 border border-slate-200 p-4 sm:p-5 rounded-2xl mb-5 text-slate-800 space-y-2.5">
-              <h4 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">
-                Quy trình kết nối & Học thử
-              </h4>
-              <div className="text-xs sm:text-sm text-slate-600 space-y-1.5 leading-relaxed">
-                <p><strong>1.</strong> Nhập thông tin để nhận Số điện thoại / Zalo trực tiếp của giáo viên và nhận email xác nhận.</p>
-                <p><strong>2.</strong> Hai bên trao đổi chi tiết mục tiêu học tập và thống nhất lịch học thử 1-1 miễn phí.</p>
-                <p><strong>3.</strong> Sau buổi học thử, học sinh xác nhận <em>"Đăng ký học chính thức"</em> nếu hài lòng với phương pháp của giáo viên.</p>
-              </div>
-            </div>
-
-            <form onSubmit={handleConnect} className="space-y-3.5">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Họ và tên học sinh / phụ huynh</label>
-                <input 
-                  type="text" 
-                  value={studentName}
-                  onChange={e => setStudentName(e.target.value)}
-                  placeholder="Nhập họ và tên..."
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-600 outline-none text-sm font-medium"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Số điện thoại / Zalo liên hệ</label>
-                <input 
-                  type="tel" 
-                  value={studentPhone}
-                  onChange={e => setStudentPhone(e.target.value)}
-                  placeholder="Nhập số điện thoại..."
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-600 outline-none text-sm font-medium"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Email nhận thông báo kết nối & hướng dẫn học thử
-                </label>
-                <input 
-                  type="email" 
-                  value={studentEmail}
-                  onChange={e => setStudentEmail(e.target.value)}
-                  placeholder="Nhập email của bạn (VD: hocsinh@gmail.com)..."
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-600 outline-none text-sm font-medium"
-                  required
-                />
-                <span className="text-[10px] text-slate-400 block mt-1">
-                  Hệ thống sẽ gửi email xác nhận thông tin lớp học và số liên hệ của giáo viên ngay sau khi đăng ký.
-                </span>
-              </div>
-
-              <button 
-                type="submit" 
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-sm text-sm flex items-center justify-center cursor-pointer mt-2"
-              >
-                Xác nhận & Gửi thông tin về Email
-              </button>
-            </form>
-          </div>
-        ) : (
-          <div className="text-center py-2 space-y-4">
-            <div>
-              <h3 className="text-xl font-extrabold text-slate-900">Đã kết nối thành công</h3>
-              <p className="text-xs text-slate-500 mt-1">Thông tin liên hệ trực tiếp của giáo viên {tutor.name}:</p>
-            </div>
-
-            {/* Email notification success banner - Font chữ to, nổi bật, rõ ràng */}
-            <div className="bg-emerald-50 border-2 border-emerald-300 p-5 rounded-2xl text-left flex items-start gap-4 shadow-sm">
-              <div className="w-11 h-11 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-md text-xl font-bold">
-                ✉️
-              </div>
-              <div className="flex-1 space-y-1">
-                <h4 className="text-base sm:text-lg font-extrabold text-emerald-950 leading-snug">
-                  Đã gửi email thông báo thành công!
-                </h4>
-                <p className="text-xs sm:text-sm text-emerald-900 leading-relaxed font-medium">
-                  Thông tin kết nối, số Zalo/SĐT giáo viên và hướng dẫn học thử đã được gửi trực tiếp tới hòm thư: <br />
-                  <strong className="text-slate-900 font-extrabold text-sm sm:text-base underline decoration-emerald-500 decoration-2">{studentEmail}</strong>
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl flex items-center justify-between">
-              <div className="text-left">
-                <span className="text-[11px] text-slate-500 font-medium block">Số điện thoại / Zalo giáo viên</span>
-                <span className="text-lg font-bold text-slate-900">{tutor.phone || tutor.zalo || '0967891234'}</span>
-              </div>
-              <button 
-                type="button" 
-                onClick={copyPhoneNumber}
-                className="px-3.5 py-2 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 cursor-pointer transition-colors shadow-2xs"
-              >
-                {copied ? 'Đã sao chép' : 'Sao chép'}
-              </button>
-            </div>
-
-            <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl text-xs text-slate-600 text-left leading-relaxed">
-              Thông tin đã được lưu vào mục <strong>Lớp học thử của tôi</strong>. Sau khi hoàn thành buổi học thử 1-1, vui lòng bấm <strong>"Đăng ký học chính thức"</strong> để kích hoạt khóa học.
-            </div>
-
-            <div className="pt-2 border-t border-slate-100 flex flex-col gap-2.5">
-              <a 
-                href={`https://zalo.me/${tutor.zalo || tutor.phone || '0967891234'}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full py-3 bg-[#0068FF] hover:bg-[#0056d6] text-white text-xs font-bold rounded-xl transition-colors shadow-xs text-center inline-block"
-              >
-                Mở Zalo trao đổi trực tiếp
-              </a>
-
-              <button 
-                type="button"
-                onClick={onOfficialEnroll}
-                className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer"
-              >
-                Đã hoàn thành học thử: Đăng ký học chính thức
-              </button>
+            <h3 className="text-xl font-extrabold text-slate-900">{tutor.name}</h3>
+            <p className="text-xs text-slate-500 mt-0.5">{tutor.title}</p>
+            <div className="flex items-center gap-1.5 mt-2">
+              <span className="bg-slate-900 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+                {tutor.badgeSubject || tutor.subjects?.[0] || 'Môn học'}
+              </span>
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
+                <ShieldCheck className="w-3 h-3" /> Zalo đã xác thực
+              </span>
             </div>
           </div>
-        )}
+
+          {/* Khung Mã QR Zalo Giáo viên */}
+          <div className="bg-gradient-to-b from-blue-50/70 to-slate-50 border border-blue-100 p-5 rounded-3xl space-y-3">
+            <div className="text-center">
+              <span className="text-xs font-extrabold text-blue-900 uppercase tracking-wider block">
+                Mã QR Zalo Kết Nối Trực Tiếp
+              </span>
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                Quét mã bằng Zalo trên điện thoại để nhắn tin & xếp lịch học thử 1-1
+              </p>
+            </div>
+
+            {/* Ảnh mã QR */}
+            <div className="w-48 h-48 sm:w-52 sm:h-52 mx-auto bg-white p-2.5 rounded-2xl shadow-md border border-slate-200/80 flex items-center justify-center relative group">
+              <img 
+                src={qrCodeUrl} 
+                alt={`Mã QR Zalo ${tutor.name}`} 
+                className="w-full h-full object-contain rounded-xl"
+              />
+            </div>
+
+            <div className="flex items-center justify-center gap-1 text-[11px] text-slate-500 font-medium">
+              <span>🔒 Bảo mật thông tin</span> • <span>Học thử 1-1 miễn phí</span>
+            </div>
+          </div>
+
+          {/* Nút hành động */}
+          <div className="space-y-2 pt-1">
+            <a 
+              href={zaloUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full py-3.5 bg-[#0068FF] hover:bg-[#0056d6] text-white font-extrabold text-sm rounded-2xl transition-all shadow-md shadow-blue-200 flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <span>Mở Zalo kết nối ngay</span>
+              <ExternalLink className="w-4 h-4" />
+            </a>
+
+            <button 
+              type="button"
+              onClick={onOfficialEnroll}
+              className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-2xl transition-colors cursor-pointer"
+            >
+              Đã hoàn thành học thử: Đăng ký học chính thức
+            </button>
+          </div>
+
+          {/* Ghi chú lưu tự động vào Lớp học thử của tôi */}
+          <div className="bg-slate-50 border border-slate-200/80 p-3 rounded-2xl text-[11px] text-slate-600 text-center leading-relaxed">
+            ✨ Lớp học thử 1-1 đã được tự động lưu vào mục <strong className="text-slate-900">"Lớp học thử của tôi"</strong>.
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -2705,12 +2617,12 @@ function TeacherDetailPage() {
                     <div className="text-xs text-slate-900 font-bold">
                       Trạng thái: Đang trao đổi & học thử cùng {tutor.name}
                     </div>
-                    <p className="text-xs text-slate-600 leading-relaxed">
-                      Số điện thoại / Zalo giáo viên: <strong className="text-slate-900">{tutor.phone || tutor.zalo || '0912345678'}</strong>
+                    <p className="text-xs text-slate-600 leading-relaxed flex items-center justify-between">
+                      <span>Kênh kết nối:</span> <strong className="text-blue-600">Zalo chính thức đã xác thực</strong>
                     </p>
                     
                     <a
-                      href={`https://zalo.me/${tutor.zalo || tutor.phone || '0912345678'}`}
+                      href={`https://zalo.me/${(tutor.zalo || tutor.phone || '0912345678').replace(/[^0-9]/g, '')}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="w-full bg-[#0068FF] hover:bg-[#0056d6] text-white font-bold py-2.5 rounded-xl transition-all text-xs flex items-center justify-center shadow-xs text-center"
