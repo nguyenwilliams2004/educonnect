@@ -98,46 +98,61 @@ export interface TutorType {
   slug?: string;
   name: string;
   avatar: string;
+  coverImage?: string;       // 4. Ảnh cá nhân khác (1 ảnh bìa FB)
+  otherImages?: string[];     // 4. Ảnh cá nhân khác (tối đa 3 ảnh)
   title: string;
-  headline?: string;     // Khẩu hiệu/Slogan nổi bật (vd: Ươm mầm tình yêu văn học, Chiến lược 9+ Địa Lí...)
-  shortBio?: string;     // Trích ngang học vị/thành tích (vd: Ths. Quản lý Giáo dục. GV Ngữ Văn online...)
-  rolePrefix?: string;   // Cô / Thầy / HLV / Gia sư
-  displayName?: string;  // Tên ngắn gọn hiển thị góc trái dưới (vd: Sương Mai, Trần Văn Tài...)
-  badgeSubject?: string; // Môn học pill đen góc phải (vd: Ngữ văn, Địa lí, Hoá học, Sinh học, Toán, Bơi lội...)
+  headline?: string;         // 2. Dòng giới thiệu ngắn (Headline / Slogan)
+  shortBio?: string;         // Trích ngang học vị/thành tích
+  rolePrefix?: string;       // Cô / Thầy / HLV / Gia sư
+  displayName?: string;      // 1. Tên hiển thị trên web
+  badgeSubject?: string;     // Môn học pill đen góc phải
   rating: number;
   reviews: number;
-  subjects: string[];
+  subjects: string[];        // 6. Môn học tiếp nhận
+  targetAudience?: string;   // 9. Cấp học & Đối tượng nhận dạy (giáo viên tự điền)
   location: string;
-  hourlyRate: string;
+  hourlyRate: string;        // 12. Bảng giá dịch vụ
   priceUnit: string;
+  levelPrices: Record<string, string>; // 12. Bảng giá theo từng cấp lớp
   isOnline: boolean;
+  teachingFormatsOnline?: string;  // 10. Trực tuyến (Zoom, Google Meet, MS Teams...)
+  teachingFormatsOffline?: string; // 10. Trực tiếp (Danh sách quận/huyện)
   type: string;
   providerType: string;
   targetTags: string[];
   successStory: string;
-  levelPrices: Record<string, string>;
   phone: string;
   zalo: string;
   birthYear?: string;
   experience?: string | number;
-  education?: string;
-  certificates?: string[];
-  // Thông tin mở rộng phong cách Qanda & Superprof
+  education?: string;        // 5. Trình độ học vấn (Lưu trong KYC)
+  educationLevel?: string;   // Đại học / Cao đẳng / Thạc sĩ
+  major?: string;            // Chuyên ngành học
+  certificates?: string[];   // 7. Chứng chỉ chuyên môn & Nghiệp vụ sư phạm
+  pedagogicalCertificates?: string[]; // 7. Chứng chỉ nghiệp vụ sư phạm (TESOL, CELTA...)
   personality: string[];
   teachingMethod: string;
   philosophy: string;
-  videoDemo?: string;
-  courseOutlines?: { title: string; desc: string; duration: string }[];
+  teachingAchievement?: string; // 8. Thành tích, phương pháp giảng dạy (~200 từ)
+  achievementProofUrl?: string; // 8. Tài liệu minh chứng
+  trainingMaterials?: string;   // 11. Tài liệu đào tạo (Học liệu cung cấp)
+  videoDemo?: string;           // 11. Đường dẫn video bài giảng mẫu
+  responseTime?: string;        // 13. Thời gian phản hồi cam kết
+  schedule?: string[];          // 13. Lịch học & Khung giờ nhận lớp (ma trận 7x3)
+  skills?: string[];
   trialStats: {
     totalTrials: number;
     officialEnrolled: number;
   };
   kycStatus: 'approved' | 'pending' | 'rejected';
+  cccdNumber?: string;
   cccdFront?: string;
   cccdBack?: string;
   credentialFile?: string;
-  schedule?: string[];
-  skills?: string[];
+  bankName?: string;
+  bankAccountNumber?: string;
+  bankAccountHolder?: string;
+  courseOutlines?: { title: string; desc: string; duration: string }[];
   reviewsList?: {
     id: string;
     studentName: string;
@@ -155,556 +170,246 @@ export const mockTutors: TutorType[] = [
     slug: "co-suong-mai-ngu-van",
     name: "Cô Sương Mai",
     rolePrefix: "Cô",
-    displayName: "Sương Mai",
-    headline: "Ươm mầm tình yêu văn học",
+    displayName: "Cô Sương Mai",
+    headline: "Ươm mầm tình yêu văn học - Bứt phá điểm 9+ kỳ thi THPT",
     shortBio: "Ths. Quản lý Giáo dục. GV Ngữ Văn online được tin tưởng bởi 60,000+ học sinh",
     badgeSubject: "Ngữ văn",
     avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=400&auto=format&fit=crop",
+    coverImage: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?q=80&w=1200&auto=format&fit=crop",
+    otherImages: [
+      "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=600&auto=format&fit=crop"
+    ],
     title: "ThS. Quản lý Giáo dục - GV Ngữ Văn Online hàng đầu",
     rating: 5.0,
     reviews: 215,
-    subjects: ["Ngữ Văn", "Luyện thi Đại học", "Tiểu học"],
-    location: "Cầu Giấy, Hà Nội & Online",
+    subjects: ["Ngữ Văn", "Luyện thi Vào 10", "Luyện thi THPT Quốc Gia", "Văn học Cảm thụ"],
+    targetAudience: "Học sinh mất gốc môn Văn cần lấy lại căn bản cấp tốc; Học sinh lớp 9 ôn thi vào 10 trường Chuyên/Công lập; Học sinh lớp 12 luyện thi THPT Quốc Gia mục tiêu 8.5+; Học viên yêu thích phát triển kỹ năng viết và cảm thụ văn học.",
+    location: "Cầu Giấy, Nam Từ Liêm, Ba Đình (Hà Nội) & Toàn quốc (Online)",
     hourlyRate: "200.000 - 350.000",
+    priceUnit: "giờ",
+    levelPrices: {
+      "Tiểu học & Cảm thụ": "200.000",
+      "THCS (Lớp 6-9) & Vào 10": "280.000",
+      "THPT (Lớp 10-12) & Đại học": "350.000"
+    },
     isOnline: true,
+    teachingFormatsOnline: "Google Meet, Zoom PRO Bản quyền (Tích hợp bảng vẽ Wacom & sơ đồ tư duy thời gian thực)",
+    teachingFormatsOffline: "Khu vực Cầu Giấy, Nam Từ Liêm, Ba Đình, Đống Đa, Tây Hồ (Hà Nội)",
     type: "Giáo viên",
     providerType: "1-1",
-    priceUnit: "giờ",
     phone: "0912345678",
     zalo: "0912345678",
     birthYear: "1992",
     experience: "8 năm",
     education: "Thạc sĩ Quản lý Giáo dục - ĐH Sư Phạm Hà Nội",
-    certificates: ["Bằng Thạc sĩ Sư phạm Xuất sắc", "Top 10 Giáo viên Ngữ văn Truyền cảm hứng"],
+    educationLevel: "Thạc sĩ",
+    major: "Sư phạm Ngữ văn",
+    certificates: [
+      "Bằng Thạc sĩ Sư phạm Ngữ văn Xuất sắc - ĐH Sư phạm Hà Nội",
+      "Chứng nhận Top 10 Giáo viên Truyền cảm hứng Văn học Quốc gia",
+      "Chứng chỉ Nghiệp vụ Sư phạm Quốc tế Advance"
+    ],
+    pedagogicalCertificates: ["Chứng chỉ Bồi dưỡng Nghiệp vụ Sư phạm Cao cấp", "Chứng nhận Đổi mới Phương pháp Dạy học"],
     personality: ["Truyền cảm hứng", "Sâu sắc", "Dịu dàng", "Tâm lý"],
     teachingMethod: "Dạy Văn bằng sơ đồ tư duy cảm xúc, khơi gợi trí tưởng tượng và rèn luyện kỹ năng nghị luận sắc bén.",
     philosophy: "Học Văn là học cách yêu thương, thấu hiểu con người và làm chủ ngôn từ cuộc sống.",
+    teachingAchievement: "Với hơn 8 năm kinh nghiệm giảng dạy và đào tạo chuyên sâu môn Ngữ văn, tôi đã trực tiếp hướng dẫn hơn 60,000 học sinh trên cả nước. Phương pháp giảng dạy của tôi tập trung vào việc biến môn Văn khô khan thành những câu chuyện sống động thông qua sơ đồ tư duy cảm xúc và kỹ thuật nghị luận xã hội hiện đại. Tỷ lệ học sinh đạt điểm 8.5+ trong kỳ thi THPT Quốc Gia hàng năm đạt trên 82%, với nhiều thủ khoa, á khoa môn Văn tại các tỉnh thành lớn.",
+    achievementProofUrl: "https://images.unsplash.com/photo-1589330694653-ded6df03f754?q=80&w=800",
+    trainingMaterials: "Bộ giáo trình độc quyền 'Bí kíp 9+ Ngữ văn THPT', Tuyển tập 50 đề thi thử bám sát ma trận Bộ GD&ĐT, Sổ tay mở bài - kết bài sáng tạo và ngân hàng dẫn chứng nghị luận xã hội cập nhật hàng tuần.",
+    videoDemo: "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=0",
+    responseTime: "Dưới 30 phút",
+    schedule: ["Thứ 2_Tối", "Thứ 3_Tối", "Thứ 4_Tối", "Thứ 6_Tối", "Thứ 7_Sáng", "Chủ Nhật_Sáng", "Chủ Nhật_Tối"],
     targetTags: ["Khá → Giỏi", "Luyện thi THPT Quốc Gia", "Văn cảm xúc", "Nghị luận xã hội"],
     successStory: "Đã đồng hành cùng hơn 60,000 học sinh trên toàn quốc; tỷ lệ đạt 8.5+ môn Văn đạt trên 80%.",
-    levelPrices: {
-      "THCS (Lớp 6-9)": "200.000",
-      "THPT (Lớp 10-12)": "280.000",
-      "Luyện thi Đại học": "350.000"
-    },
     trialStats: {
       totalTrials: 54,
       officialEnrolled: 52
     },
-    kycStatus: 'approved',
-    schedule: ["Thứ 2_Tối", "Thứ 4_Tối", "Thứ 6_Tối", "Chủ Nhật_Sáng"]
+    kycStatus: 'approved'
   },
   {
     id: "t2",
     slug: "thay-tran-van-tai-dia-li",
     name: "Thầy Trần Văn Tài",
     rolePrefix: "Thầy",
-    displayName: "Trần Văn Tài",
-    headline: "Chiến lược 9+ Địa Lí",
+    displayName: "Thầy Trần Văn Tài",
+    headline: "Chiến lược 9+ Địa Lí - Bí kíp Atlat & Tư duy số liệu",
     shortBio: "GV Giỏi Sư phạm Địa Lí có hơn 50 Thủ khoa/ Á khoa tỉnh/ thành phố",
     badgeSubject: "Địa lí",
     avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=400&auto=format&fit=crop",
+    coverImage: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200&auto=format&fit=crop",
+    otherImages: [
+      "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?q=80&w=600&auto=format&fit=crop"
+    ],
     title: "GV Giỏi Sư phạm Địa Lí - Chuyên gia Luyện thi 9+",
     rating: 4.9,
     reviews: 148,
-    subjects: ["Địa Lý", "Luyện thi Đại học", "THPT (Lớp 10-12)"],
-    location: "Đống Đa, Hà Nội & Online",
+    subjects: ["Địa Lý", "Luyện thi THPT Quốc Gia", "Bồi dưỡng HSG Địa Lí"],
+    targetAudience: "Học sinh lớp 12 luyện thi tốt nghiệp THPT khối C, C00, D14; Học sinh thi học sinh giỏi cấp Tỉnh/Thành phố; Học sinh cần lấy gốc kỹ năng Atlat và nhận diện biểu đồ nhanh trong 15 phút.",
+    location: "Đống Đa, Thanh Xuân, Cầu Giấy (Hà Nội) & Toàn quốc (Online)",
     hourlyRate: "180.000 - 300.000",
+    priceUnit: "giờ",
+    levelPrices: {
+      "THPT (Lớp 10-12)": "220.000",
+      "Luyện thi Đại học 9+": "300.000"
+    },
     isOnline: true,
+    teachingFormatsOnline: "Zoom, Google Meet (Chia sẻ màn hình Atlat điện tử 3D)",
+    teachingFormatsOffline: "Khu vực Đống Đa, Thanh Xuân, Cầu Giấy, Ba Đình (Hà Nội)",
     type: "Giáo viên",
     providerType: "1-1",
-    priceUnit: "giờ",
     phone: "0987654321",
     zalo: "0987654321",
     birthYear: "1990",
     experience: "9 năm",
     education: "Đại học Sư Phạm Hà Nội - Khoa Địa Lý",
-    certificates: ["Giáo viên dạy giỏi cấp Thành phố", "Tác giả bộ Atlat thực chiến"],
+    educationLevel: "Đại học",
+    major: "Sư phạm Địa lý",
+    certificates: [
+      "Giáo viên dạy giỏi cấp Thành phố Hà Nội",
+      "Tác giả bộ sách 'Atlat thực chiến 9+ Địa Lí'",
+      "Chứng nhận bồi dưỡng HSG Quốc Gia"
+    ],
+    pedagogicalCertificates: ["Chứng chỉ Nghiệp vụ Sư phạm Quốc gia"],
     personality: ["Hài hước", "Năng lượng", "Thực tế", "Tỉ mỉ"],
     teachingMethod: "Khai thác triệt để kỹ năng đọc Atlat Địa lý, biểu đồ và số liệu thống kê. Học 1 nhớ 10 mà không cần học vẹt.",
     philosophy: "Địa lý là bức tranh sống động của thế giới, hãy học bằng tư duy khám phá thay vì ghi nhớ máy móc.",
+    teachingAchievement: "Hơn 9 năm kinh nghiệm luyện thi đại học và bồi dưỡng đội tuyển HSG môn Địa lý. Đã đào tạo thành công hơn 50 Thủ khoa và Á khoa khối C tại các tỉnh miền Bắc. Phương pháp dạy tối ưu hoá Atlat giúp học sinh giải quyết 15 câu trắc nghiệm kỹ năng chỉ trong 5 phút với độ chính xác 100%.",
+    achievementProofUrl: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=800",
+    trainingMaterials: "Bộ cẩm nang 'Giải mã Atlat Địa lý Việt Nam', 30 đề thi thử độc quyền phân loại câu hỏi Vận dụng cao, Bảng tổng hợp số liệu kinh tế - xã hội cập nhật mới nhất.",
+    videoDemo: "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=0",
+    responseTime: "Dưới 30 phút",
+    schedule: ["Thứ 3_Tối", "Thứ 5_Tối", "Thứ 7_Chiều", "Chủ Nhật_Tối"],
     targetTags: ["Bí kíp Atlat", "Mục tiêu 9+", "Luyện thi Đại học", "Lấy gốc nhanh"],
     successStory: "Đã bồi dưỡng hơn 50 Thủ khoa và Á khoa khối C tại các kỳ thi tuyển sinh đại học.",
-    levelPrices: {
-      "THPT (Lớp 10-12)": "220.000",
-      "Luyện thi Đại học 9+": "300.000"
-    },
     trialStats: {
       totalTrials: 38,
       officialEnrolled: 36
     },
-    kycStatus: 'approved',
-    schedule: ["Thứ 3_Tối", "Thứ 5_Tối", "Thứ 7_Chiều", "Chủ Nhật_Tối"]
+    kycStatus: 'approved'
   },
   {
     id: "t3",
     slug: "thay-pham-thang-hoa-hoc",
     name: "Thầy Phạm Thắng",
     rolePrefix: "Thầy",
-    displayName: "Phạm Thắng",
-    headline: "Có thầy đơn giản Hoá",
+    displayName: "Thầy Phạm Thắng",
+    headline: "Có thầy đơn giản Hoá - Bản chất phản ứng & Kỹ thuật Casio",
     shortBio: "Thủ khoa, NCS Tiến sĩ, giảng viên Công nghệ Hoá Học MTA",
     badgeSubject: "Hóa học",
     avatar: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?q=80&w=400&auto=format&fit=crop",
+    coverImage: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=1200&auto=format&fit=crop",
+    otherImages: [
+      "https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=1200&auto=format&fit=crop"
+    ],
     title: "Thủ khoa, NCS Tiến sĩ - Giảng viên Công nghệ Hóa học MTA",
     rating: 5.0,
     reviews: 192,
-    subjects: ["Hóa Học", "Luyện thi Đại học", "Hóa Chuyên"],
-    location: "Hai Bà Trưng, Ba Đình, Hà Nội & Online",
+    subjects: ["Hóa Học", "Luyện thi Đại học Khối A/B", "Hóa Chuyên"],
+    targetAudience: "Học sinh mất gốc Hóa cấp 2 và cấp 3; Học sinh 11-12 mục tiêu đỗ ĐH Y Hà Nội, Dược, Bách Khoa; Học sinh ôn thi chuyên Hóa vào các trường Chuyên Sư Phạm, Chuyên KHTN.",
+    location: "Hai Bà Trưng, Ba Đình, Hoàn Kiếm (Hà Nội) & Online",
     hourlyRate: "250.000 - 450.000",
-    isOnline: true,
-    type: "Giáo viên",
-    providerType: "1-1",
     priceUnit: "giờ",
-    phone: "0905123456",
-    zalo: "0905123456",
-    birthYear: "1989",
-    experience: "10 năm",
-    education: "NCS Tiến sĩ Hóa học - Học viện Kỹ thuật Quân sự",
-    certificates: ["Bằng Thạc sĩ Hóa học Xuất sắc", "Thủ khoa đầu ra Học viện"],
-    personality: ["Logic cao", "Khoa học", "Dễ hiểu", "Tận tâm"],
-    teachingMethod: "Hệ thống hóa bản chất phản ứng và bảo toàn nguyên tố/điện tích. Triệt tiêu hoàn toàn nỗi sợ bài tập vô cơ và hữu cơ.",
-    philosophy: "Hóa học là môn khoa học thực nghiệm kỳ diệu. Hiểu bản chất sẽ thấy mọi bài toán đều trở nên cực kỳ đơn giản.",
-    targetTags: ["Đơn giản Hóa", "Mục tiêu 9+", "Bảo toàn E & Nguyên tố", "Lấy lại gốc Hóa"],
-    successStory: "Hướng dẫn hàng trăm học sinh đạt điểm 9+ môn Hóa, đỗ ĐH Y Hà Nội, ĐH Bách Khoa, Dược Hà Nội.",
     levelPrices: {
       "THCS (Lớp 8-9)": "220.000",
       "THPT (Lớp 10-12)": "300.000",
       "Luyện thi Đại học Y Dược": "450.000"
     },
+    isOnline: true,
+    teachingFormatsOnline: "MS Teams, Zoom HD (Bảng mô phỏng phân tử 3D)",
+    teachingFormatsOffline: "Hai Bà Trưng, Ba Đình, Hoàn Kiếm, Đống Đa (Hà Nội)",
+    type: "Giáo viên",
+    providerType: "1-1",
+    phone: "0905123456",
+    zalo: "0905123456",
+    birthYear: "1989",
+    experience: "10 năm",
+    education: "NCS Tiến sĩ Hóa học - Học viện Kỹ thuật Quân sự",
+    educationLevel: "Thạc sĩ",
+    major: "Công nghệ Kỹ thuật Hóa học",
+    certificates: [
+      "Bằng Thạc sĩ Hóa học Xuất sắc",
+      "Thủ khoa đầu ra Học viện Kỹ thuật Quân sự",
+      "Bằng khen Giảng viên Nghiên cứu Khoa học Xuất sắc"
+    ],
+    pedagogicalCertificates: ["Chứng chỉ Bồi dưỡng Nghiệp vụ Giảng viên ĐH"],
+    personality: ["Logic cao", "Khoa học", "Dễ hiểu", "Tận tâm"],
+    teachingMethod: "Hệ thống hóa bản chất phản ứng và bảo toàn nguyên tố/điện tích. Triệt tiêu hoàn toàn nỗi sợ bài tập vô cơ và hữu cơ.",
+    philosophy: "Hóa học là môn khoa học thực nghiệm kỳ diệu. Hiểu bản chất sẽ thấy mọi bài toán đều trở nên cực kỳ đơn giản.",
+    teachingAchievement: "10 năm giảng dạy đại học và luyện thi THPT Quốc Gia. Đã đào tạo trực tiếp hơn 200 học sinh đỗ vào các trường Y Dược hàng đầu (ĐH Y Hà Nội, ĐH Dược Hà Nội, Học viện Quân Y). Tác giả phương pháp 'Quy đổi este nâng cao' được hàng nghìn học sinh ứng dụng hiệu quả.",
+    achievementProofUrl: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=800",
+    trainingMaterials: "Tuyển tập 1000 câu bài tập Hóa học Este - Lipit phân loại theo mức độ, Sơ đồ tư duy vô cơ và ngân hàng đề thi thử bám sát đề thi chính thức.",
+    videoDemo: "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=0",
+    responseTime: "Dưới 30 phút",
+    schedule: ["Thứ 2_Sáng", "Thứ 4_Chiều", "Thứ 6_Tối", "Thứ 7_Tối"],
+    targetTags: ["Đơn giản Hóa", "Mục tiêu 9+", "Bảo toàn E & Nguyên tố", "Lấy lại gốc Hóa"],
+    successStory: "Hướng dẫn hàng trăm học sinh đạt điểm 9+ môn Hóa, đỗ ĐH Y Hà Nội, ĐH Bách Khoa, Dược Hà Nội.",
     trialStats: {
       totalTrials: 45,
       officialEnrolled: 43
     },
-    kycStatus: 'approved',
-    schedule: ["Thứ 2_Sáng", "Thứ 4_Chiều", "Thứ 6_Tối", "Thứ 7_Tối"]
+    kycStatus: 'approved'
   },
   {
     id: "t4",
     slug: "thay-truong-cong-kien-sinh-hoc",
     name: "Thầy Trương Công Kiên",
     rolePrefix: "Thầy",
-    displayName: "Trương Công Kiên",
-    headline: "Sinh học tốc độ tối ưu điểm số",
+    displayName: "Thầy Trương Công Kiên",
+    headline: "Sinh học tốc độ tối ưu điểm số - Chiến thuật bứt phá 9+",
     shortBio: "8 năm luyện thi trực tuyến với hơn 1000+ điểm 8,9+ mỗi khoá",
     badgeSubject: "Sinh học",
     avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400&auto=format&fit=crop",
+    coverImage: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?q=80&w=1200&auto=format&fit=crop",
+    otherImages: [
+      "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?q=80&w=1200&auto=format&fit=crop"
+    ],
     title: "Chuyên gia Luyện thi Sinh học Khối B & Y Dược",
     rating: 4.9,
     reviews: 175,
     subjects: ["Sinh Học", "Luyện thi Đại học", "Khối B Y Dược"],
-    location: "Thanh Xuân, Hà Nội & Online",
+    targetAudience: "Học sinh lớp 12 định hướng khối B (Toán - Hóa - Sinh); Học sinh luyện thi vào các trường Đại học Y Dược; Học sinh cần tăng tốc độ làm bài trắc nghiệm Sinh học.",
+    location: "Thanh Xuân, Hà Đông (Hà Nội) & Online",
     hourlyRate: "200.000 - 380.000",
+    priceUnit: "giờ",
+    levelPrices: {
+      "THPT (Lớp 10-12)": "250.000",
+      "Luyện thi Khối B Y Dược": "380.000"
+    },
     isOnline: true,
+    teachingFormatsOnline: "Zoom, Google Meet",
+    teachingFormatsOffline: "Khu vực Thanh Xuân, Hà Đông, Nam Từ Liêm (Hà Nội)",
     type: "Giáo viên",
     providerType: "1-1",
-    priceUnit: "giờ",
     phone: "0934567890",
     zalo: "0934567890",
     birthYear: "1993",
     experience: "8 năm",
     education: "Đại học Sư Phạm Hà Nội - Khoa Sinh học",
-    certificates: ["Bằng Cử nhân Sinh học Xuất sắc", "Top giáo viên luyện thi Khối B uy tín"],
+    educationLevel: "Đại học",
+    major: "Sư phạm Sinh học",
+    certificates: [
+      "Bằng Cử nhân Sư phạm Sinh học Xuất sắc",
+      "Chứng nhận Top Giáo viên Luyện thi Khối B uy tín miền Bắc"
+    ],
     personality: ["Sôi nổi", "Truyền lửa", "Chiến thuật rõ ràng", "Bám sát đề thi"],
     teachingMethod: "Kỹ thuật giải nhanh Di truyền học và Sinh thái học trong 30 giây. Bấm Casio và áp dụng công thức siêu tốc.",
     philosophy: "Học đúng phương pháp, tốc độ giải đề sẽ tăng gấp đôi và điểm số sẽ tự khắc bứt phá.",
+    teachingAchievement: "8 năm luyện thi chuyên sâu môn Sinh học. Mỗi năm có hơn 1000 học sinh đạt 8.5+ trong kỳ thi THPT Quốc Gia.",
+    achievementProofUrl: "https://images.unsplash.com/photo-1576086213369-97a306d36557?q=80&w=800",
+    trainingMaterials: "Bộ 40 công thức giải nhanh Di truyền học, Cẩm nang chinh phục Phả hệ, Bộ đề thi thử độc quyền 2026.",
+    videoDemo: "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=0",
+    responseTime: "Dưới 30 phút",
+    schedule: ["Thứ 3_Tối", "Thứ 5_Tối", "Thứ 7_Sáng", "Chủ Nhật_Chiều"],
     targetTags: ["Tốc độ tối ưu", "Luyện thi Y Dược Khối B", "Di truyền học Casio", "Mục tiêu 9+"],
     successStory: "Mỗi khóa có hơn 1000+ học viên đạt 8.5 - 10 điểm môn Sinh trong kỳ thi THPT Quốc Gia.",
-    levelPrices: {
-      "THPT (Lớp 10-12)": "250.000",
-      "Luyện thi Khối B Y Dược": "380.000"
-    },
     trialStats: {
       totalTrials: 42,
       officialEnrolled: 40
     },
-    kycStatus: 'approved',
-    schedule: ["Thứ 3_Tối", "Thứ 5_Tối", "Thứ 7_Sáng", "Chủ Nhật_Chiều"]
-  },
-  {
-    id: "t5",
-    slug: "co-hoang-yen-ngu-van",
-    name: "Cô Hoàng Yến",
-    rolePrefix: "Cô",
-    displayName: "Hoàng Yến",
-    headline: "Văn không lòng vòng bằng tư duy sắc bén",
-    shortBio: "9+ năm luyện thi, 12 năm viết và xuất bản sách tham khảo",
-    badgeSubject: "Ngữ văn",
-    avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=400&auto=format&fit=crop",
-    title: "Tác giả Sách Tham khảo Văn học - 9+ năm luyện thi THPT",
-    rating: 5.0,
-    reviews: 160,
-    subjects: ["Ngữ Văn", "Luyện thi Đại học"],
-    location: "Ba Đình, Hoàn Kiếm, Hà Nội & Online",
-    hourlyRate: "220.000 - 400.000",
-    isOnline: true,
-    type: "Giáo viên",
-    providerType: "1-1",
-    priceUnit: "giờ",
-    phone: "0968112233",
-    zalo: "0968112233",
-    birthYear: "1991",
-    experience: "9 năm",
-    education: "Đại học Sư Phạm Hà Nội - Khoa Ngữ Văn",
-    certificates: ["Tác giả 5 đầu sách Văn học tham khảo", "Giáo viên dạy giỏi cấp Tỉnh"],
-    personality: ["Sắc sảo", "Ngắn gọn", "Hiện đại", "Kiên nhẫn"],
-    teachingMethod: "Rèn luyện tư duy lập luận logic và diễn đạt gãy gọn, sắc sảo. Không viết lan man dài dòng, ghi điểm tuyệt đối ở mở bài và kết bài.",
-    philosophy: "Văn chương hiện đại cần sự khúc chiết, cảm xúc chân thực và tư duy phản biện sắc sảo.",
-    targetTags: ["Tư duy sắc bén", "Nghị luận xã hội 9+", "Viết văn logic", "Vào 10 & THPT"],
-    successStory: "Giúp hàng trăm học sinh từ sợ Văn, không biết viết gì trở nên tự tin viết được bài văn 8+ điểm.",
-    levelPrices: {
-      "Luyện thi Vào 10": "250.000",
-      "Luyện thi Đại học": "380.000"
-    },
-    trialStats: {
-      totalTrials: 36,
-      officialEnrolled: 35
-    },
-    kycStatus: 'approved',
-    schedule: ["Thứ 2_Tối", "Thứ 4_Tối", "Thứ 7_Tối", "Chủ Nhật_Sáng"]
-  },
-  {
-    id: "t6",
-    slug: "thay-minh-khang-hoa-hoc",
-    name: "Thầy Minh Khang",
-    rolePrefix: "Thầy",
-    displayName: "Minh Khang",
-    headline: "Nhẹ nhàng hiểu Hoá",
-    shortBio: "Á Khoa trường ĐH Y Dược – ĐHQGHN, Nghiên cứu tại Viện Dược liệu Trung ương",
-    badgeSubject: "Hóa học",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop",
-    title: "Á Khoa ĐH Y Dược ĐHQGHN - Nghiên cứu viên Viện Dược liệu TW",
-    rating: 4.8,
-    reviews: 89,
-    subjects: ["Hóa Học", "Luyện thi Đại học"],
-    location: "Cầu Giấy, Nam Từ Liêm, Hà Nội & Online",
-    hourlyRate: "160.000 - 260.000",
-    isOnline: true,
-    type: "Sinh viên",
-    providerType: "1-1",
-    priceUnit: "giờ",
-    phone: "0977223344",
-    zalo: "0977223344",
-    birthYear: "2001",
-    experience: "4 năm",
-    education: "Đại học Y Dược - ĐHQGHN - Dược học",
-    certificates: ["Á khoa đầu vào ĐH Y Dược ĐHQGHN (Hóa 9.8)", "Giải Nhì HSG Quốc gia môn Hóa"],
-    personality: ["Gần gũi", "Tâm lý", "Phương pháp dễ nhớ", "Nhiệt tình"],
-    teachingMethod: "Chia nhỏ lý thuyết thành các mẹo ghi nhớ vui nhộn, liên hệ với dược phẩm và đời sống thực tế.",
-    philosophy: "Học Hóa không hề áp lực nếu bạn tìm thấy niềm vui trong từng phản ứng.",
-    targetTags: ["Nhẹ nhàng hiểu Hóa", "Mẹo nhớ công thức", "Luyện thi Đại học", "Lấy lại căn bản"],
-    successStory: "Đã kèm cặp hơn 50 học sinh đạt 8+ môn Hóa trong kỳ thi THPT Quốc Gia.",
-    levelPrices: {
-      "THCS (Lớp 8-9)": "160.000",
-      "THPT (Lớp 10-12)": "220.000",
-      "Luyện thi Đại học": "260.000"
-    },
-    trialStats: {
-      totalTrials: 28,
-      officialEnrolled: 26
-    },
-    kycStatus: 'approved',
-    schedule: ["Thứ 3_Chiều", "Thứ 5_Tối", "Thứ 7_Sáng", "Chủ Nhật_Chiều"]
-  },
-  {
-    id: "t7",
-    slug: "co-thu-ha-sinh-hoc",
-    name: "Cô Thu Hà",
-    rolePrefix: "Cô",
-    displayName: "Thu Hà",
-    headline: "Sinh học bài bản từ Thủ khoa Sư phạm",
-    shortBio: "Thủ khoa đầu vào, tốt nghiệp Xuất sắc trường ĐHSP HN",
-    badgeSubject: "Sinh học",
-    avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=400&auto=format&fit=crop",
-    title: "Thủ khoa ĐH Sư Phạm Hà Nội - Giảng dạy Sinh học chuẩn Quốc tế",
-    rating: 5.0,
-    reviews: 110,
-    subjects: ["Sinh Học", "Luyện thi Đại học", "THCS (Lớp 6-9)"],
-    location: "Hoàn Kiếm, Hai Bà Trưng, Hà Nội & Online",
-    hourlyRate: "200.000 - 350.000",
-    isOnline: true,
-    type: "Giáo viên",
-    providerType: "1-1",
-    priceUnit: "giờ",
-    phone: "0944556677",
-    zalo: "0944556677",
-    birthYear: "1996",
-    experience: "6 năm",
-    education: "Đại học Sư Phạm Hà Nội - Khoa Sinh học",
-    certificates: ["Thủ khoa tốt nghiệp Xuất sắc ĐH Sư Phạm HN", "Chứng chỉ Sư phạm Quốc tế"],
-    personality: ["Tỉ mỉ", "Bài bản", "Kiên nhẫn", "Thân thiện"],
-    teachingMethod: "Hệ thống kiến thức từ gốc rễ tế bào học đến sinh thái học bằng sơ đồ hình ảnh trực quan 3D.",
-    philosophy: "Học sinh hiểu được bức tranh toàn cảnh của sự sống sẽ học Sinh một cách tự nhiên và say mê.",
-    targetTags: ["Bài bản từ gốc", "Mục tiêu 9+", "Sinh học 3D", "Luyện thi Khối B"],
-    successStory: "100% học sinh ôn luyện thi THPT đạt điểm trên 8.0 môn Sinh.",
-    levelPrices: {
-      "THCS (Lớp 6-9)": "200.000",
-      "THPT (Lớp 10-12)": "280.000",
-      "Luyện thi Đại học": "350.000"
-    },
-    trialStats: {
-      totalTrials: 30,
-      officialEnrolled: 29
-    },
-    kycStatus: 'approved',
-    schedule: ["Thứ 2_Chiều", "Thứ 4_Chiều", "Thứ 6_Tối", "Chủ Nhật_Tối"]
-  },
-  {
-    id: "t8",
-    slug: "thay-tuan-dung-dia-li",
-    name: "Thầy Tuấn Dũng",
-    rolePrefix: "Thầy",
-    displayName: "Tuấn Dũng",
-    headline: "Bản đồ mở khoá môn Địa",
-    shortBio: "GV THCS & THPT Thạc sĩ Địa lí Tự nhiên trường ĐH Sư phạm HN",
-    badgeSubject: "Địa lí",
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=400&auto=format&fit=crop",
-    title: "ThS. Địa lí Tự nhiên - ĐH Sư Phạm Hà Nội",
-    rating: 4.9,
-    reviews: 95,
-    subjects: ["Địa Lý", "Luyện thi Đại học"],
-    location: "Thanh Xuân, Hà Đông, Hà Nội & Online",
-    hourlyRate: "180.000 - 300.000",
-    isOnline: true,
-    type: "Giáo viên",
-    providerType: "1-1",
-    priceUnit: "giờ",
-    phone: "0911889900",
-    zalo: "0911889900",
-    birthYear: "1994",
-    experience: "7 năm",
-    education: "Thạc sĩ Địa lý Tự nhiên - ĐH Sư Phạm Hà Nội",
-    certificates: ["Bằng Thạc sĩ Địa lý", "Giáo viên dạy giỏi cấp Trường"],
-    personality: ["Nhiệt tình", "Gần gũi", "Sáng tạo", "Trách nhiệm"],
-    teachingMethod: "Học Địa lý thông qua bản đồ tư duy và hình ảnh thực tế, giúp học sinh nắm chắc 30 câu trắc nghiệm đầu trong 15 phút.",
-    philosophy: "Bản đồ là chìa khóa vàng mở ra kho tàng tri thức địa lý.",
-    targetTags: ["Bản đồ mở khóa", "Luyện đề thực chiến", "Mục tiêu 9+", "Khối C & D"],
-    successStory: "Đã giúp nhiều bạn học sinh đạt điểm 9.5 - 10 môn Địa lý trong kỳ thi tốt nghiệp.",
-    levelPrices: {
-      "THCS (Lớp 6-9)": "180.000",
-      "THPT (Lớp 10-12)": "240.000",
-      "Luyện thi Đại học": "300.000"
-    },
-    trialStats: {
-      totalTrials: 25,
-      officialEnrolled: 24
-    },
-    kycStatus: 'approved',
-    schedule: ["Thứ 3_Tối", "Thứ 5_Chiều", "Thứ 7_Sáng", "Chủ Nhật_Chiều"]
-  },
-  {
-    id: "t9",
-    slug: "hlv-dang-quoc-bao-boi-loi",
-    name: "HLV Đặng Quốc Bảo",
-    rolePrefix: "HLV",
-    displayName: "Quốc Bảo",
-    headline: "Tự tin bơi chuẩn kỹ thuật sau 8 buổi",
-    shortBio: "Kiện tướng Bơi lội Quốc gia, ĐH SP TDTT, hơn 300 học viên biết bơi an toàn",
-    badgeSubject: "Bơi lội",
-    avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=400&auto=format&fit=crop",
-    title: "Kiện tướng Bơi lội Quốc gia - HLV Bơi chuyên nghiệp",
-    rating: 5.0,
-    reviews: 68,
-    subjects: ["Bơi lội", "Thể thao", "Kỹ năng sinh tồn"],
-    location: "Cầu Giấy, Tây Hồ, Hà Nội",
-    hourlyRate: "200.000 - 300.000",
-    isOnline: false,
-    type: "Giáo viên",
-    providerType: "1-1",
-    priceUnit: "buổi",
-    phone: "0978123456",
-    zalo: "0978123456",
-    birthYear: "1995",
-    experience: "7 năm",
-    education: "Đại học Sư phạm Thể dục Thể thao Hà Nội - Khoa Bơi lội",
-    certificates: ["Bằng Kiện tướng Bơi lội Quốc gia", "Chứng chỉ Cứu hộ Bơi lội Quốc tế"],
-    personality: ["Nhiệt huyết", "Cẩn thận", "Kiên nhẫn với trẻ em", "Kỷ luật"],
-    teachingMethod: "Kèm 1-1 trực tiếp dưới nước, cam kết biết bơi ếch, bơi sải đúng kỹ thuật sau 8-10 buổi. Hướng dẫn kỹ năng đứng nước và phòng chống đuối nước.",
-    philosophy: "Bơi lội không chỉ là một môn thể thao tăng chiều cao mà là kỹ năng sinh tồn thiết yếu suốt đời.",
-    targetTags: ["Cam kết biết bơi", "Bơi ếch & Bơi sải", "Trẻ em từ 5 tuổi", "Kỹ năng đứng nước"],
-    successStory: "Đã huấn luyện hơn 300 học viên từ sợ nước trở nên tự tin bơi lội an toàn.",
-    levelPrices: {
-      "Trẻ em (5-12 tuổi)": "200.000",
-      "Người lớn cơ bản": "250.000",
-      "Bơi nâng cao (Bướm/Ngửa)": "300.000"
-    },
-    trialStats: {
-      totalTrials: 32,
-      officialEnrolled: 31
-    },
-    kycStatus: 'approved',
-    schedule: ["Thứ 2_Chiều", "Thứ 4_Chiều", "Thứ 6_Chiều", "Thứ 7_Sáng", "Chủ Nhật_Sáng"]
-  },
-  {
-    id: "t10",
-    slug: "co-le-thao-my-piano-guitar",
-    name: "Cô Lê Thảo My",
-    rolePrefix: "Cô",
-    displayName: "Thảo My",
-    headline: "Làm chủ Piano & Cảm thụ âm nhạc",
-    shortBio: "Thủ khoa Piano Học viện Âm nhạc QGVN, chứng chỉ Quốc tế ABRSM Grade 8",
-    badgeSubject: "Đàn Piano",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop",
-    title: "Thủ khoa Piano - Học viện Âm nhạc Quốc gia Việt Nam",
-    rating: 5.0,
-    reviews: 79,
-    subjects: ["Đàn Piano", "Đàn Guitar", "Thanh nhạc / Hát"],
-    location: "Hoàn Kiếm, Ba Đình, Hà Nội & Online",
-    hourlyRate: "250.000 - 400.000",
-    isOnline: true,
-    type: "Giáo viên",
-    providerType: "1-1",
-    priceUnit: "giờ",
-    phone: "0936789012",
-    zalo: "0936789012",
-    birthYear: "1998",
-    experience: "6 năm",
-    education: "Học viện Âm nhạc Quốc gia Việt Nam - Khoa Piano",
-    certificates: ["Chứng chỉ Âm nhạc Quốc tế ABRSM Grade 8", "Giải Nhất Festival Piano Hà Nội 2022"],
-    personality: ["Nghệ sĩ", "Truyền cảm hứng", "Dịu dàng", "Kiên nhẫn"],
-    teachingMethod: "Phương pháp cảm thụ âm nhạc hiện đại, kết hợp thị tấu nốt nhạc và chơi các bản nhạc yêu thích ngay từ những buổi đầu.",
-    philosophy: "Mỗi nốt nhạc là một cung bậc cảm xúc, âm nhạc giúp tâm hồn luôn tươi sáng và thư thái.",
-    targetTags: ["Piano cổ điển & Cover", "ABRSM Grade 1-8", "Trẻ em từ 4 tuổi", "Guitar đệm hát"],
-    successStory: "100% học viên tham gia thi chứng chỉ ABRSM đạt loại Merit và Distinction.",
-    levelPrices: {
-      "Piano cơ bản / Vỡ lòng": "250.000",
-      "Piano đệm hát / Cover": "300.000",
-      "Luyện thi ABRSM Quốc tế": "400.000"
-    },
-    trialStats: {
-      totalTrials: 28,
-      officialEnrolled: 27
-    },
-    kycStatus: 'approved',
-    schedule: ["Thứ 2_Tối", "Thứ 4_Tối", "Thứ 6_Tối", "Thứ 7_Sáng", "Chủ Nhật_Chiều"]
-  },
-  {
-    id: "t11",
-    slug: "hlv-vu-hoang-long-taekwondo-vo-thuat",
-    name: "HLV Vũ Hoàng Long",
-    rolePrefix: "HLV",
-    displayName: "Hoàng Long",
-    headline: "Võ thuật tự vệ & Thể lực vượt trội",
-    shortBio: "Huyền đai Đệ Tứ đẳng Taekwondo Quốc tế Kukkiwon, 8 năm huấn luyện tự vệ",
-    badgeSubject: "Võ thuật",
-    avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=400&auto=format&fit=crop",
-    title: "Huyền đai Đệ Tứ đẳng Taekwondo - HLV Võ thuật & Tự vệ",
-    rating: 4.9,
-    reviews: 52,
-    subjects: ["Võ thuật (Taekwondo / Karate / Tự vệ)", "Thể thao", "Kỹ năng sống"],
-    location: "Đống Đa, Thanh Xuân, Hà Nội",
-    hourlyRate: "180.000 - 280.000",
-    isOnline: false,
-    type: "Giáo viên",
-    providerType: "1-1",
-    priceUnit: "buổi",
-    phone: "0982345678",
-    zalo: "0982345678",
-    birthYear: "1993",
-    experience: "8 năm",
-    education: "Đại học Thể dục Thể thao - Chuyên ngành Võ thuật",
-    certificates: ["Huyền đai Đệ Tứ đẳng Quốc Tế Kukkiwon", "Trọng tài Quốc gia Taekwondo"],
-    personality: ["Nghiêm túc", "Truyền cảm hứng", "Mạnh mẽ", "Tận tâm"],
-    teachingMethod: "Rèn luyện thể lực, phản xạ tự vệ thực chiến và tinh thần võ đạo.",
-    philosophy: "Học võ để rèn luyện ý chí kiên cường, bảo vệ bản thân và tôn trọng mọi người xung quanh.",
-    targetTags: ["Võ tự vệ thực chiến", "Rèn luyện thể lực", "Trẻ em & Nữ giới", "Thi thăng đai"],
-    successStory: "Đào tạo nhiều học viên đạt huy chương tại các giải võ thuật mở rộng Hà Nội.",
-    levelPrices: {
-      "Vỡ lòng / Thiếu nhi": "180.000",
-      "Võ tự vệ cấp tốc": "220.000",
-      "Luyện thi đai đen": "280.000"
-    },
-    trialStats: {
-      totalTrials: 20,
-      officialEnrolled: 19
-    },
-    kycStatus: 'approved',
-    schedule: ["Thứ 3_Tối", "Thứ 5_Tối", "Thứ 7_Chiều", "Chủ Nhật_Chiều"]
-  },
-  {
-    id: "t12",
-    slug: "thay-nguyen-thanh-chung-my-thuat-ve",
-    name: "Thầy Nguyễn Thành Chung",
-    rolePrefix: "Thầy",
-    displayName: "Thành Chung",
-    headline: "Bản đồ mở khóa Hội họa & Tư duy màu",
-    shortBio: "Họa sĩ, Giảng viên ĐH Mỹ thuật VN, hướng dẫn hơn 25 học sinh đỗ ĐH Kiến Trúc",
-    badgeSubject: "Hội họa",
-    avatar: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?q=80&w=400&auto=format&fit=crop",
-    title: "Họa sĩ - Giảng viên ĐH Mỹ thuật Việt Nam",
-    rating: 4.8,
-    reviews: 41,
-    subjects: ["Vẽ / Hội họa", "Năng khiếu Nghệ thuật", "Luyện thi Khối V - H"],
-    location: "Thanh Xuân, Hà Nội & Online",
-    hourlyRate: "180.000 - 300.000",
-    isOnline: true,
-    type: "Giáo viên",
-    providerType: "1-1",
-    priceUnit: "buổi",
-    phone: "0945123789",
-    zalo: "0945123789",
-    birthYear: "1991",
-    experience: "9 năm",
-    education: "Đại học Mỹ thuật Việt Nam - Chuyên ngành Hội họa",
-    certificates: ["Bằng Cử nhân Hội họa Xuất sắc", "Hội viên Hội Mỹ thuật Hà Nội"],
-    personality: ["Sáng tạo", "Cởi mở", "Khơi gợi trí tưởng tượng", "Tỉ mỉ"],
-    teachingMethod: "Phát triển tư duy hình khối, màu sắc và phối cảnh. Hướng dẫn từ màu nước, màu sáp, chì than đến sơn dầu và vẽ kỹ thuật số.",
-    philosophy: "Hội họa là ngôn ngữ của thị giác, nơi mọi ý tưởng độc đáo đều có thể tỏa sáng.",
-    targetTags: ["Vẽ tranh sáng tạo", "Luyện thi Kiến trúc / Mỹ thuật", "Màu nước & Sơn dầu", "Digital Art"],
-    successStory: "Đã dìu dắt hơn 25 học sinh đỗ vào ĐH Kiến Trúc, ĐH Mỹ Thuật Công Nghiệp.",
-    levelPrices: {
-      "Hội họa thiếu nhi": "180.000",
-      "Vẽ màu nước / Sơn dầu": "220.000",
-      "Luyện thi Khối V, H": "300.000"
-    },
-    trialStats: {
-      totalTrials: 16,
-      officialEnrolled: 15
-    },
-    kycStatus: 'approved',
-    schedule: ["Thứ 3_Chiều", "Thứ 5_Chiều", "Thứ 7_Tối", "Chủ Nhật_Sáng"]
-  },
-  {
-    id: "t13",
-    slug: "thay-do-minh-tri-lap-trinh-co-vua",
-    name: "Thầy Đỗ Minh Trí",
-    rolePrefix: "Thầy",
-    displayName: "Minh Trí",
-    headline: "Lập trình nhí & Tư duy chiến thuật Cờ vua",
-    shortBio: "Kỹ sư CNTT ĐH Công nghệ ĐHQGHN, Vận động viên Cờ vua cấp 1 Quốc gia",
-    badgeSubject: "Lập trình",
-    avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=400&auto=format&fit=crop",
-    title: "Kỹ sư Phần mềm - HLV Cờ vua & Lập trình nhí",
-    rating: 4.9,
-    reviews: 63,
-    subjects: ["Lập trình (Python / Web / Scratch)", "Cờ vua / Cờ tướng", "Tin Học"],
-    location: "Nam Từ Liêm, Hà Nội & Online",
-    hourlyRate: "160.000 - 250.000",
-    isOnline: true,
-    type: "Sinh viên",
-    providerType: "1-1",
-    priceUnit: "giờ",
-    phone: "0968345912",
-    zalo: "0968345912",
-    birthYear: "2002",
-    experience: "3 năm",
-    education: "Đại học Công nghệ ĐHQGHN - Khoa Công nghệ Thông tin",
-    certificates: ["Giải Nhất Olympic Tin học Sinh viên", "Vận động viên Cờ vua cấp 1 Quốc gia"],
-    personality: ["Thông minh", "Hài hước", "Kiên nhẫn", "Dạy dễ hiểu"],
-    teachingMethod: "Dạy lập trình qua việc làm game thực tế (Scratch, Python, Web HTML/CSS/JS) và dạy tư duy chiến thuật cờ vua logic.",
-    philosophy: "Học lập trình và cờ vua giúp rèn luyện tư duy giải quyết vấn đề vượt trội cho thế hệ trẻ.",
-    targetTags: ["Lập trình Scratch & Python", "Cờ vua từ vỡ lòng", "Tư duy logic", "Lập trình Web"],
-    successStory: "Nhiều học sinh đạt giải Cờ vua cấp trường/quận và tự tay lập trình được game 2D sau 3 tháng.",
-    levelPrices: {
-      "Cờ vua cơ bản": "160.000",
-      "Lập trình Scratch nhí": "180.000",
-      "Lập trình Python / Web": "250.000"
-    },
-    trialStats: {
-      totalTrials: 22,
-      officialEnrolled: 21
-    },
-    kycStatus: 'approved',
-    schedule: ["Thứ 2_Tối", "Thứ 4_Tối", "Thứ 7_Sáng", "Chủ Nhật_Tối"]
+    kycStatus: 'approved'
   }
 ];
 

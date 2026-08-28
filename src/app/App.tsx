@@ -2233,12 +2233,13 @@ function FindTutorsPage() {
   );
 }
 
-// TeacherDetailPage
+// TeacherDetailPage - Giao diện thông tin giáo viên theo chuẩn đặc tả Google Docs
 function TeacherDetailPage() {
   const { id } = useParams();
   const { tutors, myTrials, cancelTrialEnrollment, reviews } = useData();
   const { openContactZaloModal, openEnrollmentModal, openReviewModal } = useUI();
   const [reviewFilter, setReviewFilter] = useState<'all' | 'trial' | 'official'>('all');
+  const [activeProofModal, setActiveProofModal] = useState<string | null>(null);
 
   const tutor = tutors.find(t => String(t.id) === String(id)) || tutors[0];
 
@@ -2261,177 +2262,359 @@ function TeacherDetailPage() {
     return true;
   });
 
+  const shifts = ['Sáng', 'Chiều', 'Tối'];
+  const days = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ Nhật'];
+  const coverBannerUrl = tutor.coverImage || tutor.otherImages?.[0] || "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?q=80&w=1200&auto=format&fit=crop";
+
   return (
-    <div className="bg-slate-50 min-h-screen py-10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Profile Header */}
-        <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-sm mb-8 relative overflow-hidden">
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-            <img src={tutor.avatar} alt={tutor.name} className="w-24 h-24 md:w-32 md:h-32 rounded-3xl object-cover shadow-sm shrink-0" />
-            <div className="flex-1">
-              <div className="flex flex-wrap items-center gap-3 mb-2">
-                <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900">{tutor.name}</h1>
-                <span className="bg-emerald-50 text-emerald-700 border border-emerald-300 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1 shadow-2xs">
-                  <svg className="w-3.5 h-3.5 fill-emerald-600" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  Đã xác thực KYC
-                </span>
-                <span className="bg-slate-900 text-white text-xs font-bold px-3 py-1 rounded-full">
-                  {tutor.badgeSubject || tutor.subjects?.[0]}
-                </span>
-              </div>
-              <p className="text-base text-slate-600 font-medium mb-3">{tutor.headline || tutor.title}</p>
-              
-              <div className="flex flex-wrap items-center gap-4 text-xs text-slate-700 mb-3">
-                <span>Khu vực: <strong className="text-slate-900">{tutor.location}</strong></span>
-                <span className="inline-flex items-center gap-1 font-semibold text-slate-800">
-                  <svg className="w-4 h-4 fill-amber-400 text-amber-400" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                  Đánh giá: <strong className="text-slate-900">{tutor.rating}/5.0</strong> ({tutor.reviews || 0} lượt)
-                </span>
-                
-                {/* Highlighted Success Rate Badge */}
-                <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-300 text-emerald-950 px-3.5 py-1.5 rounded-xl shadow-2xs">
-                  <span className="text-xs font-semibold text-emerald-900">Tỷ lệ nhận lớp thành công:</span>
-                  <span className="text-sm font-extrabold text-emerald-700">{successRate}%</span>
-                  <span className="text-[11px] text-emerald-700 font-medium">({officialEnrolled}/{totalTrials > 0 ? totalTrials : 1} học viên chốt học sau học thử)</span>
+    <div className="bg-slate-50 min-h-screen pb-16">
+      {/* 4. Ảnh cá nhân khác (1 ảnh) - Trình bày như ảnh bìa Facebook & Header Hồ sơ */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden mb-8">
+          {/* Cover Banner (Ảnh bìa FB) */}
+          <div className="relative h-48 sm:h-64 md:h-80 w-full bg-slate-900 group">
+            <img 
+              src={coverBannerUrl} 
+              alt="Ảnh bìa hồ sơ giáo viên" 
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+            <div className="absolute top-4 right-4 bg-black/40 backdrop-blur-md text-white text-xs font-semibold px-3 py-1.5 rounded-full border border-white/20 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              Đang nhận lớp mới
+            </div>
+          </div>
+
+          {/* Profile Header Info: 3. Avatar + 1. Tên hiển thị + 2. Headline */}
+          <div className="px-6 sm:px-8 pb-8 pt-0 relative">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 -mt-16 sm:-mt-20 mb-4">
+              <div className="flex flex-col sm:flex-row items-center sm:items-end gap-5 text-center sm:text-left">
+                {/* 3. Ảnh đại diện (Avatar) */}
+                <div className="relative shrink-0">
+                  <img 
+                    src={tutor.avatar} 
+                    alt={tutor.displayName || tutor.name} 
+                    className="w-28 h-28 sm:w-36 sm:h-36 rounded-3xl object-cover border-4 border-white shadow-xl bg-white" 
+                  />
+                  <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-white p-1.5 rounded-full border-2 border-white shadow-sm" title="Đã đối soát danh tính KYC">
+                    <CheckCircle className="w-4 h-4 fill-white text-emerald-500" />
+                  </div>
+                </div>
+
+                {/* 1. Tên hiển thị trên web & 2. Headline */}
+                <div className="space-y-1.5">
+                  <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5">
+                    {/* 1. Tên hiển thị trên web */}
+                    <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
+                      {tutor.displayName || tutor.name}
+                    </h1>
+                    <span className="bg-emerald-50 text-emerald-700 border border-emerald-300 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1 shadow-2xs">
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                      Đã xác thực KYC
+                    </span>
+                    <span className="bg-slate-900 text-white text-xs font-bold px-3 py-1 rounded-full">
+                      {tutor.badgeSubject || tutor.subjects?.[0] || 'Giáo viên'}
+                    </span>
+                  </div>
+
+                  {/* 2. Dòng giới thiệu ngắn (Headline / Slogan) */}
+                  <p className="text-base sm:text-lg text-blue-700 font-semibold italic">
+                    "{tutor.headline || tutor.title}"
+                  </p>
+
+                  <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-xs text-slate-600 pt-1">
+                    <span className="flex items-center gap-1 font-semibold text-slate-800">
+                      <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                      Đánh giá: <strong className="text-slate-900">{tutor.rating}/5.0</strong> ({tutor.reviews || 0} lượt)
+                    </span>
+                    <span>Khu vực: <strong className="text-slate-900">{tutor.location}</strong></span>
+                    {tutor.experience && (
+                      <span>Kinh nghiệm: <strong className="text-slate-900">{tutor.experience} năm</strong></span>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              <div className="text-xs text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-200/80 max-w-3xl leading-relaxed">
-                <strong>Cơ chế minh bạch:</strong> Tỷ lệ nhận lớp được tính dựa trên số học sinh đã học thử và xác nhận <em>"Đăng ký học chính thức"</em>. Trường hợp học sinh hoàn thành học thử và không tiếp tục đăng ký, tỷ lệ này sẽ tự động giảm nhằm đảm bảo tính khách quan.
+              {/* Tỷ lệ nhận lớp thành công */}
+              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3.5 sm:text-right shrink-0">
+                <div className="text-xs font-bold text-emerald-900">Tỷ lệ nhận lớp thành công</div>
+                <div className="text-2xl font-black text-emerald-700">{successRate}%</div>
+                <div className="text-[11px] text-emerald-800 font-medium">({officialEnrolled}/{totalTrials > 0 ? totalTrials : 1} học viên chốt học sau học thử)</div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Content & Sticky Booking */}
+        {/* Content Columns: Left 2 cols, Right Sticky 1 col */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Content */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Prominent Academic Credentials & Education Section */}
-            <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-sm space-y-6">
-              <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-                <h2 className="text-lg font-bold text-slate-900">
-                  Học vấn & Bằng cấp chuyên môn
-                </h2>
-                <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
-                  Đã đối soát văn bằng gốc
-                </span>
+          {/* Main Profile Info (Strictly Following Google Docs Sequence) */}
+          <div className="lg:col-span-2 space-y-6">
+            
+            {/* 6. Môn học tiếp nhận */}
+            <div className="bg-white rounded-3xl p-6 md:p-7 border border-slate-200 shadow-sm space-y-3">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+                <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm">6</div>
+                <h2 className="text-base sm:text-lg font-bold text-slate-900">Môn học tiếp nhận</h2>
               </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* University Education */}
-                <div className="p-4 bg-slate-50 border border-slate-200/90 rounded-2xl space-y-1.5">
-                  <div className="text-[11px] font-bold uppercase text-slate-600 tracking-wider">
-                    Học vấn chính quy
-                  </div>
-                  <div className="text-sm font-bold text-slate-900">
-                    {tutor.education || 'Đại học Sư Phạm Hà Nội'}
-                  </div>
-                  <div className="text-xs text-slate-600">
-                    Cử nhân Sư phạm / Thạc sĩ chuyên ngành
-                  </div>
-                </div>
-
-                {/* Teaching Experience */}
-                <div className="p-4 bg-slate-50 border border-slate-200/90 rounded-2xl space-y-1.5">
-                  <div className="text-[11px] font-bold uppercase text-slate-600 tracking-wider">
-                    Kinh nghiệm giảng dạy
-                  </div>
-                  <div className="text-sm font-bold text-slate-900">
-                    {tutor.experience || '3 năm'} kinh nghiệm thực tế
-                  </div>
-                  <div className="text-xs text-slate-600">
-                    Chuyên sâu phương pháp kèm cặp 1-1 & bồi dưỡng năng lực
-                  </div>
-                </div>
-              </div>
-
-              {/* Certificates Showcase */}
-              <div className="space-y-3 pt-2">
-                <div className="text-xs font-bold uppercase text-slate-700 tracking-wider">
-                  Chứng chỉ & Văn bằng nghiệp vụ đã kiểm duyệt
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {(tutor.certificates && tutor.certificates.length > 0 ? tutor.certificates : [
-                    'Chứng chỉ Nghiệp vụ Sư phạm Quốc tế',
-                    'Chứng nhận Giáo viên Dạy giỏi Cấp Thành phố'
-                  ]).map((cert: string, idx: number) => (
-                    <div key={idx} className="p-3 bg-white border border-slate-200 rounded-xl flex items-center justify-between gap-3 shadow-2xs">
-                      <span className="text-xs font-bold text-slate-800 leading-snug">
-                        {cert}
-                      </span>
-                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 shrink-0">
-                        Đã xác minh
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Personality */}
-            <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-sm">
-              <h2 className="text-lg font-bold text-slate-900 mb-4">
-                Đặc điểm & Phong cách giảng dạy
-              </h2>
-              <div className="flex flex-wrap gap-2.5">
-                {(tutor.personality || ['Tận tâm', 'Kiên nhẫn', 'Thân thiện', 'Truyền cảm hứng']).map((trait: string) => (
-                  <span key={trait} className="px-4 py-2 bg-slate-100 text-slate-800 text-xs font-semibold rounded-2xl border border-slate-200">
-                    {trait}
+              <div className="flex flex-wrap gap-2.5 pt-1">
+                {(tutor.subjects && tutor.subjects.length > 0 ? tutor.subjects : ['Toán học', 'Ngữ văn', 'Tiếng Anh']).map((sub: string, idx: number) => (
+                  <span 
+                    key={idx} 
+                    className="px-4 py-2 bg-blue-50 text-blue-800 text-xs sm:text-sm font-bold rounded-xl border border-blue-200 flex items-center gap-1.5 shadow-2xs"
+                  >
+                    <BookOpen className="w-3.5 h-3.5 text-blue-600" />
+                    {sub}
                   </span>
                 ))}
               </div>
             </div>
 
-            {/* Teaching Method */}
-            <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-sm">
-              <h2 className="text-lg font-bold text-slate-900 mb-4">
-                Phương pháp giảng dạy & Triết lý giáo dục
-              </h2>
-              <div className="bg-slate-50 p-5 rounded-2xl text-sm text-slate-700 leading-relaxed mb-4 border border-slate-200/80">
-                {tutor.teachingMethod || 'Cá nhân hóa lộ trình theo năng lực từng học sinh, tập trung vào bản chất kiến thức và phản xạ tư duy.'}
+            {/* 9. Cấp học & Đối tượng nhận dạy */}
+            <div className="bg-white rounded-3xl p-6 md:p-7 border border-slate-200 shadow-sm space-y-3">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+                <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm">9</div>
+                <h2 className="text-base sm:text-lg font-bold text-slate-900">Cấp học & Đối tượng nhận dạy</h2>
               </div>
-              {tutor.philosophy && (
-                <div className="border-l-4 border-slate-400 bg-slate-50 p-4 rounded-r-2xl text-sm italic text-slate-800">
-                  "{tutor.philosophy}"
+              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 text-sm text-slate-800 leading-relaxed font-medium">
+                {tutor.targetAudience || 'Nhận dạy kèm tất cả các cấp học từ cơ bản đến nâng cao theo nguyện vọng của học sinh và phụ huynh; Bồi dưỡng học sinh mất gốc và luyện thi vào các trường chuyên/đại học.'}
+              </div>
+            </div>
+
+            {/* 12. Bảng giá dịch vụ */}
+            <div className="bg-white rounded-3xl p-6 md:p-7 border border-slate-200 shadow-sm space-y-4">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm">12</div>
+                  <h2 className="text-base sm:text-lg font-bold text-slate-900">Bảng giá dịch vụ</h2>
+                </div>
+                <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+                  Học phí theo {tutor.priceUnit || 'giờ'}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                {tutor.levelPrices && Object.keys(tutor.levelPrices).length > 0 ? (
+                  Object.entries(tutor.levelPrices).map(([lvl, prc]) => (
+                    <div key={lvl} className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 flex flex-col justify-between">
+                      <span className="text-xs font-semibold text-slate-600 mb-1">{lvl}</span>
+                      <span className="text-lg font-extrabold text-blue-700">{prc}đ <span className="text-xs font-normal text-slate-500">/{tutor.priceUnit || 'giờ'}</span></span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="sm:col-span-3 p-4 bg-slate-50 rounded-2xl border border-slate-200/80 flex items-center justify-between">
+                    <span className="text-sm font-semibold text-slate-700">Học phí dạy kèm theo giờ:</span>
+                    <span className="text-xl font-extrabold text-blue-700">{tutor.hourlyRate}đ <span className="text-xs font-normal text-slate-500">/{tutor.priceUnit || 'giờ'}</span></span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 13. Lịch học & Cam kết vận hành */}
+            <div className="bg-white rounded-3xl p-6 md:p-7 border border-slate-200 shadow-sm space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-100">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-sm">13</div>
+                  <h2 className="text-base sm:text-lg font-bold text-slate-900">Lịch học & Khung giờ nhận lớp</h2>
+                </div>
+                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-purple-700 bg-purple-50 border border-purple-200 px-3 py-1 rounded-full">
+                  <Clock className="w-3.5 h-3.5" />
+                  Cam kết phản hồi: {tutor.responseTime || 'Dưới 30 phút'}
+                </span>
+              </div>
+
+              {/* Ma trận Lịch trống */}
+              <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-2xs">
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[500px] border-collapse text-xs text-center">
+                    <thead>
+                      <tr className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
+                        <th className="p-2.5 text-left pl-3.5">Ca dạy</th>
+                        {days.map(d => <th key={d} className="p-2.5">{d}</th>)}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {shifts.map(shift => (
+                        <tr key={shift} className="border-b border-slate-100 last:border-0">
+                          <td className="p-2.5 font-bold text-slate-700 text-left pl-3.5 bg-slate-50/60">{shift}</td>
+                          {days.map(day => {
+                            const slot = `${day}_${shift}`;
+                            const isAvailable = tutor.schedule ? tutor.schedule.includes(slot) : (shift === 'Tối');
+                            return (
+                              <td key={day} className="p-1">
+                                {isAvailable ? (
+                                  <span className="block py-1.5 px-2 bg-emerald-100 text-emerald-800 font-bold rounded-lg text-[11px] shadow-2xs">
+                                    Có thể
+                                  </span>
+                                ) : (
+                                  <span className="block py-1.5 px-2 text-slate-300 text-[11px]">
+                                    —
+                                  </span>
+                                )}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            {/* 10. Hình thức giảng dạy */}
+            <div className="bg-white rounded-3xl p-6 md:p-7 border border-slate-200 shadow-sm space-y-4">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+                <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-sm">10</div>
+                <h2 className="text-base sm:text-lg font-bold text-slate-900">Hình thức giảng dạy</h2>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Trực tuyến (Online) */}
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2">
+                  <div className="flex items-center gap-2 text-blue-700 font-bold text-sm">
+                    <Globe className="w-4 h-4" />
+                    <span>Trực tuyến (Online)</span>
+                  </div>
+                  <p className="text-xs text-slate-700 leading-relaxed font-medium">
+                    {tutor.teachingFormatsOnline || 'Nền tảng Google Meet, Zoom PRO, MS Teams (Tích hợp chia sẻ màn hình & bảng vẽ thông minh)'}
+                  </p>
+                </div>
+
+                {/* Trực tiếp (Offline) */}
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2">
+                  <div className="flex items-center gap-2 text-emerald-700 font-bold text-sm">
+                    <MapPin className="w-4 h-4" />
+                    <span>Trực tiếp (Offline)</span>
+                  </div>
+                  <p className="text-xs text-slate-700 leading-relaxed font-medium">
+                    {tutor.teachingFormatsOffline || tutor.location || 'Tại nhà học viên / Nhà giáo viên trong khu vực đăng ký'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* 7. Chứng chỉ chuyên môn & Nghiệp vụ sư phạm */}
+            <div className="bg-white rounded-3xl p-6 md:p-7 border border-slate-200 shadow-sm space-y-4">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-sm">7</div>
+                  <h2 className="text-base sm:text-lg font-bold text-slate-900">Chứng chỉ chuyên môn & Nghiệp vụ sư phạm</h2>
+                </div>
+                <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full flex items-center gap-1">
+                  <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
+                  Đã đối soát bản gốc
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {(tutor.certificates && tutor.certificates.length > 0 ? tutor.certificates : [
+                  'Chứng chỉ Sư phạm / Chuyên môn Quốc tế',
+                  'Văn bằng & Chứng chỉ Giảng dạy Chuyên sâu'
+                ]).map((cert: string, idx: number) => (
+                  <div key={idx} className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200/80 flex items-center justify-between gap-3 shadow-2xs">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <Award className="w-4 h-4 text-amber-500 shrink-0" />
+                      <span className="text-xs font-bold text-slate-800 leading-snug truncate">
+                        {cert}
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 shrink-0">
+                      Xác thực
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 8. Thành tích, phương pháp giảng dạy */}
+            <div className="bg-white rounded-3xl p-6 md:p-7 border border-slate-200 shadow-sm space-y-4">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center font-bold text-sm">8</div>
+                  <h2 className="text-base sm:text-lg font-bold text-slate-900">Thành tích & Phương pháp giảng dạy</h2>
+                </div>
+                {tutor.achievementProofUrl && (
+                  <button
+                    type="button"
+                    onClick={() => setActiveProofModal(tutor.achievementProofUrl || null)}
+                    className="text-xs font-bold text-blue-600 hover:text-blue-800 underline cursor-pointer flex items-center gap-1"
+                  >
+                    <Eye className="w-3.5 h-3.5" /> Xem minh chứng
+                  </button>
+                )}
+              </div>
+
+              {/* Đặc điểm & Tính cách */}
+              <div className="flex flex-wrap gap-2">
+                {(tutor.personality || ['Tận tâm', 'Kiên nhẫn', 'Thân thiện', 'Truyền cảm hứng']).map((trait: string) => (
+                  <span key={trait} className="px-3.5 py-1.5 bg-slate-100 text-slate-800 text-xs font-semibold rounded-xl border border-slate-200">
+                    #{trait}
+                  </span>
+                ))}
+              </div>
+
+              {/* Bài viết chi tiết background (~200 từ) */}
+              <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 text-sm text-slate-700 leading-relaxed space-y-3 font-normal">
+                <p>
+                  {tutor.teachingAchievement || tutor.successStory || tutor.teachingMethod || 'Giáo viên luôn tận tâm đồng hành cùng học sinh, chú trọng xây dựng nền tảng vững chắc và kích hoạt tư duy phản xạ sáng tạo.'}
+                </p>
+                {tutor.teachingMethod && tutor.teachingMethod !== tutor.teachingAchievement && (
+                  <div className="pt-2 border-t border-slate-200 text-xs text-slate-600 font-medium">
+                    <strong>Phương pháp cốt lõi:</strong> {tutor.teachingMethod}
+                  </div>
+                )}
+                {tutor.philosophy && (
+                  <div className="border-l-4 border-blue-500 bg-white p-3 rounded-r-xl text-xs italic text-slate-800">
+                    "{tutor.philosophy}"
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 11. Tài liệu đào tạo */}
+            <div className="bg-white rounded-3xl p-6 md:p-7 border border-slate-200 shadow-sm space-y-4">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+                <div className="w-8 h-8 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center font-bold text-sm">11</div>
+                <h2 className="text-base sm:text-lg font-bold text-slate-900">Tài liệu đào tạo</h2>
+              </div>
+
+              {/* Học liệu cung cấp */}
+              {tutor.trainingMaterials && (
+                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-1">
+                  <span className="text-xs font-bold text-slate-700 block uppercase">Học liệu cung cấp cho học viên:</span>
+                  <p className="text-xs text-slate-700 leading-relaxed font-medium">{tutor.trainingMaterials}</p>
                 </div>
               )}
-            </div>
 
-            {/* Video Demo */}
-            <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-sm">
-              <h2 className="text-lg font-bold text-slate-900 mb-4">
-                Video bài giảng mẫu
-              </h2>
-              <div className="aspect-video bg-slate-900 rounded-2xl overflow-hidden flex items-center justify-center relative shadow-inner">
-                <iframe 
-                  className="w-full h-full"
-                  src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=0" 
-                  title="Video Demo"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                  allowFullScreen
-                ></iframe>
+              {/* Video bài giảng mẫu */}
+              <div>
+                <span className="text-xs font-bold text-slate-700 block uppercase mb-2">Video bài giảng mẫu:</span>
+                <div className="aspect-video bg-slate-900 rounded-2xl overflow-hidden shadow-inner flex items-center justify-center relative">
+                  <iframe 
+                    className="w-full h-full"
+                    src={tutor.videoDemo || "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=0"} 
+                    title="Video Demo Bài Giảng"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowFullScreen
+                  />
+                </div>
               </div>
             </div>
 
-            {/* Student Reviews & Feedback Section */}
-            <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-sm space-y-6">
+            {/* Comment của học sinh */}
+            <div className="bg-white rounded-3xl p-6 md:p-7 border border-slate-200 shadow-sm space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
                 <div>
                   <div className="flex items-center gap-2">
-                    <h2 className="text-lg font-bold text-slate-900">
-                      Đánh giá & Nhận xét từ học viên
+                    <h2 className="text-base sm:text-lg font-bold text-slate-900">
+                      Comment & Đánh giá của học sinh
                     </h2>
                     <span className="bg-blue-50 text-blue-700 text-xs font-extrabold px-2.5 py-0.5 rounded-full">
                       {tutorReviews.length} nhận xét
                     </span>
                   </div>
                   <p className="text-xs text-slate-500 mt-1">
-                    Nhận xét thực tế từ phụ huynh & học sinh sau buổi học thử hoặc quá trình học chính thức
+                    Đánh giá từ phụ huynh & học sinh đã học thử 1-1 hoặc theo học chính thức
                   </p>
                 </div>
 
@@ -2459,7 +2642,7 @@ function TeacherDetailPage() {
                       ))}
                     </div>
                     <span className="text-xs text-slate-500 font-medium mt-1 block">
-                      Dựa trên {tutorReviews.length || tutor.reviews || 10} đánh giá đã xác minh
+                      Dựa trên {tutorReviews.length || tutor.reviews || 10} đánh giá thực tế
                     </span>
                   </div>
                 </div>
@@ -2467,11 +2650,11 @@ function TeacherDetailPage() {
                 <div className="flex items-center gap-3">
                   <div className="px-4 py-2 bg-emerald-50 text-emerald-800 rounded-xl border border-emerald-200 text-center">
                     <span className="text-xs font-bold block">100% Hài lòng</span>
-                    <span className="text-[10px] text-emerald-600">Sau buổi học thử 1-1</span>
+                    <span className="text-[10px] text-emerald-600">Sau học thử 1-1</span>
                   </div>
                   <div className="px-4 py-2 bg-blue-50 text-blue-800 rounded-xl border border-blue-200 text-center">
-                    <span className="text-xs font-bold block">96% Tiếp tục</span>
-                    <span className="text-[10px] text-blue-600">Đăng ký học chính thức</span>
+                    <span className="text-xs font-bold block">{successRate}% Tiếp tục</span>
+                    <span className="text-[10px] text-blue-600">Đăng ký chính thức</span>
                   </div>
                 </div>
               </div>
@@ -2579,7 +2762,7 @@ function TeacherDetailPage() {
             </div>
           </div>
 
-          {/* Right Sticky Booking Widget */}
+          {/* Right Sticky Action Widget */}
           <div>
             <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm sticky top-28 space-y-5">
               <div>
@@ -2587,7 +2770,7 @@ function TeacherDetailPage() {
                 <span className="text-2xl font-extrabold text-slate-900">{tutor.hourlyRate}đ <span className="text-xs font-normal text-slate-500">/{tutor.priceUnit || 'giờ'}</span></span>
               </div>
 
-              {/* Highlighted Success Rate Card in Sidebar */}
+              {/* Highlighted Success Rate Card */}
               <div className="p-3.5 bg-emerald-50/80 border border-emerald-200 rounded-2xl space-y-1">
                 <div className="flex justify-between items-center text-xs">
                   <span className="font-semibold text-emerald-900">Tỷ lệ nhận lớp thành công:</span>
@@ -2608,14 +2791,18 @@ function TeacherDetailPage() {
                   <span>Xác thực hồ sơ KYC:</span>
                   <span className="font-bold text-emerald-700">Đã kiểm duyệt 100%</span>
                 </div>
+                <div className="flex justify-between">
+                  <span>Thời gian phản hồi:</span>
+                  <span className="font-bold text-blue-700">{tutor.responseTime || 'Dưới 30 phút'}</span>
+                </div>
               </div>
 
-              {/* Dynamic Student Trial State Widget */}
+              {/* Action Buttons */}
               <div className="space-y-3 pt-2">
                 {trialItem?.status === 'trial_in_progress' ? (
                   <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
                     <div className="text-xs text-slate-900 font-bold">
-                      Trạng thái: Đang trao đổi & học thử cùng {tutor.name}
+                      Trạng thái: Đang trao đổi & học thử cùng {tutor.displayName || tutor.name}
                     </div>
                     <p className="text-xs text-slate-600 leading-relaxed flex items-center justify-between">
                       <span>Kênh kết nối:</span> <strong className="text-blue-600">Zalo chính thức đã xác thực</strong>
@@ -2651,7 +2838,7 @@ function TeacherDetailPage() {
                 ) : trialItem?.status === 'enrolled' ? (
                   <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-center space-y-2">
                     <div className="text-xs text-slate-900 font-bold">
-                      Đã đăng ký học chính thức cùng {tutor.name}
+                      Đã đăng ký học chính thức cùng {tutor.displayName || tutor.name}
                     </div>
                     <p className="text-xs text-slate-600">
                       Khóa học đã được kích hoạt trên hệ thống.
@@ -2676,6 +2863,30 @@ function TeacherDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Modal Xem Minh chứng thành tích */}
+      {activeProofModal && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setActiveProofModal(null)}
+        >
+          <div 
+            className="bg-white rounded-3xl p-5 max-w-lg w-full shadow-2xl relative"
+            onClick={e => e.stopPropagation()}
+          >
+            <button 
+              onClick={() => setActiveProofModal(null)} 
+              className="absolute top-4 right-4 p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <h3 className="text-base font-bold text-slate-900 mb-3">Tài liệu minh chứng thành tích</h3>
+            <div className="rounded-2xl overflow-hidden border border-slate-200 max-h-[70vh] flex items-center justify-center bg-slate-50">
+              <img src={activeProofModal} alt="Minh chứng thành tích" className="max-h-[65vh] w-auto object-contain" />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -3087,141 +3298,161 @@ function AdminDashboardPage() {
   );
 }
 
-// 6. TutorRegistrationPage
+// 6. TutorRegistrationPage - Form hồ sơ đăng ký giáo viên chuẩn đặc tả Google Docs
 function TutorRegistrationPage() {
   const { addMockTutor } = useData();
   const location = useLocation();
-
-  // Đọc query params được truyền từ AuthModal khi chọn "Đăng ký dạy học"
   const urlParams = new URLSearchParams(location.search);
 
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  // Account & Personal Info — khởi tạo sẵn từ query params nếu có
-  const [email, setEmail] = useState(urlParams.get('email') || '');
-  const [password, setPassword] = useState('');
-  const [phone, setPhone] = useState(urlParams.get('phone') || '');
+  // ================= PHẦN I: THẨM ĐỊNH DANH TÍNH & BẢO MẬT HỒ SƠ =================
+  // 1. Định danh cá nhân (KYC)
   const [fullName, setFullName] = useState(urlParams.get('name') || '');
-  const [birthYear, setBirthYear] = useState(urlParams.get('year') || '2000');
-
-  // Professional Details — Tách Trường học & Ngành học
-  const [categoryType, setCategoryType] = useState('student');
-  const [title, setTitle] = useState('');
-  const [experience, setExperience] = useState('');
-  const [university, setUniversity] = useState('Đại học Sư phạm Hà Nội');
-  const [customUniversity, setCustomUniversity] = useState('');
-  const [major, setMajor] = useState('');
-  const [certificates, setCertificates] = useState('');
-  const [achievements, setAchievements] = useState('');
-
-  // Teaching Preferences
-  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
-  const [customSubject, setCustomSubject] = useState('');
-  const [selectedLevels, setSelectedLevels] = useState<string[]>([]);
-  const [teachingFormats, setTeachingFormats] = useState<string[]>([]);
-  const [locationText, setLocationText] = useState('');
-  const [levelPrices, setLevelPrices] = useState<Record<string, string>>({});
-  const [priceUnit, setPriceUnit] = useState('giờ');
-  const [scheduleNote, setScheduleNote] = useState('');
-  const [scheduleSlots, setScheduleSlots] = useState<string[]>([]);
-
-  // Files & Previews
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string>('');
-
+  const [cccdNumber, setCccdNumber] = useState('');
   const [cccdFrontFile, setCccdFrontFile] = useState<File | null>(null);
   const [cccdFrontPreview, setCccdFrontPreview] = useState<string>('');
-
   const [cccdBackFile, setCccdBackFile] = useState<File | null>(null);
   const [cccdBackPreview, setCccdBackPreview] = useState<string>('');
 
-  const [credentialFile, setCredentialFile] = useState<File | null>(null);
-  const [credentialPreview, setCredentialPreview] = useState<string>('');
-
-  const [achievementFile, setAchievementFile] = useState<File | null>(null);
-  const [achievementPreview, setAchievementPreview] = useState<string>('');
-  const [showSampleModal, setShowSampleModal] = useState(false);
-
-  // Bank account for receiving tutor payment (70%)
+  // 2. Thông tin liên hệ & Kênh thanh toán
+  const [phone, setPhone] = useState(urlParams.get('phone') || '');
+  const [email, setEmail] = useState(urlParams.get('email') || '');
+  const [password, setPassword] = useState('');
   const [bankName, setBankName] = useState('');
+  const [customBankName, setCustomBankName] = useState('');
   const [bankAccountNumber, setBankAccountNumber] = useState('');
   const [bankAccountHolder, setBankAccountHolder] = useState('');
 
-  // Dropdowns lists
-  const birthYears = Array.from({ length: 2012 - 1950 + 1 }, (_, i) => (2012 - i).toString());
+  // ================= PHẦN II: THÔNG TIN GIẢNG DẠY (HIỂN THỊ TRÊN WEB) =================
+  // 1. Tên hiển thị trên web
+  const [displayName, setDisplayName] = useState(urlParams.get('name') || '');
 
-  const universitiesList = [
-    'Đại học Quốc gia Hà Nội',
-    'Đại học Quốc gia TP.HCM',
-    'Đại học Bách khoa Hà Nội',
-    'Đại học Kinh tế Quốc dân (NEU)',
-    'Đại học Ngoại thương (FTU)',
-    'Đại học Sư phạm Hà Nội',
-    'Đại học Sư phạm TP.HCM',
-    'Đại học Y Hà Nội',
-    'Đại học Y Dược TP.HCM',
-    'Đại học Thương mại (TMU)',
-    'Học viện Tài chính (AOF)',
-    'Học viện Ngân hàng (BA)',
-    'Đại học Luật Hà Nội',
-    'Đại học Giao thông Vận tải',
-    'Đại học Xây dựng Hà Nội',
-    'Đại học Thủy lợi',
-    'Đại học Công nghiệp Hà Nội',
-    'Đại học Kinh tế TP.HCM (UEH)',
-    'Đại học Bách khoa TP.HCM',
-    'Đại học Khoa học Tự nhiên',
-    'Đại học Khoa học Xã hội và Nhân văn',
-    'Đại học FPT',
-    'Đại học RMIT Vietnam',
-    'Đại học Tôn Đức Thắng',
-    'Đại học Cần Thơ',
-    'Đại học Đà Nẵng',
-    'Đại học Huế',
-    'Học viện Báo chí và Tuyên truyền',
-    'Trường khác (Tự nhập)'
-  ];
+  // 2. Dòng giới thiệu ngắn (Headline / Slogan)
+  const [headline, setHeadline] = useState('');
 
-  const subjectsList = ['Toán', 'Tiếng Anh', 'Vật Lý', 'Hóa Học', 'Ngữ Văn', 'Sinh Học', 'Lịch Sử', 'Địa Lý', 'Tin Học'];
-  const levelsList = ['Tiểu học (Lớp 1-5)', 'THCS (Lớp 6-9)', 'THPT (Lớp 10-12)', 'Luyện thi Đại học', 'Luyện thi chứng chỉ (IELTS/TOEIC...)', 'Phát triển năng khiếu / Khác'];
-  const formatsList = ['Gia sư tại nhà học viên', 'Dạy tại nhà giáo viên', 'Dạy trực tuyến (Online)', 'Dạy offline tại trung tâm / Khác'];
+  // 3. Ảnh đại diện (Avatar)
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string>('');
+  const [showSampleModal, setShowSampleModal] = useState(false);
+
+  // 4. Ảnh cá nhân khác (3 ảnh - optional)
+  const [otherImages, setOtherImages] = useState<string[]>([]);
+  const [coverPreview, setCoverPreview] = useState<string>('');
+
+  // 5. Trình độ học vấn
+  const [educationLevel, setEducationLevel] = useState('Đại học');
+  const [major, setMajor] = useState('');
+  const [university, setUniversity] = useState('Đại học Sư phạm Hà Nội');
+  const [customUniversity, setCustomUniversity] = useState('');
+  const [credentialFile, setCredentialFile] = useState<File | null>(null);
+  const [credentialPreview, setCredentialPreview] = useState<string>('');
+
+  // 6. Môn học tiếp nhận
+  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
+  const [customSubject, setCustomSubject] = useState('');
+
+  // 7. Chứng chỉ chuyên môn & Nghiệp vụ sư phạm
+  const [subjectCertificates, setSubjectCertificates] = useState('');
+  const [pedagogicalCertificates, setPedagogicalCertificates] = useState('');
+  const [certificateProofFile, setCertificateProofFile] = useState<File | null>(null);
+  const [certificateProofPreview, setCertificateProofPreview] = useState<string>('');
+
+  // 8. Thành tích, phương pháp giảng dạy
+  const [teachingAchievement, setTeachingAchievement] = useState('');
+  const [experience, setExperience] = useState('');
+  const [personalityTraits, setPersonalityTraits] = useState<string[]>(['Tận tâm', 'Kiên nhẫn']);
+  const [customPersonality, setCustomPersonality] = useState('');
+  const [achievementFile, setAchievementFile] = useState<File | null>(null);
+  const [achievementPreview, setAchievementPreview] = useState<string>('');
+
+  // 9. Cấp học & Đối tượng nhận dạy (Giáo viên tự điền, KHÔNG tạo ô chọn sẵn)
+  const [targetAudience, setTargetAudience] = useState('');
+
+  // 10. Hình thức giảng dạy
+  const [teachingFormatsOnline, setTeachingFormatsOnline] = useState('Google Meet, Zoom PRO, MS Teams');
+  const [teachingFormatsOffline, setTeachingFormatsOffline] = useState('');
+  const [isOnlineSupport, setIsOnlineSupport] = useState(true);
+  const [isOfflineSupport, setIsOfflineSupport] = useState(true);
+
+  // 11. Tài liệu đào tạo (Optional)
+  const [trainingMaterials, setTrainingMaterials] = useState('');
+  const [videoDemo, setVideoDemo] = useState('');
+
+  // 12. Bảng giá dịch vụ (VNĐ/giờ)
+  const [hourlyRate, setHourlyRate] = useState('200.000 - 350.000');
+  const [priceUnit, setPriceUnit] = useState('giờ');
+  const [levelPrices, setLevelPrices] = useState<Record<string, string>>({
+    'THCS (Lớp 6-9)': '200.000',
+    'THPT (Lớp 10-12)': '280.000',
+    'Luyện thi Đại học / Chuyên': '350.000'
+  });
+
+  // 13. Lịch học & Cam kết vận hành
+  const [scheduleSlots, setScheduleSlots] = useState<string[]>(['Thứ 2_Tối', 'Thứ 4_Tối', 'Thứ 6_Tối', 'Chủ Nhật_Sáng']);
+  const [responseTime, setResponseTime] = useState<'Dưới 30 phút' | 'Dưới 1 giờ' | 'Dưới 3 giờ'>('Dưới 30 phút');
+  const [commitAccurate, setCommitAccurate] = useState(false);
+  const [commitConduct, setCommitConduct] = useState(false);
+  const [commitTerms, setCommitTerms] = useState(false);
+
+  // Lists & Options
   const banksList = [
     'Vietcombank (VCB)', 'VietinBank (CTG)', 'BIDV', 'Agribank',
     'MB Bank', 'Techcombank', 'VPBank', 'ACB', 'Sacombank',
     'TPBank', 'SHB', 'HDBank', 'SeABank', 'OCB', 'MSB',
-    'LienVietPostBank', 'Nam A Bank', 'VIB', 'Eximbank', 'BaoViet Bank'
+    'LienVietPostBank', 'Nam A Bank', 'VIB', 'Eximbank', 'Ngân hàng khác (Tự nhập)'
+  ];
+
+  const popularSubjects = [
+    'Toán học', 'Ngữ văn', 'Tiếng Anh', 'Vật lý', 'Hóa học', 'Sinh học',
+    'Lịch sử', 'Địa lý', 'Tin học', 'Tiếng Trung', 'Tiếng Nhật', 'Tiếng Hàn',
+    'Đàn Piano', 'Đàn Guitar', 'Vẽ / Mỹ thuật', 'Bơi lội', 'Cầu lông', 'Bóng rổ',
+    'Võ thuật (Tự vệ)', 'Cờ vua', 'Yoga'
+  ];
+
+  const suggestedPersonalities = [
+    'Tận tâm', 'Kiên nhẫn', 'Thân thiện', 'Truyền cảm hứng', 'Năng lượng',
+    'Hài hước', 'Logic cao', 'Sắc sảo', 'Tỉ mỉ', 'Chiến thuật rõ ràng'
   ];
 
   const shifts = ['Sáng', 'Chiều', 'Tối'];
   const days = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ Nhật'];
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fileType: 'avatar' | 'cccdFront' | 'cccdBack' | 'credential' | 'achievement') => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'cover' | 'other' | 'cccdFront' | 'cccdBack' | 'credential' | 'certProof' | 'achievement') => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     if (file.size > 8 * 1024 * 1024) {
-      alert("Tệp tải lên không được lớn hơn 8MB");
+      alert("Tệp tải lên không được vượt quá 8MB.");
       return;
     }
 
     const reader = new FileReader();
     reader.onload = (event) => {
       const dataUrl = event.target?.result as string;
-      if (fileType === 'avatar') {
+      if (type === 'avatar') {
         setAvatarFile(file);
         setAvatarPreview(dataUrl);
-      } else if (fileType === 'cccdFront') {
+      } else if (type === 'cover') {
+        setCoverPreview(dataUrl);
+        setOtherImages(prev => [dataUrl, ...prev.slice(0, 2)]);
+      } else if (type === 'other') {
+        setOtherImages(prev => prev.length < 3 ? [...prev, dataUrl] : [prev[0], prev[1], dataUrl]);
+      } else if (type === 'cccdFront') {
         setCccdFrontFile(file);
         setCccdFrontPreview(dataUrl);
-      } else if (fileType === 'cccdBack') {
+      } else if (type === 'cccdBack') {
         setCccdBackFile(file);
         setCccdBackPreview(dataUrl);
-      } else if (fileType === 'credential') {
+      } else if (type === 'credential') {
         setCredentialFile(file);
         setCredentialPreview(dataUrl);
-      } else if (fileType === 'achievement') {
+      } else if (type === 'certProof') {
+        setCertificateProofFile(file);
+        setCertificateProofPreview(dataUrl);
+      } else if (type === 'achievement') {
         setAchievementFile(file);
         setAchievementPreview(dataUrl);
       }
@@ -3238,233 +3469,144 @@ function TutorRegistrationPage() {
     }
   };
 
-  const handleSubjectChange = (subject: string) => {
-    if (selectedSubjects.includes(subject)) {
-      setSelectedSubjects(selectedSubjects.filter(s => s !== subject));
+  const toggleSubject = (sub: string) => {
+    if (selectedSubjects.includes(sub)) {
+      setSelectedSubjects(selectedSubjects.filter(s => s !== sub));
     } else {
-      setSelectedSubjects([...selectedSubjects, subject]);
+      setSelectedSubjects([...selectedSubjects, sub]);
     }
   };
 
-  const handleLevelChange = (level: string) => {
-    if (selectedLevels.includes(level)) {
-      setSelectedLevels(selectedLevels.filter(l => l !== level));
+  const togglePersonality = (p: string) => {
+    if (personalityTraits.includes(p)) {
+      setPersonalityTraits(personalityTraits.filter(t => t !== p));
     } else {
-      setSelectedLevels([...selectedLevels, level]);
+      setPersonalityTraits([...personalityTraits, p]);
     }
   };
 
-  const handleFormatChange = (format: string) => {
-    if (teachingFormats.includes(format)) {
-      setTeachingFormats(teachingFormats.filter(f => f !== format));
-    } else {
-      setTeachingFormats([...teachingFormats, format]);
-    }
-  };
-
-  const validateStep = (currentStep: number) => {
-    if (currentStep === 1) {
-      if (!fullName.trim()) return "Vui lòng nhập Họ và tên";
-      if (!birthYear) return "Vui lòng chọn Năm sinh";
-      
-      if (!email.trim()) return "Vui lòng nhập Email";
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) return "Email không đúng định dạng (VD: example@gmail.com)";
-      
-      if (!phone.trim()) return "Vui lòng nhập Số điện thoại";
-      const phoneRegex = /^(0|\+84)[3|5|7|8|9][0-9]{8}$/;
-      if (!phoneRegex.test(phone)) return "Số điện thoại không đúng định dạng. Vui lòng nhập SĐT Việt Nam hợp lệ (VD: 0912345678)";
-
-      if (!avatarFile && !avatarPreview) return "Vui lòng tải lên Ảnh thẻ chân dung 4x6 (nền trắng)";
-
-      if (!title.trim()) return "Vui lòng nhập Tiêu đề hồ sơ / Chức danh";
-      if (!experience || parseInt(experience) < 0) return "Vui lòng nhập Số năm kinh nghiệm";
-
-      if (university === 'Trường khác (Tự nhập)' && !customUniversity.trim()) {
-        return "Vui lòng nhập tên trường Đại học của bạn";
-      }
-      if (!major.trim()) return "Vui lòng nhập Ngành học của bạn";
-    }
-    if (currentStep === 2) {
-      if (selectedSubjects.length === 0 && !customSubject.trim()) return "Vui lòng chọn hoặc nhập ít nhất 1 Môn học";
-      if (selectedLevels.length === 0) return "Vui lòng chọn ít nhất 1 Cấp độ dạy học";
-      if (teachingFormats.length === 0) return "Vui lòng chọn ít nhất 1 Hình thức dạy";
-      if (!locationText.trim()) return "Vui lòng nhập Khu vực dạy";
-      for (const lvl of selectedLevels) {
-        const p = levelPrices[lvl];
-        if (!p || parseInt(p.replace(/\D/g, '')) <= 0) {
-          return `Vui lòng nhập học phí hợp lệ cho cấp học: ${lvl}`;
-        }
-      }
-      if (scheduleSlots.length === 0) return "Vui lòng chọn ít nhất 1 Lịch rảnh rỗi trên bảng";
-      // Bank account validation
-      if (!bankName) return "Vui lòng chọn Ngân hàng để nhận thanh toán";
-      if (!bankAccountNumber.trim()) return "Vui lòng nhập Số tài khoản ngân hàng";
-      if (!/^[0-9]{6,20}$/.test(bankAccountNumber.trim())) return "Số tài khoản không hợp lệ (chỉ chứa số, 6-20 ký tự)";
-      if (!bankAccountHolder.trim()) return "Vui lòng nhập Tên chủ tài khoản";
-      if (!cccdFrontFile || !cccdBackFile) return "Vui lòng tải lên đầy đủ ảnh mặt trước và mặt sau CCCD để xác thực";
-    }
+  const validatePartI = () => {
+    if (!fullName.trim()) return "Vui lòng nhập Họ và tên đầy đủ theo CCCD.";
+    if (!cccdNumber.trim()) return "Vui lòng nhập Số CCCD/Hộ chiếu.";
+    if (!cccdFrontPreview) return "Vui lòng tải lên Ảnh chụp mặt trước CCCD/Hộ chiếu.";
+    if (!cccdBackPreview) return "Vui lòng tải lên Ảnh chụp mặt sau CCCD/Hộ chiếu.";
+    if (!phone.trim()) return "Vui lòng nhập Số điện thoại dùng Zalo.";
+    if (!email.trim()) return "Vui lòng nhập Email cá nhân.";
+    if (!bankName) return "Vui lòng chọn Ngân hàng nhận thanh toán.";
+    if (bankName === 'Ngân hàng khác (Tự nhập)' && !customBankName.trim()) return "Vui lòng nhập tên ngân hàng của bạn.";
+    if (!bankAccountNumber.trim()) return "Vui lòng nhập Số tài khoản ngân hàng.";
+    if (!bankAccountHolder.trim()) return "Vui lòng nhập Tên chủ tài khoản (phải trùng khớp họ tên CCCD).";
     return null;
   };
 
-  const handleNext = () => {
-    const error = validateStep(step);
+  const validatePartII = () => {
+    if (!displayName.trim()) return "Vui lòng nhập Tên hiển thị trên website.";
+    if (!headline.trim()) return "Vui lòng nhập Dòng giới thiệu ngắn (Headline / Slogan).";
+    if (!avatarPreview) return "Vui lòng tải lên Ảnh đại diện (Avatar).";
+    if (!educationLevel) return "Vui lòng chọn Trình độ học vấn.";
+    if (!major.trim()) return "Vui lòng nhập Chuyên ngành học.";
+    if (selectedSubjects.length === 0 && !customSubject.trim()) return "Vui lòng chọn hoặc nhập ít nhất 1 Môn học tiếp nhận.";
+    if (!targetAudience.trim()) return "Vui lòng điền Cấp học & Đối tượng nhận dạy (mục 9).";
+    if (!hourlyRate.trim()) return "Vui lòng điền Bảng giá dịch vụ học phí (mục 12).";
+    if (scheduleSlots.length === 0) return "Vui lòng chọn ít nhất 1 ca rảnh trong tuần (mục 13).";
+    if (!commitAccurate || !commitConduct || !commitTerms) return "Vui lòng tích chọn đầy đủ 3 cam kết tiêu chuẩn cộng đồng.";
+    return null;
+  };
+
+  const handleNextStep = () => {
+    const error = validatePartI();
     if (error) {
       alert(error);
       return;
     }
-    setStep(step + 1);
-  };
-
-  const handlePrev = () => {
-    setStep(step - 1);
+    // Tự động gán displayName = fullName nếu chưa nhập
+    if (!displayName.trim()) setDisplayName(fullName);
+    if (!bankAccountHolder.trim()) setBankAccountHolder(fullName.toUpperCase());
+    setStep(2);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSubmit = async () => {
-    const error = validateStep(2);
+    const error = validatePartII();
     if (error) {
       alert(error);
       return;
     }
 
     setLoading(true);
-    const userId = 'tutor-' + Date.now();
-    const finalSubjects = [...selectedSubjects];
-    if (customSubject && !finalSubjects.includes(customSubject)) {
-      finalSubjects.push(customSubject);
+    const tutorId = `tutor-${Date.now()}`;
+    const allSubjects = [...selectedSubjects];
+    if (customSubject.trim() && !allSubjects.includes(customSubject.trim())) {
+      allSubjects.push(customSubject.trim());
     }
 
-    // Ghép Trường học và Ngành học
-    const finalUniversity = university === 'Trường khác (Tự nhập)' ? (customUniversity.trim() || 'Trường khác') : university;
-    const finalEducation = major.trim() ? `${finalUniversity} - ${major.trim()}` : finalUniversity;
+    const finalUniversityName = university === 'Trường khác (Tự nhập)' ? (customUniversity.trim() || 'Trường Đại học') : university;
+    const finalBankName = bankName === 'Ngân hàng khác (Tự nhập)' ? customBankName.trim() : bankName;
 
-    // Parse levelPrices to calculate range
-    const numericPrices = Object.values(levelPrices)
-      .map(p => parseInt(p.replace(/\D/g, '')))
-      .filter(p => !isNaN(p) && p > 0);
-    
-    const minPrice = numericPrices.length > 0 ? Math.min(...numericPrices) : 150000;
-    const maxPrice = numericPrices.length > 0 ? Math.max(...numericPrices) : 150000;
+    const certList: string[] = [];
+    if (subjectCertificates.trim()) certList.push(subjectCertificates.trim());
+    if (pedagogicalCertificates.trim()) certList.push(pedagogicalCertificates.trim());
 
-    let displayHourlyRate = '';
-    if (numericPrices.length === 0) {
-      displayHourlyRate = '150.000';
-    } else if (minPrice === maxPrice) {
-      displayHourlyRate = minPrice.toLocaleString();
-    } else {
-      displayHourlyRate = `${minPrice.toLocaleString()} - ${maxPrice.toLocaleString()}`;
-    }
-
-    let avatarUrl = avatarPreview || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=256&auto=format&fit=crop";
-    let certUrls: string[] = [];
-    let achievementUrl = achievementPreview || '';
-
-    try {
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password: password || '123456',
-        options: {
-          data: {
-            full_name: fullName,
-            phone: phone,
-          }
-        }
-      });
-
-      if (!authError && authData?.user) {
-        const dbUserId = authData.user.id;
-        
-        if (avatarFile) {
-          try {
-            const fileExt = avatarFile.name.split('.').pop();
-            const fileName = `avatar-${dbUserId}.${fileExt}`;
-            await supabase.storage.from('avatars').upload(fileName, avatarFile, { upsert: true });
-            avatarUrl = supabase.storage.from('avatars').getPublicUrl(fileName).data.publicUrl;
-          } catch(e) {}
-        }
-
-        if (achievementFile) {
-          try {
-            const fileExt = achievementFile.name.split('.').pop();
-            const fileName = `achievement-${dbUserId}.${fileExt}`;
-            await supabase.storage.from('documents').upload(fileName, achievementFile, { upsert: true });
-            achievementUrl = supabase.storage.from('documents').getPublicUrl(fileName).data.publicUrl;
-          } catch(e) {}
-        }
-
-        await supabase.from('users').insert({
-          id: dbUserId,
-          email,
-          full_name: fullName,
-          role: 'instructor'
-        });
-
-        await supabase.from('profiles').insert({
-          id: dbUserId,
-          avatar_url: avatarUrl,
-          subjects: finalSubjects,
-          levels: selectedLevels,
-          category_type: categoryType,
-          provider_type: '1-1',
-          price: minPrice,
-          price_unit: priceUnit,
-          location: locationText,
-          online: teachingFormats.includes('Dạy trực tuyến (Online)'),
-          experience: parseInt(experience) || 0,
-          education: finalEducation,
-          intro: title,
-          bio: `[Năm sinh: ${birthYear}] [Hình thức: ${teachingFormats.join(', ')}] [Minh chứng: ${achievementUrl}] [Bảng giá: ${Object.entries(levelPrices).map(([lvl, prc]) => `${lvl}=${prc}`).join(';')}] [Lịch trống: ${scheduleSlots.join(', ')} / ${scheduleNote}] ${achievements || ''}`,
-          schedule: scheduleSlots,
-          certificates: certUrls.length > 0 ? certUrls : (certificates ? [certificates] : []),
-          skills: teachingFormats,
-          success_story: achievements,
-          verified: false,
-          bank_name: bankName,
-          bank_account_number: bankAccountNumber.trim(),
-          bank_account_name: bankAccountHolder.trim().toUpperCase()
-        });
-      }
-    } catch (e) {
-      console.warn("Supabase registration error, falling back to local simulation", e);
-    }
-
-    const mockTutorData = {
-      id: userId,
+    const newTutorProfile: TutorType = {
+      id: tutorId,
       name: fullName,
-      avatar: avatarUrl,
-      title: title,
+      displayName: displayName || fullName,
+      rolePrefix: educationLevel === 'Thạc sĩ' ? 'ThS' : 'Giáo viên',
+      headline: headline,
+      badgeSubject: allSubjects[0] || 'Giáo viên',
+      avatar: avatarPreview || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400",
+      coverImage: coverPreview || otherImages[0] || "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?q=80&w=1200",
+      otherImages: otherImages.length > 0 ? otherImages : [coverPreview || avatarPreview],
+      title: `${educationLevel} ${major} - ${headline}`,
+      shortBio: `${educationLevel} ${major} (${finalUniversityName})`,
       rating: 5.0,
       reviews: 0,
-      subjects: finalSubjects,
-      location: locationText,
-      hourlyRate: displayHourlyRate,
+      subjects: allSubjects,
+      targetAudience: targetAudience,
+      location: teachingFormatsOffline || 'Hà Nội & Toàn quốc (Online)',
+      hourlyRate: hourlyRate,
       priceUnit: priceUnit,
-      isOnline: teachingFormats.includes('Dạy trực tuyến (Online)'),
-      providerType: '1-1',
-      targetTags: selectedLevels.slice(0, 3),
-      successStory: achievements,
-      achievementProofUrl: achievementUrl,
-      type: categoryType === 'teacher' ? 'Giáo viên' : 'Sinh viên',
-      experience: parseInt(experience) || 0,
-      education: finalEducation,
-      bio: `[Năm sinh: ${birthYear}] [Hình thức: ${teachingFormats.join(', ')}] [Minh chứng: ${achievementUrl}] [Bảng giá: ${Object.entries(levelPrices).map(([lvl, prc]) => `${lvl}=${prc}`).join(';')}] ${achievements || ''}`,
-      schedule: scheduleSlots,
-      skills: teachingFormats,
-      levels: selectedLevels,
       levelPrices: levelPrices,
-      certificates: certificates ? [certificates] : [],
-      verified: false,
-      kycStatus: 'pending',
-      cccdFront: cccdFrontPreview || "https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=800",
-      cccdBack: cccdBackPreview || "https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=800",
-      credentialFile: credentialPreview || "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=800",
+      isOnline: isOnlineSupport,
+      teachingFormatsOnline: isOnlineSupport ? teachingFormatsOnline : 'Không dạy online',
+      teachingFormatsOffline: isOfflineSupport ? (teachingFormatsOffline || 'Khu vực nội thành') : 'Chỉ dạy online',
+      type: educationLevel.includes('Tiến sĩ') || educationLevel.includes('Thạc sĩ') ? 'Giáo viên' : 'Gia sư',
+      providerType: '1-1',
+      targetTags: allSubjects.slice(0, 3),
+      successStory: teachingAchievement,
+      phone: phone,
+      zalo: phone,
+      birthYear: '1995',
+      experience: experience || '3 năm',
+      education: `${educationLevel} ${major} - ${finalUniversityName}`,
+      educationLevel: educationLevel,
+      major: major,
+      certificates: certList.length > 0 ? certList : ['Đã xác thực văn bằng gốc'],
+      pedagogicalCertificates: pedagogicalCertificates ? [pedagogicalCertificates] : [],
+      personality: personalityTraits,
+      teachingMethod: teachingAchievement || 'Phương pháp giảng dạy cá nhân hóa, bám sát năng lực học sinh.',
+      philosophy: headline || 'Tận tâm đồng hành vì sự tiến bộ của từng học trò.',
+      teachingAchievement: teachingAchievement,
+      achievementProofUrl: achievementPreview || certificateProofPreview,
+      trainingMaterials: trainingMaterials || 'Giáo trình biên soạn độc quyền và tài liệu ôn thi cập nhật.',
+      videoDemo: videoDemo || 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+      responseTime: responseTime,
+      schedule: scheduleSlots,
       trialStats: {
         totalTrials: 0,
         officialEnrolled: 0
-      }
+      },
+      kycStatus: 'pending',
+      cccdNumber: cccdNumber,
+      cccdFront: cccdFrontPreview,
+      cccdBack: cccdBackPreview,
+      credentialFile: credentialPreview,
+      bankName: finalBankName,
+      bankAccountNumber: bankAccountNumber,
+      bankAccountHolder: bankAccountHolder
     };
 
-    addMockTutor(mockTutorData);
+    addMockTutor(newTutorProfile);
     setLoading(false);
     setSuccess(true);
   };
@@ -3472,166 +3614,380 @@ function TutorRegistrationPage() {
   if (success) {
     return (
       <div className="max-w-md mx-auto px-4 py-16 text-center animate-in fade-in zoom-in-95 duration-200">
-        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-          <CheckCircle className="w-10 h-10 text-green-600 animate-bounce" />
+        <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <CheckCircle className="w-10 h-10 text-emerald-600 animate-bounce" />
         </div>
-        <h1 className="text-3xl font-bold text-slate-900 mb-2">Đăng ký thành công!</h1>
-        <p className="text-slate-500 mb-8 leading-relaxed">
-          Hồ sơ của bạn đã được gửi xét duyệt (KYC). Trong thời gian chờ phê duyệt, hồ sơ của bạn đã được giả lập duyệt thành công để bạn có thể xem thử ngay lập tức!
+        <h1 className="text-3xl font-bold text-slate-900 mb-2">Gửi hồ sơ thành công!</h1>
+        <p className="text-slate-600 mb-8 text-sm leading-relaxed">
+          Hồ sơ của bạn đã được gửi đến ban kiểm duyệt HanTutor. Chúng tôi sẽ đối soát danh tính KYC và kích hoạt huy hiệu xác thực trong thời gian sớm nhất.
         </p>
-        <Link to="/tim-gia-su" className="inline-block bg-blue-600 text-white font-bold px-8 py-3.5 rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200">
-          Xem hồ sơ của tôi
+        <Link 
+          to="/tim-gia-su" 
+          className="inline-block bg-blue-600 text-white font-bold px-8 py-3.5 rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200 text-sm"
+        >
+          Xem danh sách giáo viên
         </Link>
       </div>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="bg-white rounded-3xl p-6 md:p-10 shadow-xl border border-slate-100">
-        {/* Header */}
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 animate-in fade-in slide-in-from-bottom-4 duration-300">
+      <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-xl border border-slate-200">
+        
+        {/* Header Form */}
         <div className="text-center mb-8 border-b border-slate-100 pb-6">
-          <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <Briefcase className="w-8 h-8 text-blue-600" />
+          <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-2xs">
+            <GraduationCap className="w-8 h-8" />
           </div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Đăng ký làm Giáo viên / Gia sư</h1>
-          <p className="text-slate-500 text-sm">Gia nhập đội ngũ giáo dục hàng đầu. Đăng ký nhanh chỉ trong 2 bước.</p>
-          
-          {/* Step Progress Indicators — 2 Bước tối giản */}
-          <div className="flex items-center justify-center gap-3 mt-8">
-            <div className="flex items-center gap-2">
-              <span className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${step >= 1 ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>1</span>
-              <span className={`text-xs font-semibold ${step >= 1 ? 'text-blue-600' : 'text-slate-400'}`}>Chuyên môn & Học vấn</span>
-            </div>
-            <div className="w-12 h-0.5 bg-slate-200"></div>
-            <div className="flex items-center gap-2">
-              <span className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${step >= 2 ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>2</span>
-              <span className={`text-xs font-semibold ${step >= 2 ? 'text-blue-600' : 'text-slate-400'}`}>Lịch trống, STK & KYC</span>
-            </div>
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900">Đăng ký Hồ sơ Giáo viên / Giảng viên</h1>
+          <p className="text-slate-500 text-xs sm:text-sm mt-1.5 max-w-xl mx-auto">
+            Quy trình đăng ký chuẩn gồm 2 phần: Thẩm định danh tính bảo mật & Thông tin giảng dạy công khai.
+          </p>
+
+          {/* Stepper Progress Tabs */}
+          <div className="grid grid-cols-2 gap-3 mt-6 max-w-xl mx-auto">
+            <button
+              type="button"
+              onClick={() => setStep(1)}
+              className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+                step === 1 
+                  ? 'border-blue-600 bg-blue-50/80 text-blue-900 shadow-xs' 
+                  : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <span className={`w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center ${step === 1 ? 'bg-blue-600 text-white' : 'bg-slate-300 text-slate-700'}`}>I</span>
+                <span className="text-xs font-bold uppercase tracking-wider">Phần I: Thẩm định KYC</span>
+              </div>
+              <span className="text-[10px] text-slate-500 block mt-1">Bảo mật, không hiển thị trên web</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                const err = validatePartI();
+                if (err) {
+                  alert(err);
+                  return;
+                }
+                setStep(2);
+              }}
+              className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+                step === 2 
+                  ? 'border-blue-600 bg-blue-50/80 text-blue-900 shadow-xs' 
+                  : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <span className={`w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center ${step === 2 ? 'bg-blue-600 text-white' : 'bg-slate-300 text-slate-700'}`}>II</span>
+                <span className="text-xs font-bold uppercase tracking-wider">Phần II: TT Giảng dạy</span>
+              </div>
+              <span className="text-[10px] text-slate-500 block mt-1">Hiển thị trên web cho học sinh</span>
+            </button>
           </div>
         </div>
 
-        <div className="space-y-6">
-          {/* STEP 1: CHUYÊN MÔN & HỌC VẤN */}
-          {step === 1 && (
-            <div className="space-y-6 animate-in fade-in duration-200">
-              
-              {/* Thẻ thông tin cá nhân đã tự điền */}
-              <div className="bg-blue-50/70 border border-blue-100 p-5 rounded-2xl">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-xs font-bold text-blue-800 uppercase tracking-wider flex items-center gap-1.5">
-                    <CheckCircle className="w-4 h-4 text-blue-600" /> Thông tin tài khoản
-                  </h4>
-                  <span className="text-[11px] text-blue-600 font-medium">Đã tự động lấy từ Đăng ký</span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                  <div>
-                    <label className="block text-xs text-slate-500 mb-0.5">Họ và tên *</label>
-                    <input 
-                      type="text" 
-                      value={fullName}
-                      onChange={e => setFullName(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 focus:ring-2 focus:ring-blue-100 outline-none text-sm font-semibold text-slate-800" 
-                      placeholder="VD: Nguyễn Văn A" 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-slate-500 mb-0.5">Năm sinh *</label>
-                    <select 
-                      value={birthYear}
-                      onChange={e => setBirthYear(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 focus:ring-2 focus:ring-blue-100 outline-none text-sm font-semibold text-slate-800"
-                    >
-                      {birthYears.map(year => (
-                        <option key={year} value={year}>{year}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs text-slate-500 mb-0.5">Số điện thoại *</label>
-                    <input 
-                      type="tel" 
-                      value={phone}
-                      onChange={e => setPhone(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 focus:ring-2 focus:ring-blue-100 outline-none text-sm font-semibold text-slate-800" 
-                      placeholder="09xx xxx xxx" 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-slate-500 mb-0.5">Email đăng nhập *</label>
-                    <input 
-                      type="email" 
-                      value={email}
-                      onChange={e => setEmail(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 focus:ring-2 focus:ring-blue-100 outline-none text-sm font-semibold text-slate-800" 
-                      placeholder="email@example.com" 
-                    />
-                  </div>
-                </div>
+        {/* ================= BƯỚC 1: PHẦN I - THẨM ĐỊNH DANH TÍNH & BẢO MẬT HỒ SƠ ================= */}
+        {step === 1 && (
+          <div className="space-y-8 animate-in fade-in duration-200">
+            {/* Security Notice Banner */}
+            <div className="bg-amber-50/80 border border-amber-200 rounded-2xl p-4 flex items-start gap-3 text-xs text-amber-900 leading-relaxed">
+              <ShieldCheck className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+              <div>
+                <strong className="font-bold">Quy định bảo mật hồ sơ (Phần I):</strong> Toàn bộ thông tin định danh CCCD và Tài khoản ngân hàng ở Phần I được bảo mật nghiêm ngặt theo chuẩn KYC, chỉ dùng cho mục đích kiểm duyệt văn bằng và chuyển trả 70% học phí, tuyệt đối KHÔNG hiển thị công khai trên website.
+              </div>
+            </div>
+
+            {/* 1. Định danh cá nhân (KYC) */}
+            <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200/80 space-y-4">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
+                <span className="w-7 h-7 rounded-xl bg-blue-600 text-white font-bold text-xs flex items-center justify-center">1</span>
+                <h3 className="text-base font-bold text-slate-900">Định danh cá nhân (KYC)</h3>
               </div>
 
-              {/* Avatar Uploader: Ảnh chân dung rõ mặt với Ảnh Mẫu chuẩn bên cạnh (click để phóng to) */}
-              <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100">
-                <label className="block text-sm font-bold text-slate-800 mb-3">Ảnh chân dung rõ mặt *</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Họ và tên đầy đủ *</label>
+                  <input 
+                    type="text" 
+                    value={fullName}
+                    onChange={e => setFullName(e.target.value)}
+                    placeholder="VD: NGUYỄN VĂN AN"
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 focus:ring-2 focus:ring-blue-100 outline-none text-sm font-semibold text-slate-800" 
+                  />
+                  <span className="text-[10px] text-slate-400 mt-1 block">Nhập đúng như trên thẻ Căn cước công dân</span>
+                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
-                  {/* Left: User Upload Box */}
-                  <div className="flex items-center gap-3.5">
-                    <div className="w-20 h-28 sm:w-24 sm:h-32 rounded-xl bg-slate-100 border-2 border-slate-200 shadow-inner flex-shrink-0 overflow-hidden relative flex flex-col items-center justify-center">
-                      {avatarPreview ? (
-                        <img src={avatarPreview} alt="Avatar Preview" className="w-full h-full object-cover object-top" />
-                      ) : (
-                        <div className="flex flex-col items-center justify-center text-slate-400 p-2 text-center">
-                          <Users className="w-7 h-7 mb-1" />
-                          <span className="text-[9px] font-bold uppercase tracking-wider">Khung ảnh</span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <label className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 transition-colors shadow-xs">
-                        <UploadCloud className="w-4 h-4" />
-                        <span>Chọn ảnh tải lên</span>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Số CCCD / Hộ chiếu *</label>
+                  <input 
+                    type="text" 
+                    value={cccdNumber}
+                    onChange={e => setCccdNumber(e.target.value.replace(/\D/g, ''))}
+                    placeholder="VD: 001200012345"
+                    maxLength={12}
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 focus:ring-2 focus:ring-blue-100 outline-none text-sm font-semibold text-slate-800" 
+                  />
+                  <span className="text-[10px] text-slate-400 mt-1 block">Số thẻ 12 chữ số hợp lệ</span>
+                </div>
+
+                {/* Ảnh chụp 2 mặt CCCD */}
+                <div className="sm:col-span-2 space-y-2 pt-2">
+                  <label className="block text-xs font-bold text-slate-700">Ảnh chụp 2 mặt CCCD / Hộ chiếu *</label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Mặt trước */}
+                    <div className="space-y-1.5">
+                      <span className="text-[11px] font-semibold text-slate-600 block">Mặt trước CCCD *</span>
+                      <div className="relative border-2 border-dashed border-slate-200 rounded-2xl p-4 text-center hover:bg-white hover:border-blue-300 transition-all cursor-pointer min-h-[140px] flex flex-col justify-center items-center bg-white/70">
                         <input 
                           type="file" 
                           accept="image/*" 
-                          onChange={e => handleFileChange(e, 'avatar')} 
+                          onChange={e => handleFileChange(e, 'cccdFront')}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                        />
+                        {cccdFrontPreview ? (
+                          <img src={cccdFrontPreview} alt="CCCD Front" className="max-h-[120px] rounded-lg object-contain" />
+                        ) : (
+                          <>
+                            <UploadCloud className="w-7 h-7 text-blue-500 mb-1" />
+                            <span className="font-bold text-slate-700 text-xs block">Tải ảnh mặt trước</span>
+                            <span className="text-[10px] text-slate-400">JPG, PNG rõ nét không bị lóa</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Mặt sau */}
+                    <div className="space-y-1.5">
+                      <span className="text-[11px] font-semibold text-slate-600 block">Mặt sau CCCD *</span>
+                      <div className="relative border-2 border-dashed border-slate-200 rounded-2xl p-4 text-center hover:bg-white hover:border-blue-300 transition-all cursor-pointer min-h-[140px] flex flex-col justify-center items-center bg-white/70">
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          onChange={e => handleFileChange(e, 'cccdBack')}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                        />
+                        {cccdBackPreview ? (
+                          <img src={cccdBackPreview} alt="CCCD Back" className="max-h-[120px] rounded-lg object-contain" />
+                        ) : (
+                          <>
+                            <UploadCloud className="w-7 h-7 text-blue-500 mb-1" />
+                            <span className="font-bold text-slate-700 text-xs block">Tải ảnh mặt sau</span>
+                            <span className="text-[10px] text-slate-400">JPG, PNG rõ nét không bị lóa</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 2. Thông tin liên hệ & Kênh thanh toán */}
+            <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200/80 space-y-4">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
+                <span className="w-7 h-7 rounded-xl bg-blue-600 text-white font-bold text-xs flex items-center justify-center">2</span>
+                <h3 className="text-base font-bold text-slate-900">Thông tin liên hệ & Kênh thanh toán</h3>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Số điện thoại dùng Zalo *</label>
+                  <input 
+                    type="tel" 
+                    value={phone}
+                    onChange={e => setPhone(e.target.value)}
+                    placeholder="VD: 0912345678"
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 focus:ring-2 focus:ring-blue-100 outline-none text-sm font-semibold text-slate-800" 
+                  />
+                  <span className="text-[10px] text-slate-400 mt-1 block">Dùng để tạo mã QR Zalo kết nối học sinh học thử</span>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Email cá nhân *</label>
+                  <input 
+                    type="email" 
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    placeholder="VD: email@example.com"
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 focus:ring-2 focus:ring-blue-100 outline-none text-sm font-semibold text-slate-800" 
+                  />
+                  <span className="text-[10px] text-slate-400 mt-1 block">Nhận thông báo lịch dạy & báo cáo thanh toán</span>
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Mật khẩu đăng nhập tài khoản</label>
+                  <input 
+                    type="password" 
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    placeholder="Nhập mật khẩu (nếu để trống mặc định là 123456)"
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 focus:ring-2 focus:ring-blue-100 outline-none text-sm text-slate-800" 
+                  />
+                </div>
+
+                {/* Tài khoản ngân hàng */}
+                <div className="sm:col-span-2 pt-2 border-t border-slate-200">
+                  <div className="mb-3">
+                    <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Tài khoản ngân hàng nhận thanh toán (70% học phí) *</h4>
+                    <p className="text-[11px] text-slate-500 mt-0.5">Tên chủ tài khoản bắt buộc phải trùng khớp với Họ tên trên CCCD.</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">Tên ngân hàng *</label>
+                      <select
+                        value={bankName}
+                        onChange={e => setBankName(e.target.value)}
+                        className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold outline-none"
+                      >
+                        <option value="">-- Chọn ngân hàng --</option>
+                        {banksList.map(b => <option key={b} value={b}>{b}</option>)}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">Số tài khoản *</label>
+                      <input 
+                        type="text" 
+                        value={bankAccountNumber}
+                        onChange={e => setBankAccountNumber(e.target.value.replace(/\D/g, ''))}
+                        placeholder="VD: 0123456789"
+                        className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold outline-none" 
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">Tên chủ tài khoản *</label>
+                      <input 
+                        type="text" 
+                        value={bankAccountHolder}
+                        onChange={e => setBankAccountHolder(e.target.value.toUpperCase())}
+                        placeholder="VD: NGUYEN VAN AN"
+                        className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold uppercase outline-none" 
+                      />
+                    </div>
+
+                    {bankName === 'Ngân hàng khác (Tự nhập)' && (
+                      <div className="sm:col-span-3">
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1">Nhập tên ngân hàng của bạn *</label>
+                        <input 
+                          type="text" 
+                          value={customBankName}
+                          onChange={e => setCustomBankName(e.target.value)}
+                          placeholder="VD: Ngân hàng số Cake by VPBank"
+                          className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-xs outline-none" 
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Next Button */}
+            <div className="pt-4 flex justify-end">
+              <button 
+                type="button"
+                onClick={handleNextStep}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3.5 rounded-2xl transition-all shadow-md shadow-blue-200 text-sm cursor-pointer"
+              >
+                Tiếp tục sang Phần II (Thông tin giảng dạy) →
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ================= BƯỚC 2: PHẦN II - THÔNG TIN GIẢNG DẠY ================= */}
+        {step === 2 && (
+          <div className="space-y-8 animate-in fade-in duration-200">
+            
+            {/* 1. Tên hiển thị & 2. Headline */}
+            <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200/80 space-y-4">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
+                <span className="w-7 h-7 rounded-xl bg-blue-600 text-white font-bold text-xs flex items-center justify-center">1-2</span>
+                <h3 className="text-base font-bold text-slate-900">Tên hiển thị & Giới thiệu ngắn</h3>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">1. Tên hiển thị trên web *</label>
+                  <input 
+                    type="text" 
+                    value={displayName}
+                    onChange={e => setDisplayName(e.target.value)}
+                    placeholder="VD: Cô Sương Mai, Thầy Trần Văn Tài, HLV Minh Tuấn..."
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 focus:ring-2 focus:ring-blue-100 outline-none text-sm font-bold text-slate-800" 
+                  />
+                  <span className="text-[10px] text-slate-400 mt-1 block">Tên này sẽ hiển thị trực tiếp cho học sinh nhìn thấy</span>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">2. Dòng giới thiệu ngắn (Headline / Slogan) *</label>
+                  <input 
+                    type="text" 
+                    value={headline}
+                    onChange={e => setHeadline(e.target.value)}
+                    placeholder="VD: Ươm mầm tình yêu văn học - Bứt phá điểm 9+ kỳ thi THPT"
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 focus:ring-2 focus:ring-blue-100 outline-none text-sm font-semibold text-blue-700" 
+                  />
+                  <span className="text-[10px] text-slate-400 mt-1 block">Khẩu hiệu truyền cảm hứng hoặc thế mạnh giảng dạy</span>
+                </div>
+              </div>
+            </div>
+
+            {/* 3. Ảnh đại diện (Avatar) & 4. Ảnh cá nhân khác */}
+            <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200/80 space-y-6">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
+                <span className="w-7 h-7 rounded-xl bg-blue-600 text-white font-bold text-xs flex items-center justify-center">3-4</span>
+                <h3 className="text-base font-bold text-slate-900">Ảnh đại diện (Avatar) & Ảnh bìa / Cá nhân khác</h3>
+              </div>
+
+              {/* 3. Avatar Upload with Sample Box */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-2">3. Ảnh đại diện (Avatar) * (Chân dung bản thân, trang phục lịch sự, phông nền sáng)</label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center bg-white p-4 rounded-2xl border border-slate-200">
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-20 h-24 sm:w-24 sm:h-28 rounded-2xl bg-slate-100 border-2 border-slate-200 overflow-hidden shrink-0 flex items-center justify-center">
+                      {avatarPreview ? (
+                        <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
+                      ) : (
+                        <Users className="w-8 h-8 text-slate-400" />
+                      )}
+                    </div>
+                    <div>
+                      <label className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 transition-colors shadow-xs">
+                        <UploadCloud className="w-4 h-4" />
+                        <span>Tải ảnh đại diện</span>
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          onChange={e => handleFileChange(e, 'avatar')}
                           className="hidden" 
                         />
                       </label>
-                      <p className="text-[11px] text-slate-500 mt-1.5 leading-relaxed">
-                        Ảnh chụp chính diện rõ mặt, phông nền trắng hoặc xanh nước biển. Tối đa 5MB.
-                      </p>
+                      <p className="text-[10px] text-slate-500 mt-1">Ảnh nét, phông sáng, tối đa 5MB</p>
                     </div>
                   </div>
 
-                  {/* Right: Reference Sample Photo (Click để phóng to xem kĩ) */}
-                  <div className="flex items-center gap-3 bg-amber-50/70 border border-amber-200/80 rounded-xl p-3">
+                  {/* Sample avatar preview */}
+                  <div className="flex items-center gap-3 bg-amber-50 p-3 rounded-xl border border-amber-200">
                     <button
                       type="button"
                       onClick={() => setShowSampleModal(true)}
-                      className="relative group w-16 h-24 sm:w-20 sm:h-28 rounded-lg overflow-hidden border-2 border-white shadow-xs flex-shrink-0 bg-white cursor-pointer transition-all hover:scale-105 hover:ring-2 hover:ring-amber-400"
-                      title="Nhấp để phóng to ảnh mẫu"
+                      className="w-14 h-18 sm:w-16 sm:h-20 rounded-lg overflow-hidden border border-amber-300 shrink-0 bg-white cursor-pointer hover:scale-105 transition-transform"
+                      title="Bấm để phóng to xem ảnh mẫu"
                     >
-                      <img 
-                        src="/sample-avatar-4x6.png" 
-                        alt="Ảnh mẫu chân dung chuẩn" 
-                        className="w-full h-full object-cover object-top"
-                      />
-                      <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
-                        <Eye className="w-5 h-5 drop-shadow-md" />
-                      </div>
+                      <img src="/sample-avatar-4x6.png" alt="Ảnh mẫu" className="w-full h-full object-cover" />
                     </button>
-                    <div className="min-w-0 flex-1">
-                      <div className="inline-flex items-center gap-1 bg-amber-200/80 text-amber-950 font-extrabold text-[10px] px-2 py-0.5 rounded-md mb-1 uppercase tracking-wider">
-                        ★ Ảnh mẫu chuẩn
-                      </div>
-                      <p className="text-[11px] text-slate-600 leading-snug">
-                        Chụp thẳng mặt, phông nền trắng hoặc xanh nước biển như ảnh mẫu.
-                      </p>
+                    <div>
+                      <span className="text-[10px] font-extrabold text-amber-900 bg-amber-200/80 px-1.5 py-0.5 rounded uppercase block w-fit mb-0.5">Ảnh mẫu chuẩn</span>
+                      <p className="text-[11px] text-slate-600">Chụp chính diện lịch sự, phông sáng.</p>
                       <button
                         type="button"
                         onClick={() => setShowSampleModal(true)}
-                        className="text-[11px] font-bold text-amber-800 hover:text-amber-950 hover:underline mt-1 inline-flex items-center gap-1 cursor-pointer"
+                        className="text-[11px] text-amber-800 font-bold hover:underline mt-0.5 inline-flex items-center gap-1 cursor-pointer"
                       >
                         <Eye className="w-3.5 h-3.5" /> Xem phóng to ảnh mẫu
                       </button>
@@ -3640,168 +3996,166 @@ function TutorRegistrationPage() {
                 </div>
               </div>
 
-              {/* Hồ sơ chuyên môn */}
-              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2 pt-2">
-                <span className="w-1.5 h-5 bg-blue-600 rounded-full inline-block"></span>
-                Chuyên môn & Học vấn
-              </h3>
-
+              {/* 4. Ảnh cá nhân khác (Tối đa 3 ảnh - optional) */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Bạn ứng tuyển làm *</label>
-                <div className="grid grid-cols-2 gap-4">
-                  <button 
-                    type="button"
-                    onClick={() => setCategoryType('student')}
-                    className={`py-3.5 px-4 rounded-xl border text-sm font-bold transition-all flex flex-col items-center justify-center gap-1.5 ${categoryType === 'student' ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50 bg-white'}`}
-                  >
-                    <Users className="w-5 h-5" /> Gia sư Sinh viên
-                  </button>
-                  <button 
-                    type="button"
-                    onClick={() => setCategoryType('teacher')}
-                    className={`py-3.5 px-4 rounded-xl border text-sm font-bold transition-all flex flex-col items-center justify-center gap-1.5 ${categoryType === 'teacher' ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50 bg-white'}`}
-                  >
-                    <GraduationCap className="w-5 h-5" /> Giáo viên chuyên nghiệp
-                  </button>
+                <label className="block text-xs font-bold text-slate-700 mb-2">4. Ảnh cá nhân khác (Tối đa 3 ảnh - Ảnh 1 làm ảnh bìa Facebook, ảnh 2-3 hoạt động dạy học)</label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {/* Slot 1: Cover Photo */}
+                  <div className="border border-slate-200 rounded-2xl p-3 bg-white text-center">
+                    <span className="text-[10px] font-bold text-blue-700 block mb-1.5">Ảnh 1 (Ảnh bìa FB Cover)</span>
+                    <div className="relative aspect-video rounded-xl bg-slate-100 overflow-hidden flex items-center justify-center border border-slate-200">
+                      {coverPreview ? (
+                        <img src={coverPreview} alt="Cover" className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-[10px] text-slate-400 font-medium">Chưa có ảnh</span>
+                      )}
+                      <label className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 hover:opacity-100 transition-opacity cursor-pointer text-white font-bold text-xs">
+                        Thay ảnh
+                        <input type="file" accept="image/*" onChange={e => handleFileChange(e, 'cover')} className="hidden" />
+                      </label>
+                    </div>
+                    <label className="cursor-pointer text-[11px] text-blue-600 font-bold hover:underline mt-2 inline-block">
+                      + Chọn ảnh bìa
+                      <input type="file" accept="image/*" onChange={e => handleFileChange(e, 'cover')} className="hidden" />
+                    </label>
+                  </div>
+
+                  {/* Slot 2: Other photo 2 */}
+                  <div className="border border-slate-200 rounded-2xl p-3 bg-white text-center">
+                    <span className="text-[10px] font-bold text-slate-700 block mb-1.5">Ảnh 2 (Hoạt động thực tế)</span>
+                    <div className="relative aspect-video rounded-xl bg-slate-100 overflow-hidden flex items-center justify-center border border-slate-200">
+                      {otherImages[1] ? (
+                        <img src={otherImages[1]} alt="Other 2" className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-[10px] text-slate-400 font-medium">Tùy chọn</span>
+                      )}
+                      <label className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 hover:opacity-100 transition-opacity cursor-pointer text-white font-bold text-xs">
+                        Thay ảnh
+                        <input type="file" accept="image/*" onChange={e => handleFileChange(e, 'other')} className="hidden" />
+                      </label>
+                    </div>
+                    <label className="cursor-pointer text-[11px] text-slate-600 font-bold hover:underline mt-2 inline-block">
+                      + Tải ảnh 2
+                      <input type="file" accept="image/*" onChange={e => handleFileChange(e, 'other')} className="hidden" />
+                    </label>
+                  </div>
+
+                  {/* Slot 3: Other photo 3 */}
+                  <div className="border border-slate-200 rounded-2xl p-3 bg-white text-center">
+                    <span className="text-[10px] font-bold text-slate-700 block mb-1.5">Ảnh 3 (Hoạt động thực tế)</span>
+                    <div className="relative aspect-video rounded-xl bg-slate-100 overflow-hidden flex items-center justify-center border border-slate-200">
+                      {otherImages[2] ? (
+                        <img src={otherImages[2]} alt="Other 3" className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-[10px] text-slate-400 font-medium">Tùy chọn</span>
+                      )}
+                      <label className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 hover:opacity-100 transition-opacity cursor-pointer text-white font-bold text-xs">
+                        Thay ảnh
+                        <input type="file" accept="image/*" onChange={e => handleFileChange(e, 'other')} className="hidden" />
+                      </label>
+                    </div>
+                    <label className="cursor-pointer text-[11px] text-slate-600 font-bold hover:underline mt-2 inline-block">
+                      + Tải ảnh 3
+                      <input type="file" accept="image/*" onChange={e => handleFileChange(e, 'other')} className="hidden" />
+                    </label>
+                  </div>
                 </div>
               </div>
+            </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Tiêu đề hồ sơ / Chức danh ngắn *</label>
-                  <input 
-                    type="text" 
-                    value={title}
-                    onChange={e => setTitle(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-sm" 
-                    placeholder={categoryType === 'teacher' ? "VD: Giáo viên Tiếng Anh chuyên luyện thi IELTS 8.0" : "VD: Sinh viên năm 3 Đại học Ngoại Thương - Học bổng IELTS"} 
-                  />
-                </div>
+            {/* 5. Trình độ học vấn & 6. Môn học tiếp nhận */}
+            <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200/80 space-y-6">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
+                <span className="w-7 h-7 rounded-xl bg-blue-600 text-white font-bold text-xs flex items-center justify-center">5-6</span>
+                <h3 className="text-base font-bold text-slate-900">Trình độ học vấn & Môn học tiếp nhận</h3>
+              </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Kinh nghiệm giảng dạy (Số năm) *</label>
-                  <input 
-                    type="number" 
-                    value={experience}
-                    onChange={e => setExperience(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-sm" 
-                    placeholder="VD: 3" 
-                  />
-                </div>
+              {/* 5. Trình độ học vấn */}
+              <div className="space-y-3">
+                <label className="block text-xs font-bold text-slate-700">5. Trình độ học vấn *</label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <span className="text-[11px] font-semibold text-slate-600 block mb-1">Trình độ *</span>
+                    <select
+                      value={educationLevel}
+                      onChange={e => setEducationLevel(e.target.value)}
+                      className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-xs font-bold outline-none"
+                    >
+                      <option value="Đại học">Đại học (Cử nhân)</option>
+                      <option value="Cao đẳng">Cao đẳng</option>
+                      <option value="Thạc sĩ">Thạc sĩ</option>
+                      <option value="NCS Tiến sĩ">NCS Tiến sĩ</option>
+                    </select>
+                  </div>
 
-                {/* TÁCH BÀI TRƯỜNG HỌC & NGÀNH HỌC */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Trường Đại học *</label>
-                  <select 
-                    value={university}
-                    onChange={e => setUniversity(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-sm"
-                  >
-                    {universitiesList.map(u => (
-                      <option key={u} value={u}>{u}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {university === 'Trường khác (Tự nhập)' && (
-                  <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Tên trường Đại học của bạn *</label>
+                  <div>
+                    <span className="text-[11px] font-semibold text-slate-600 block mb-1">Chuyên ngành học *</span>
                     <input 
                       type="text" 
-                      value={customUniversity}
-                      onChange={e => setCustomUniversity(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-sm" 
-                      placeholder="VD: Đại học Quốc tế RMIT Vietnam" 
+                      value={major}
+                      onChange={e => setMajor(e.target.value)}
+                      placeholder="VD: Sư phạm Ngữ văn, Toán học..."
+                      className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold outline-none" 
                     />
                   </div>
-                )}
 
-                <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Ngành học chuyên môn *</label>
-                  <input 
-                    type="text" 
-                    value={major}
-                    onChange={e => setMajor(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-sm" 
-                    placeholder="VD: Sư phạm Toán, Ngôn ngữ Anh, Công nghệ thông tin..." 
-                  />
+                  <div>
+                    <span className="text-[11px] font-semibold text-slate-600 block mb-1">Trường ĐH / Cao đẳng *</span>
+                    <input 
+                      type="text" 
+                      value={university}
+                      onChange={e => setUniversity(e.target.value)}
+                      placeholder="VD: ĐH Sư Phạm Hà Nội"
+                      className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold outline-none" 
+                    />
+                  </div>
                 </div>
 
-                <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Bằng cấp & Chứng chỉ nổi bật (nếu có)</label>
-                  <input 
-                    type="text" 
-                    value={certificates}
-                    onChange={e => setCertificates(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-sm" 
-                    placeholder="VD: IELTS 8.0, TOEIC 950, Bằng tốt nghiệp loại giỏi..." 
-                  />
-                </div>
-
-                <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Thành tích nổi bật</label>
-                  <textarea 
-                    rows={3}
-                    value={achievements}
-                    onChange={e => setAchievements(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-sm resize-none" 
-                    placeholder="Mô tả thành tích tiêu biểu (VD: Giải thưởng chuyên môn, huy chương thể thao, chứng chỉ âm nhạc/nghệ thuật, hoặc thành tích tiến bộ của học sinh cũ...)"
-                  />
-                </div>
-
-                <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Ảnh minh chứng thành tích (giải thưởng, chứng chỉ, bảng điểm, huy chương...)</label>
-                  <div className="relative border-2 border-dashed border-slate-200 rounded-2xl p-4 text-center hover:bg-slate-50 hover:border-blue-300 transition-colors cursor-pointer min-h-[110px] flex flex-col justify-center items-center bg-slate-50/50">
+                {/* Tải lên tệp kiểm duyệt (Bằng tốt nghiệp / Thẻ sinh viên) */}
+                <div className="pt-2">
+                  <span className="text-[11px] font-bold text-slate-700 block mb-1">Tải lên tệp kiểm duyệt (Bản scan/ảnh chụp Bằng tốt nghiệp, Bảng điểm hoặc Thẻ sinh viên)</span>
+                  <div className="relative border-2 border-dashed border-slate-200 rounded-2xl p-4 text-center hover:bg-white hover:border-blue-300 transition-all cursor-pointer min-h-[100px] flex flex-col justify-center items-center bg-white/70">
                     <input 
                       type="file" 
                       accept="image/*,application/pdf" 
-                      onChange={e => handleFileChange(e, 'achievement')} 
+                      onChange={e => handleFileChange(e, 'credential')}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
                     />
-                    {achievementPreview ? (
-                      achievementFile?.type === 'application/pdf' ? (
-                        <div className="text-blue-600 font-semibold text-xs flex items-center gap-1.5">
-                          <GraduationCap className="w-5 h-5" /> {achievementFile.name}
-                        </div>
-                      ) : (
-                        <img src={achievementPreview} alt="Achievements Proof" className="max-h-[90px] rounded-lg object-contain" />
-                      )
+                    {credentialPreview ? (
+                      <span className="text-xs font-bold text-emerald-700 flex items-center gap-1.5">
+                        <CheckCircle className="w-4 h-4" /> Đã tải lên văn bằng kiểm duyệt thành công
+                      </span>
                     ) : (
                       <>
-                        <UploadCloud className="w-7 h-7 text-blue-500 mb-1" />
-                        <div className="font-medium text-slate-700 text-xs mb-0.5">Tải lên ảnh/tệp minh chứng thành tích</div>
-                        <div className="text-[10px] text-slate-400">JPG, PNG hoặc PDF (Tối đa 5MB)</div>
+                        <UploadCloud className="w-6 h-6 text-blue-500 mb-1" />
+                        <span className="font-bold text-slate-700 text-xs block">Tải lên tệp kiểm duyệt văn bằng</span>
+                        <span className="text-[10px] text-slate-400">JPG, PNG hoặc PDF (Tối đa 8MB)</span>
                       </>
                     )}
                   </div>
                 </div>
               </div>
-            </div>
-          )}
 
-          {/* STEP 2: DẠY HỌC, STK & KYC */}
-          {step === 2 && (
-            <div className="space-y-6 animate-in fade-in duration-200">
-              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <span className="w-1.5 h-5 bg-blue-600 rounded-full inline-block"></span>
-                Môn học, Học phí & STK Ngân hàng
-              </h3>
-
-              {/* Môn học checkboxes */}
-              <div>
-                <label className="block text-sm font-bold text-slate-800 mb-2">Môn học giảng dạy *</label>
-                <div className="grid grid-cols-3 gap-2 bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                  {subjectsList.map(subj => {
-                    const isChecked = selectedSubjects.includes(subj);
+              {/* 6. Môn học tiếp nhận (Tạo ô chọn) */}
+              <div className="pt-3 border-t border-slate-200 space-y-2">
+                <label className="block text-xs font-bold text-slate-700">6. Môn học tiếp nhận * (Chọn các môn bạn nhận dạy kèm)</label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 bg-white p-4 rounded-2xl border border-slate-200">
+                  {popularSubjects.map(sub => {
+                    const isSelected = selectedSubjects.includes(sub);
                     return (
-                      <label key={subj} className="flex items-center gap-2 cursor-pointer p-2 hover:bg-white rounded-lg transition-colors">
+                      <label 
+                        key={sub} 
+                        className={`flex items-center gap-2 p-2 rounded-xl text-xs font-semibold cursor-pointer transition-colors ${
+                          isSelected ? 'bg-blue-50 text-blue-800 border border-blue-200' : 'hover:bg-slate-50 text-slate-700'
+                        }`}
+                      >
                         <input 
                           type="checkbox" 
-                          checked={isChecked} 
-                          onChange={() => handleSubjectChange(subj)}
+                          checked={isSelected}
+                          onChange={() => toggleSubject(sub)}
                           className="rounded text-blue-600 focus:ring-blue-500" 
                         />
-                        <span className="text-sm text-slate-600">{subj}</span>
+                        <span>{sub}</span>
                       </label>
                     );
                   })}
@@ -3810,124 +4164,314 @@ function TutorRegistrationPage() {
                   type="text" 
                   value={customSubject}
                   onChange={e => setCustomSubject(e.target.value)}
-                  className="w-full mt-2 px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-sm" 
-                  placeholder="Môn học khác (nếu có, VD: Lập trình, Tiếng Nhật...)" 
+                  placeholder="Nhập môn học khác nếu chưa có trong danh sách trên..."
+                  className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-xs outline-none" 
                 />
               </div>
+            </div>
 
-              {/* Cấp độ checkboxes */}
-              <div>
-                <label className="block text-sm font-bold text-slate-800 mb-2">Cấp độ học sinh nhận dạy *</label>
-                <div className="grid grid-cols-2 gap-2 bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                  {levelsList.map(level => {
-                    const isChecked = selectedLevels.includes(level);
-                    return (
-                      <label key={level} className="flex items-center gap-2 cursor-pointer p-2 hover:bg-white rounded-lg transition-colors">
-                        <input 
-                          type="checkbox" 
-                          checked={isChecked} 
-                          onChange={() => handleLevelChange(level)}
-                          className="rounded text-blue-600 focus:ring-blue-500" 
-                        />
-                        <span className="text-sm text-slate-600">{level}</span>
-                      </label>
-                    );
-                  })}
-                </div>
+            {/* 7. Chứng chỉ chuyên môn & Nghiệp vụ sư phạm */}
+            <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200/80 space-y-4">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
+                <span className="w-7 h-7 rounded-xl bg-blue-600 text-white font-bold text-xs flex items-center justify-center">7</span>
+                <h3 className="text-base font-bold text-slate-900">Chứng chỉ chuyên môn & Nghiệp vụ sư phạm</h3>
               </div>
 
-              {/* Hình thức dạy checkboxes */}
-              <div>
-                <label className="block text-sm font-bold text-slate-800 mb-2">Hình thức giảng dạy *</label>
-                <div className="grid grid-cols-2 gap-2 bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                  {formatsList.map(fmt => {
-                    const isChecked = teachingFormats.includes(fmt);
-                    return (
-                      <label key={fmt} className="flex items-center gap-2 cursor-pointer p-2 hover:bg-white rounded-lg transition-colors">
-                        <input 
-                          type="checkbox" 
-                          checked={isChecked} 
-                          onChange={() => handleFormatChange(fmt)}
-                          className="rounded text-blue-600 focus:ring-blue-500" 
-                        />
-                        <span className="text-sm text-slate-600">{fmt}</span>
-                      </label>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Khu vực nhận dạy (Quận/Huyện, Tỉnh...) *</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Chứng chỉ chuyên môn môn học</label>
                   <input 
                     type="text" 
-                    value={locationText}
-                    onChange={e => setLocationText(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-sm" 
-                    placeholder="VD: Cầu Giấy & Đống Đa, Hà Nội" 
+                    value={subjectCertificates}
+                    onChange={e => setSubjectCertificates(e.target.value)}
+                    placeholder="VD: IELTS 8.0, HSK 6, Giải Nhất HSG Quốc Gia..."
+                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-xs font-medium outline-none" 
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Học phí theo từng cấp học đã chọn (VNĐ) *</label>
-                  {selectedLevels.length === 0 ? (
-                    <p className="text-xs text-amber-600 bg-amber-50 p-3 rounded-xl border border-amber-100">
-                      Vui lòng chọn ít nhất một cấp độ học sinh nhận dạy ở trên để thiết lập học phí.
-                    </p>
-                  ) : (
-                    <div className="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                      {selectedLevels.map(level => (
-                        <div key={level} className="flex flex-col sm:flex-row sm:items-center gap-2 justify-between">
-                          <span className="text-xs font-semibold text-slate-700">{level}:</span>
-                          <div className="flex gap-2 items-center">
-                            <input 
-                              type="text" 
-                              value={levelPrices[level] || ''}
-                              onChange={e => {
-                                const val = e.target.value;
-                                setLevelPrices({ ...levelPrices, [level]: val });
-                              }}
-                              className="px-3 py-2 rounded-xl bg-white border border-slate-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none text-xs w-32 text-right font-medium" 
-                              placeholder="VD: 150.000" 
-                            />
-                            <span className="text-[10px] text-slate-500">đ/{priceUnit}</span>
-                          </div>
-                        </div>
-                      ))}
-                      
-                      <div className="pt-2 border-t border-slate-200 flex justify-end items-center gap-2">
-                        <span className="text-[10px] text-slate-500">Đơn vị áp dụng:</span>
-                        <select 
-                          value={priceUnit}
-                          onChange={e => setPriceUnit(e.target.value)}
-                          className="px-2 py-1 rounded-lg bg-white border border-slate-200 text-[11px] outline-none"
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Chứng chỉ sư phạm / Nghiệp vụ giảng dạy (Optional)</label>
+                  <input 
+                    type="text" 
+                    value={pedagogicalCertificates}
+                    onChange={e => setPedagogicalCertificates(e.target.value)}
+                    placeholder="VD: Bồi dưỡng Nghiệp vụ Sư phạm, TESOL, CELTA..."
+                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-xs font-medium outline-none" 
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Tải lên tệp kiểm duyệt (Bản scan chứng chỉ gốc)</label>
+                  <div className="relative border-2 border-dashed border-slate-200 rounded-2xl p-4 text-center hover:bg-white hover:border-blue-300 transition-all cursor-pointer min-h-[90px] flex flex-col justify-center items-center bg-white/70">
+                    <input 
+                      type="file" 
+                      accept="image/*,application/pdf" 
+                      onChange={e => handleFileChange(e, 'certProof')}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                    />
+                    {certificateProofPreview ? (
+                      <span className="text-xs font-bold text-emerald-700 flex items-center gap-1.5">
+                        <CheckCircle className="w-4 h-4" /> Đã tải lên bản scan chứng chỉ gốc
+                      </span>
+                    ) : (
+                      <>
+                        <UploadCloud className="w-6 h-6 text-blue-500 mb-1" />
+                        <span className="font-bold text-slate-700 text-xs block">Tải lên bản scan chứng chỉ gốc</span>
+                        <span className="text-[10px] text-slate-400">JPG, PNG hoặc PDF</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 8. Thành tích, phương pháp giảng dạy */}
+            <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200/80 space-y-4">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
+                <span className="w-7 h-7 rounded-xl bg-blue-600 text-white font-bold text-xs flex items-center justify-center">8</span>
+                <h3 className="text-base font-bold text-slate-900">Thành tích & Phương pháp giảng dạy</h3>
+              </div>
+
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Số năm kinh nghiệm giảng dạy *</label>
+                    <input 
+                      type="text" 
+                      value={experience}
+                      onChange={e => setExperience(e.target.value)}
+                      placeholder="VD: 5 năm, 8 năm..."
+                      className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold outline-none" 
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Đặc điểm, phong cách dạy học (Chọn tags)</label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {suggestedPersonalities.map(p => (
+                        <button
+                          key={p}
+                          type="button"
+                          onClick={() => togglePersonality(p)}
+                          className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors ${
+                            personalityTraits.includes(p) ? 'bg-blue-600 text-white font-bold' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
+                          }`}
                         >
-                          <option value="giờ">/ giờ</option>
-                          <option value="tháng">/ tháng</option>
-                        </select>
-                      </div>
+                          {p}
+                        </button>
+                      ))}
                     </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Thành tích cá nhân & Background (Có thể viết dài ~200 từ để thể hiện năng lực) *
+                  </label>
+                  <textarea 
+                    rows={4}
+                    value={teachingAchievement}
+                    onChange={e => setTeachingAchievement(e.target.value)}
+                    placeholder="Mô tả chi tiết background bản thân, kinh nghiệm dẫn dắt học sinh, phong cách sư phạm, số học sinh đạt điểm cao, phương pháp giảng dạy khác biệt..."
+                    className="w-full p-4 rounded-2xl bg-white border border-slate-200 text-xs leading-relaxed outline-none focus:ring-2 focus:ring-blue-100"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Tài liệu minh chứng thành tích (Upload tệp)</label>
+                  <div className="relative border-2 border-dashed border-slate-200 rounded-2xl p-4 text-center hover:bg-white hover:border-blue-300 transition-all cursor-pointer min-h-[90px] flex flex-col justify-center items-center bg-white/70">
+                    <input 
+                      type="file" 
+                      accept="image/*,application/pdf" 
+                      onChange={e => handleFileChange(e, 'achievement')}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                    />
+                    {achievementPreview ? (
+                      <span className="text-xs font-bold text-emerald-700 flex items-center gap-1.5">
+                        <CheckCircle className="w-4 h-4" /> Đã tải lên tài liệu minh chứng thành tích
+                      </span>
+                    ) : (
+                      <>
+                        <UploadCloud className="w-6 h-6 text-blue-500 mb-1" />
+                        <span className="font-bold text-slate-700 text-xs block">Tải lên tệp minh chứng thành tích</span>
+                        <span className="text-[10px] text-slate-400">Ảnh giấy khen, giải thưởng, bảng điểm hoặc chứng nhận</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 9. Cấp học & Đối tượng nhận dạy (Giáo viên tự điền) */}
+            <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200/80 space-y-3">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
+                <span className="w-7 h-7 rounded-xl bg-blue-600 text-white font-bold text-xs flex items-center justify-center">9</span>
+                <h3 className="text-base font-bold text-slate-900">Cấp học & Đối tượng nhận dạy</h3>
+              </div>
+              <label className="block text-xs font-bold text-slate-700">
+                Cấp học & Đối tượng nhận dạy * (Giáo viên tự do điền nội dung, không bị giới hạn)
+              </label>
+              <textarea 
+                rows={3}
+                value={targetAudience}
+                onChange={e => setTargetAudience(e.target.value)}
+                placeholder="VD: Học sinh mất gốc môn Toán lớp 9 cần lấy lại căn bản cấp tốc; Học sinh lớp 12 luyện thi THPT Quốc Gia mục tiêu 8.5+; Học viên ôn thi Chuyên..."
+                className="w-full p-4 rounded-2xl bg-white border border-slate-200 text-xs leading-relaxed outline-none focus:ring-2 focus:ring-blue-100 font-medium"
+              />
+            </div>
+
+            {/* 10. Hình thức giảng dạy */}
+            <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200/80 space-y-4">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
+                <span className="w-7 h-7 rounded-xl bg-blue-600 text-white font-bold text-xs flex items-center justify-center">10</span>
+                <h3 className="text-base font-bold text-slate-900">Hình thức giảng dạy</h3>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="p-4 bg-white rounded-2xl border border-slate-200 space-y-2">
+                  <label className="flex items-center gap-2 text-xs font-bold text-slate-800 cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      checked={isOnlineSupport}
+                      onChange={e => setIsOnlineSupport(e.target.checked)}
+                      className="rounded text-blue-600" 
+                    />
+                    <span>Trực tuyến (Online)</span>
+                  </label>
+                  {isOnlineSupport && (
+                    <input 
+                      type="text" 
+                      value={teachingFormatsOnline}
+                      onChange={e => setTeachingFormatsOnline(e.target.value)}
+                      placeholder="Nền tảng sử dụng (Zoom, Google Meet, MS Teams...)"
+                      className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs outline-none" 
+                    />
+                  )}
+                </div>
+
+                <div className="p-4 bg-white rounded-2xl border border-slate-200 space-y-2">
+                  <label className="flex items-center gap-2 text-xs font-bold text-slate-800 cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      checked={isOfflineSupport}
+                      onChange={e => setIsOfflineSupport(e.target.checked)}
+                      className="rounded text-blue-600" 
+                    />
+                    <span>Trực tiếp (Offline)</span>
+                  </label>
+                  {isOfflineSupport && (
+                    <input 
+                      type="text" 
+                      value={teachingFormatsOffline}
+                      onChange={e => setTeachingFormatsOffline(e.target.value)}
+                      placeholder="Danh sách quận/huyện, khu vực có thể di chuyển..."
+                      className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs outline-none" 
+                    />
                   )}
                 </div>
               </div>
+            </div>
 
-              {/* Lịch trống Grid */}
+            {/* 11. Tài liệu đào tạo (Optional) */}
+            <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200/80 space-y-4">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
+                <span className="w-7 h-7 rounded-xl bg-blue-600 text-white font-bold text-xs flex items-center justify-center">11</span>
+                <h3 className="text-base font-bold text-slate-900">Tài liệu đào tạo (Optional)</h3>
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Học liệu cung cấp cho học viên</label>
+                  <textarea 
+                    rows={2}
+                    value={trainingMaterials}
+                    onChange={e => setTrainingMaterials(e.target.value)}
+                    placeholder="Mô tả giáo trình, đề thi thử, sổ tay công thức độc quyền..."
+                    className="w-full p-3 rounded-xl bg-white border border-slate-200 text-xs outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Đường dẫn Video bài giảng mẫu (YouTube link)</label>
+                  <input 
+                    type="text" 
+                    value={videoDemo}
+                    onChange={e => setVideoDemo(e.target.value)}
+                    placeholder="https://www.youtube.com/watch?v=..."
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-xs outline-none" 
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* 12. Bảng giá dịch vụ */}
+            <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200/80 space-y-4">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+                <div className="flex items-center gap-2">
+                  <span className="w-7 h-7 rounded-xl bg-blue-600 text-white font-bold text-xs flex items-center justify-center">12</span>
+                  <h3 className="text-base font-bold text-slate-900">Bảng giá dịch vụ</h3>
+                </div>
+                <span className="text-xs font-semibold text-slate-500">Đơn vị: VNĐ / {priceUnit}</span>
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Học phí theo giờ (Mức cố định hoặc khoảng dao động) *</label>
+                  <input 
+                    type="text" 
+                    value={hourlyRate}
+                    onChange={e => setHourlyRate(e.target.value)}
+                    placeholder="VD: 200.000 hoặc 180.000 - 300.000"
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 text-sm font-bold text-blue-700 outline-none" 
+                  />
+                </div>
+
+                {/* Bảng giá theo cấp lớp */}
+                <div className="pt-2">
+                  <span className="text-[11px] font-bold text-slate-700 block mb-2">Chi tiết mức học phí theo cấp học:</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {Object.entries(levelPrices).map(([lvl, prc]) => (
+                      <div key={lvl} className="p-3 bg-white rounded-xl border border-slate-200">
+                        <span className="text-[11px] font-semibold text-slate-600 block mb-1">{lvl}</span>
+                        <div className="flex items-center gap-1">
+                          <input 
+                            type="text" 
+                            value={prc}
+                            onChange={e => setLevelPrices({ ...levelPrices, [lvl]: e.target.value })}
+                            className="w-full px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs font-bold text-blue-700 outline-none" 
+                          />
+                          <span className="text-[10px] text-slate-400">đ/giờ</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 13. Lịch học & Cam kết vận hành */}
+            <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200/80 space-y-6">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
+                <span className="w-7 h-7 rounded-xl bg-blue-600 text-white font-bold text-xs flex items-center justify-center">13</span>
+                <h3 className="text-base font-bold text-slate-900">Lịch học & Cam kết vận hành</h3>
+              </div>
+
+              {/* Ma trận ca rảnh */}
               <div>
-                <label className="block text-sm font-bold text-slate-800 mb-3">Lịch trống trong tuần (Chọn những buổi rảnh) *</label>
-                <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+                <label className="block text-xs font-bold text-slate-700 mb-2">Khung giờ có thể nhận lớp (Tích chọn các ca rảnh trong tuần) *</label>
+                <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-2xs">
                   <div className="overflow-x-auto">
                     <table className="w-full min-w-[500px] border-collapse text-xs text-center">
                       <thead>
                         <tr className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
-                          <th className="p-3 text-left">Buổi</th>
-                          {days.map(d => <th key={d} className="p-3">{d}</th>)}
+                          <th className="p-2.5 text-left pl-3.5">Ca dạy</th>
+                          {days.map(d => <th key={d} className="p-2.5">{d}</th>)}
                         </tr>
                       </thead>
                       <tbody>
                         {shifts.map(shift => (
-                          <tr key={shift} className="border-b border-slate-100">
-                            <td className="p-3 font-semibold text-slate-700 text-left bg-slate-50/70">{shift}</td>
+                          <tr key={shift} className="border-b border-slate-100 last:border-0">
+                            <td className="p-2.5 font-bold text-slate-700 text-left pl-3.5 bg-slate-50/60">{shift}</td>
                             {days.map(day => {
                               const slot = `${day}_${shift}`;
                               const isSelected = scheduleSlots.includes(slot);
@@ -3936,13 +4480,11 @@ function TutorRegistrationPage() {
                                   <button
                                     type="button"
                                     onClick={() => toggleScheduleSlot(day, shift)}
-                                    className={`w-full py-2 rounded-lg font-medium transition-all text-[11px] ${
-                                      isSelected 
-                                        ? 'bg-blue-600 text-white shadow-sm font-bold' 
-                                        : 'bg-white text-slate-500 border border-slate-150 hover:bg-slate-50'
+                                    className={`w-full py-1.5 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
+                                      isSelected ? 'bg-blue-600 text-white shadow-xs font-bold' : 'bg-slate-50 hover:bg-slate-100 text-slate-400 border border-slate-150'
                                     }`}
                                   >
-                                    {isSelected ? 'Rảnh' : '+'}
+                                    {isSelected ? '✓ Rảnh' : '+'}
                                   </button>
                                 </td>
                               );
@@ -3953,184 +4495,83 @@ function TutorRegistrationPage() {
                     </table>
                   </div>
                 </div>
-                <input 
-                  type="text" 
-                  value={scheduleNote}
-                  onChange={e => setScheduleNote(e.target.value)}
-                  className="w-full mt-3 px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-sm" 
-                  placeholder="Ghi chú thêm về lịch học (VD: Rảnh các tối trừ thứ 7, Có thể sắp xếp thêm...)" 
-                />
               </div>
 
-              {/* Section: Thông tin nhận tiền */}
-              <div className="bg-green-50 border border-green-100 rounded-3xl p-6 space-y-4">
-                <div>
-                  <h4 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-1 flex items-center gap-2">
-                    <span className="w-1.5 h-4 bg-green-500 rounded-full inline-block"></span>
-                    Thông tin nhận thanh toán (70% học phí) *
-                  </h4>
-                  <p className="text-xs text-slate-500 leading-relaxed">
-                    Hệ thống sẽ tự động ghi nhận và chuyển <strong>70% học phí</strong> vào tài khoản của bạn mỗi khi học sinh thanh toán. Trung tâm giữ lại 30% phí nền tảng.
-                  </p>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Ngân hàng *</label>
-                    <select
-                      value={bankName}
-                      onChange={e => setBankName(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 focus:ring-2 focus:ring-green-100 focus:border-green-500 outline-none transition-all text-sm"
+              {/* Thời gian phản hồi cam kết */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-2">Thời gian phản hồi cam kết *</label>
+                <div className="grid grid-cols-3 gap-3">
+                  {(['Dưới 30 phút', 'Dưới 1 giờ', 'Dưới 3 giờ'] as const).map(time => (
+                    <button
+                      key={time}
+                      type="button"
+                      onClick={() => setResponseTime(time)}
+                      className={`py-2.5 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                        responseTime === time ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-xs' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-100'
+                      }`}
                     >
-                      <option value="">-- Chọn ngân hàng --</option>
-                      {banksList.map(b => <option key={b} value={b}>{b}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Số tài khoản *</label>
-                    <input
-                      type="text"
-                      value={bankAccountNumber}
-                      onChange={e => setBankAccountNumber(e.target.value.replace(/\D/g, ''))}
-                      className="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 focus:ring-2 focus:ring-green-100 focus:border-green-500 outline-none transition-all text-sm"
-                      placeholder="VD: 0123456789"
-                      maxLength={20}
-                    />
-                    <p className="mt-1 text-[11px] text-slate-400">Chỉ nhập số, không nhập dấu cách</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Tên chủ tài khoản *</label>
-                    <input
-                      type="text"
-                      value={bankAccountHolder}
-                      onChange={e => setBankAccountHolder(e.target.value.toUpperCase())}
-                      className="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 focus:ring-2 focus:ring-green-100 focus:border-green-500 outline-none transition-all text-sm tracking-wide"
-                      placeholder="VD: NGUYEN VAN A"
-                    />
-                    <p className="mt-1 text-[11px] text-slate-400">Nhập đúng tên trên thẻ ngân hàng (CHỮ HOA, không dấu)</p>
-                  </div>
+                      {time}
+                    </button>
+                  ))}
                 </div>
-                {bankName && bankAccountNumber && bankAccountHolder && (
-                  <div className="bg-white border border-green-200 rounded-xl p-3 text-xs text-green-800">
-                    ✅ {bankName} — STK: <strong>{bankAccountNumber}</strong> — Chủ TK: <strong>{bankAccountHolder}</strong>
-                  </div>
-                )}
               </div>
 
-              {/* KYC CMND/CCCD & Credentials */}
-              <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 space-y-6">
-                <div>
-                  <h4 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-2">Xác thực danh tính (KYC) & Bằng cấp *</h4>
-                  <p className="text-xs text-slate-400 leading-relaxed mb-4">
-                    Để đảm bảo tính chuyên nghiệp và uy tín cho nền tảng, quý gia sư vui lòng cung cấp ảnh chụp giấy tờ xác minh. Chúng tôi cam kết bảo mật tuyệt đối các thông tin cá nhân của bạn.
-                  </p>
-                </div>
+              {/* 3 Cam kết tiêu chuẩn cộng đồng */}
+              <div className="pt-3 border-t border-slate-200 space-y-2.5">
+                <label className="block text-xs font-bold text-slate-800 mb-1 uppercase tracking-wider">
+                  Cam kết tiêu chuẩn cộng đồng (Tích chọn cả 3 mục để hoàn tất) *
+                </label>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* CCCD Mặt trước */}
-                  <div className="space-y-2">
-                    <span className="block text-xs font-semibold text-slate-700">CCCD (Mặt trước) *</span>
-                    <div className="relative border-2 border-dashed border-slate-200 rounded-xl p-4 text-center hover:bg-white hover:border-blue-300 transition-all cursor-pointer min-h-[140px] flex flex-col justify-center items-center bg-white/40">
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        onChange={e => handleFileChange(e, 'cccdFront')} 
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
-                      />
-                      {cccdFrontPreview ? (
-                        <img src={cccdFrontPreview} alt="CCCD Mặt trước" className="max-h-[120px] rounded-lg object-contain" />
-                      ) : (
-                        <>
-                          <UploadCloud className="w-8 h-8 text-blue-500 mb-1.5" />
-                          <span className="font-semibold text-slate-700 text-xs block">Mặt trước CCCD</span>
-                          <span className="text-[10px] text-slate-400">JPG, PNG (Tối đa 5MB)</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
+                <label className="flex items-start gap-2.5 cursor-pointer text-xs text-slate-700 p-2.5 bg-white rounded-xl border border-slate-200 hover:bg-blue-50/30">
+                  <input 
+                    type="checkbox" 
+                    checked={commitAccurate}
+                    onChange={e => setCommitAccurate(e.target.checked)}
+                    className="mt-0.5 rounded text-blue-600 focus:ring-blue-500 shrink-0" 
+                  />
+                  <span>1. Cam kết thông tin bằng cấp, chứng chỉ đã tải lên là chính xác 100%.</span>
+                </label>
 
-                  {/* CCCD Mặt sau */}
-                  <div className="space-y-2">
-                    <span className="block text-xs font-semibold text-slate-700">CCCD (Mặt sau) *</span>
-                    <div className="relative border-2 border-dashed border-slate-200 rounded-xl p-4 text-center hover:bg-white hover:border-blue-300 transition-all cursor-pointer min-h-[140px] flex flex-col justify-center items-center bg-white/40">
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        onChange={e => handleFileChange(e, 'cccdBack')} 
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
-                      />
-                      {cccdBackPreview ? (
-                        <img src={cccdBackPreview} alt="CCCD Mặt sau" className="max-h-[120px] rounded-lg object-contain" />
-                      ) : (
-                        <>
-                          <UploadCloud className="w-8 h-8 text-blue-500 mb-1.5" />
-                          <span className="font-semibold text-slate-700 text-xs block">Mặt sau CCCD</span>
-                          <span className="text-[10px] text-slate-400">JPG, PNG (Tối đa 5MB)</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                <label className="flex items-start gap-2.5 cursor-pointer text-xs text-slate-700 p-2.5 bg-white rounded-xl border border-slate-200 hover:bg-blue-50/30">
+                  <input 
+                    type="checkbox" 
+                    checked={commitConduct}
+                    onChange={e => setCommitConduct(e.target.checked)}
+                    className="mt-0.5 rounded text-blue-600 focus:ring-blue-500 shrink-0" 
+                  />
+                  <span>2. Cam kết tuân thủ quy tắc ứng xử sư phạm và thời gian nhận lớp sau khi kết nối.</span>
+                </label>
 
-                {/* Bằng cấp tệp */}
-                <div className="space-y-2">
-                  <span className="block text-xs font-semibold text-slate-700">Thẻ sinh viên / Bằng tốt nghiệp / Chứng chỉ sư phạm</span>
-                  <div className="relative border-2 border-dashed border-slate-200 rounded-xl p-4 text-center hover:bg-white hover:border-blue-300 transition-all cursor-pointer min-h-[120px] flex flex-col justify-center items-center bg-white/40">
-                    <input 
-                      type="file" 
-                      accept="image/*,application/pdf" 
-                      onChange={e => handleFileChange(e, 'credential')} 
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
-                    />
-                    {credentialPreview ? (
-                      credentialFile?.type === 'application/pdf' ? (
-                        <div className="text-blue-600 font-semibold text-xs flex items-center gap-1.5">
-                          <GraduationCap className="w-6 h-6" /> {credentialFile.name}
-                        </div>
-                      ) : (
-                        <img src={credentialPreview} alt="Chứng chỉ" className="max-h-[100px] rounded-lg object-contain" />
-                      )
-                    ) : (
-                      <>
-                        <UploadCloud className="w-8 h-8 text-blue-500 mb-1.5" />
-                        <span className="font-semibold text-slate-700 text-xs block">Kéo thả hoặc Click chọn tệp chứng chỉ</span>
-                        <span className="text-[10px] text-slate-400">Chấp nhận JPG, PNG, PDF (Tối đa 5MB)</span>
-                      </>
-                    )}
-                  </div>
-                </div>
+                <label className="flex items-start gap-2.5 cursor-pointer text-xs text-slate-700 p-2.5 bg-white rounded-xl border border-slate-200 hover:bg-blue-50/30">
+                  <input 
+                    type="checkbox" 
+                    checked={commitTerms}
+                    onChange={e => setCommitTerms(e.target.checked)}
+                    className="mt-0.5 rounded text-blue-600 focus:ring-blue-500 shrink-0" 
+                  />
+                  <span>3. Đã đọc và đồng ý với các điều khoản của hợp đồng hợp tác đào tạo.</span>
+                </label>
               </div>
             </div>
-          )}
 
-          {/* Navigation Controls */}
-          <div className="pt-6 border-t border-slate-100 flex items-center justify-between gap-4">
-            {step > 1 ? (
+            {/* Form Controls: Back & Submit */}
+            <div className="pt-4 flex items-center justify-between gap-4 border-t border-slate-100">
               <button 
                 type="button"
-                onClick={handlePrev}
-                disabled={loading}
-                className="px-6 py-3.5 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition-colors disabled:opacity-50 text-sm cursor-pointer"
+                onClick={() => {
+                  setStep(1);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className="px-6 py-3 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 cursor-pointer"
               >
-                Quay lại
+                ← Quay lại Phần I
               </button>
-            ) : (
-              <div />
-            )}
 
-            {step < 2 ? (
-              <button 
-                type="button"
-                onClick={handleNext}
-                className="bg-blue-600 text-white font-bold px-8 py-3.5 rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200 text-sm cursor-pointer"
-              >
-                Tiếp tục →
-              </button>
-            ) : (
               <button 
                 type="button"
                 onClick={handleSubmit}
                 disabled={loading}
-                className="bg-blue-600 text-white font-bold px-8 py-3.5 rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200 text-sm disabled:opacity-50 flex items-center gap-2 cursor-pointer"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3.5 rounded-2xl transition-all shadow-md shadow-blue-200 text-sm cursor-pointer disabled:opacity-50 flex items-center gap-2"
               >
                 {loading ? (
                   <>
@@ -4138,13 +4579,13 @@ function TutorRegistrationPage() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Đang gửi...
+                    Đang gửi hồ sơ...
                   </>
-                ) : 'Hoàn tất & Gửi duyệt'}
+                ) : 'Hoàn tất đăng ký & Gửi duyệt hồ sơ'}
               </button>
-            )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Modal Phóng to Xem Kĩ Ảnh Mẫu Chuẩn */}
@@ -4178,7 +4619,7 @@ function TutorRegistrationPage() {
             </div>
 
             <p className="text-xs text-slate-600 leading-relaxed font-medium">
-              Chụp thẳng mặt rõ nét, phông nền trắng hoặc xanh nước biển như ảnh mẫu.
+              Chụp thẳng mặt rõ nét, phông nền sáng như ảnh mẫu.
             </p>
 
             <button
