@@ -2348,17 +2348,17 @@ function TeacherDetailPage() {
 
         {/* Content Columns: Left 2 cols, Right Sticky 1 col */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Profile Info (Strictly Following Google Docs Sequence) */}
+          {/* Main Profile Info (Numbered Sequentially 1 to 9) */}
           <div className="lg:col-span-2 space-y-6">
             
-            {/* 6. Môn học tiếp nhận */}
+            {/* 1. Môn học tiếp nhận */}
             <div className="bg-white rounded-3xl p-6 md:p-7 border border-slate-200 shadow-sm space-y-3">
               <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-                <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm">6</div>
+                <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm">1</div>
                 <h2 className="text-base sm:text-lg font-bold text-slate-900">Môn học tiếp nhận</h2>
               </div>
               <div className="flex flex-wrap gap-2.5 pt-1">
-                {(tutor.subjects && tutor.subjects.length > 0 ? tutor.subjects : ['Toán học', 'Ngữ văn', 'Tiếng Anh']).map((sub: string, idx: number) => (
+                {(Array.isArray(tutor.subjects) && tutor.subjects.length > 0 ? tutor.subjects : ['Toán học', 'Ngữ văn', 'Tiếng Anh']).map((sub: string, idx: number) => (
                   <span 
                     key={idx} 
                     className="px-4 py-2 bg-blue-50 text-blue-800 text-xs sm:text-sm font-bold rounded-xl border border-blue-200 flex items-center gap-1.5 shadow-2xs"
@@ -2370,10 +2370,10 @@ function TeacherDetailPage() {
               </div>
             </div>
 
-            {/* 9. Cấp học & Đối tượng nhận dạy */}
+            {/* 2. Cấp học & Đối tượng nhận dạy */}
             <div className="bg-white rounded-3xl p-6 md:p-7 border border-slate-200 shadow-sm space-y-3">
               <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-                <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm">9</div>
+                <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm">2</div>
                 <h2 className="text-base sm:text-lg font-bold text-slate-900">Cấp học & Đối tượng nhận dạy</h2>
               </div>
               <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 text-sm text-slate-800 leading-relaxed font-medium">
@@ -2381,11 +2381,11 @@ function TeacherDetailPage() {
               </div>
             </div>
 
-            {/* 12. Bảng giá dịch vụ */}
+            {/* 3. Bảng giá dịch vụ */}
             <div className="bg-white rounded-3xl p-6 md:p-7 border border-slate-200 shadow-sm space-y-4">
               <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm">12</div>
+                  <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm">3</div>
                   <h2 className="text-base sm:text-lg font-bold text-slate-900">Bảng giá dịch vụ</h2>
                 </div>
                 <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
@@ -2394,7 +2394,7 @@ function TeacherDetailPage() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                {tutor.levelPrices && Object.keys(tutor.levelPrices).length > 0 ? (
+                {tutor.levelPrices && typeof tutor.levelPrices === 'object' && Object.keys(tutor.levelPrices).length > 0 ? (
                   Object.entries(tutor.levelPrices).map(([lvl, prc]) => (
                     <div key={lvl} className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 flex flex-col justify-between">
                       <span className="text-xs font-semibold text-slate-600 mb-1">{lvl}</span>
@@ -2410,11 +2410,11 @@ function TeacherDetailPage() {
               </div>
             </div>
 
-            {/* 13. Lịch học & Cam kết vận hành */}
+            {/* 4. Lịch học & Cam kết vận hành */}
             <div className="bg-white rounded-3xl p-6 md:p-7 border border-slate-200 shadow-sm space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-100">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-sm">13</div>
+                  <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-sm">4</div>
                   <h2 className="text-base sm:text-lg font-bold text-slate-900">Lịch học & Khung giờ nhận lớp</h2>
                 </div>
                 <span className="inline-flex items-center gap-1.5 text-xs font-bold text-purple-700 bg-purple-50 border border-purple-200 px-3 py-1 rounded-full">
@@ -2423,7 +2423,7 @@ function TeacherDetailPage() {
                 </span>
               </div>
 
-              {/* Ma trận Lịch trống */}
+              {/* Ma trận Lịch trống (Đánh dấu X) */}
               <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-2xs">
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[500px] border-collapse text-xs text-center">
@@ -2439,12 +2439,12 @@ function TeacherDetailPage() {
                           <td className="p-2.5 font-bold text-slate-700 text-left pl-3.5 bg-slate-50/60">{shift}</td>
                           {days.map(day => {
                             const slot = `${day}_${shift}`;
-                            const isAvailable = tutor.schedule ? tutor.schedule.includes(slot) : (shift === 'Tối');
+                            const isAvailable = Array.isArray(tutor.schedule) ? tutor.schedule.includes(slot) : (shift === 'Tối');
                             return (
                               <td key={day} className="p-1">
                                 {isAvailable ? (
-                                  <span className="block py-1.5 px-2 bg-emerald-100 text-emerald-800 font-bold rounded-lg text-[11px] shadow-2xs">
-                                    Có thể
+                                  <span className="block py-1.5 px-2 bg-emerald-100 text-emerald-800 font-black rounded-lg text-xs shadow-2xs">
+                                    X
                                   </span>
                                 ) : (
                                   <span className="block py-1.5 px-2 text-slate-300 text-[11px]">
@@ -2462,10 +2462,10 @@ function TeacherDetailPage() {
               </div>
             </div>
 
-            {/* 10. Hình thức giảng dạy */}
+            {/* 5. Hình thức giảng dạy */}
             <div className="bg-white rounded-3xl p-6 md:p-7 border border-slate-200 shadow-sm space-y-4">
               <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-                <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-sm">10</div>
+                <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-sm">5</div>
                 <h2 className="text-base sm:text-lg font-bold text-slate-900">Hình thức giảng dạy</h2>
               </div>
 
@@ -2494,11 +2494,11 @@ function TeacherDetailPage() {
               </div>
             </div>
 
-            {/* 7. Chứng chỉ chuyên môn & Nghiệp vụ sư phạm */}
+            {/* 6. Chứng chỉ chuyên môn & Nghiệp vụ sư phạm */}
             <div className="bg-white rounded-3xl p-6 md:p-7 border border-slate-200 shadow-sm space-y-4">
               <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-sm">7</div>
+                  <div className="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-sm">6</div>
                   <h2 className="text-base sm:text-lg font-bold text-slate-900">Chứng chỉ chuyên môn & Nghiệp vụ sư phạm</h2>
                 </div>
                 <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full flex items-center gap-1">
@@ -2508,7 +2508,7 @@ function TeacherDetailPage() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {(tutor.certificates && tutor.certificates.length > 0 ? tutor.certificates : [
+                {(Array.isArray(tutor.certificates) && tutor.certificates.length > 0 ? tutor.certificates : [
                   'Chứng chỉ Sư phạm / Chuyên môn Quốc tế',
                   'Văn bằng & Chứng chỉ Giảng dạy Chuyên sâu'
                 ]).map((cert: string, idx: number) => (
@@ -2527,11 +2527,11 @@ function TeacherDetailPage() {
               </div>
             </div>
 
-            {/* 8. Thành tích, phương pháp giảng dạy */}
+            {/* 7. Thành tích, phương pháp giảng dạy */}
             <div className="bg-white rounded-3xl p-6 md:p-7 border border-slate-200 shadow-sm space-y-4">
               <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center font-bold text-sm">8</div>
+                  <div className="w-8 h-8 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center font-bold text-sm">7</div>
                   <h2 className="text-base sm:text-lg font-bold text-slate-900">Thành tích & Phương pháp giảng dạy</h2>
                 </div>
                 {tutor.achievementProofUrl && (
@@ -2547,7 +2547,7 @@ function TeacherDetailPage() {
 
               {/* Đặc điểm & Tính cách */}
               <div className="flex flex-wrap gap-2">
-                {(tutor.personality || ['Tận tâm', 'Kiên nhẫn', 'Thân thiện', 'Truyền cảm hứng']).map((trait: string) => (
+                {(Array.isArray(tutor.personality) && tutor.personality.length > 0 ? tutor.personality : ['Tận tâm', 'Kiên nhẫn', 'Thân thiện', 'Truyền cảm hứng']).map((trait: string) => (
                   <span key={trait} className="px-3.5 py-1.5 bg-slate-100 text-slate-800 text-xs font-semibold rounded-xl border border-slate-200">
                     #{trait}
                   </span>
@@ -2572,10 +2572,10 @@ function TeacherDetailPage() {
               </div>
             </div>
 
-            {/* 11. Tài liệu đào tạo */}
+            {/* 8. Tài liệu đào tạo */}
             <div className="bg-white rounded-3xl p-6 md:p-7 border border-slate-200 shadow-sm space-y-4">
               <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-                <div className="w-8 h-8 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center font-bold text-sm">11</div>
+                <div className="w-8 h-8 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center font-bold text-sm">8</div>
                 <h2 className="text-base sm:text-lg font-bold text-slate-900">Tài liệu đào tạo</h2>
               </div>
 
@@ -2602,11 +2602,12 @@ function TeacherDetailPage() {
               </div>
             </div>
 
-            {/* Comment của học sinh */}
+            {/* 9. Comment của học sinh */}
             <div className="bg-white rounded-3xl p-6 md:p-7 border border-slate-200 shadow-sm space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
                 <div>
                   <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-sm">9</div>
                     <h2 className="text-base sm:text-lg font-bold text-slate-900">
                       Comment & Đánh giá của học sinh
                     </h2>
