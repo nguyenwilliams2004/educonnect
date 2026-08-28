@@ -36,7 +36,8 @@ import {
   Heart,
   Smile,
   Zap,
-  DollarSign
+  DollarSign,
+  Globe
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { mockTutors, mockPendingTutors, mockAdminStats, TutorType, defaultTutorReviews, TutorReviewItem } from './data';
@@ -4771,7 +4772,17 @@ export default function App() {
   const [tutors, setTutors] = useState<any[]>(() => {
     try {
       const saved = localStorage.getItem('hantutor_tutors_list');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const mergedMock = mockTutors.map(mt => {
+            const found = parsed.find((p: any) => String(p.id) === String(mt.id));
+            return found ? { ...mt, ...found } : mt;
+          });
+          const customTutors = parsed.filter((p: any) => !mockTutors.some(mt => String(mt.id) === String(p.id)));
+          return [...mergedMock, ...customTutors];
+        }
+      }
     } catch (e) {}
     return mockTutors;
   });
