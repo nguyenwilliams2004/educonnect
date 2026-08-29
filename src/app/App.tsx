@@ -37,7 +37,8 @@ import {
   Smile,
   Zap,
   DollarSign,
-  Globe
+  Globe,
+  User
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { mockTutors, mockPendingTutors, mockAdminStats, TutorType, defaultTutorReviews, TutorReviewItem } from './data';
@@ -2475,11 +2476,18 @@ function FindTutorsPage() {
 function TeacherDetailPage() {
   const { id } = useParams();
   const { tutors, myTrials, cancelTrialEnrollment, reviews } = useData();
-  const { openContactZaloModal, openEnrollmentModal, openReviewModal } = useUI();
+  const { openContactZaloModal, openEnrollmentModal, openReviewModal, openAuthModal } = useUI();
   const [reviewFilter, setReviewFilter] = useState<'all' | 'trial' | 'official'>('all');
   const [activeProofModal, setActiveProofModal] = useState<string | null>(null);
 
-  const tutor = tutors.find(t => String(t.id) === String(id)) || tutors[0];
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [id]);
+
+  const tutor = tutors.find(t => String(t.id) === String(id) || String(t.slug) === String(id)) 
+             || mockTutors.find(t => String(t.id) === String(id) || String(t.slug) === String(id)) 
+             || tutors[0] 
+             || mockTutors[0];
 
   if (!tutor) {
     return <div className="p-12 text-center text-slate-500">Không tìm thấy giáo viên</div>;
