@@ -256,7 +256,8 @@ export const mockTutors: TutorType[] = [
     coverImage: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?q=80&w=1200&auto=format&fit=crop",
     otherImages: [
       "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=600&auto=format&fit=crop"
+      "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?q=80&w=600&auto=format&fit=crop"
     ],
     title: "ThS. Quản lý Giáo dục - GV Ngữ Văn Online hàng đầu",
     rating: 5.0,
@@ -292,7 +293,7 @@ export const mockTutors: TutorType[] = [
     personality: ["Truyền cảm hứng", "Sâu sắc", "Dịu dàng", "Tâm lý"],
     teachingMethod: "Dạy Văn bằng sơ đồ tư duy cảm xúc, khơi gợi trí tưởng tượng và rèn luyện kỹ năng nghị luận sắc bén.",
     philosophy: "Học Văn là học cách yêu thương, thấu hiểu con người và làm chủ ngôn từ cuộc sống.",
-    teachingAchievement: "Với hơn 8 năm kinh nghiệm giảng dạy và đào tạo chuyên sâu môn Ngữ văn, tôi đã trực tiếp hướng dẫn hơn 60,000 học sinh trên cả nước. Phương pháp giảng dạy của tôi tập trung vào việc biến môn Văn khô khan thành những câu chuyện sống động thông qua sơ đồ tư duy cảm xúc và kỹ thuật nghị luận xã hội hiện đại. Tỷ lệ học sinh đạt điểm 8.5+ trong kỳ thi THPT Quốc Gia hàng năm đạt trên 82%, với nhiều thủ khoa, á khoa môn Văn tại các tỉnh thành lớn.",
+    teachingAchievement: "Với hơn 8 năm kinh nghiệm giảng dạy và đào tạo chuyên sâu môn Ngữ văn, tôi đã trực tiếp hướng dẫn hơn 60,000 học sinh trên cả nước. Tỷ lệ học sinh đạt điểm 8.5+ trong kỳ thi THPT Quốc Gia hàng năm đạt trên 82%, với nhiều thủ khoa, á khoa môn Văn tại các tỉnh thành lớn.",
     achievementProofUrl: "https://images.unsplash.com/photo-1589330694653-ded6df03f754?q=80&w=800",
     trainingMaterials: "Bộ giáo trình độc quyền 'Bí kíp 9+ Ngữ văn THPT', Tuyển tập 50 đề thi thử bám sát ma trận Bộ GD&ĐT, Sổ tay mở bài - kết bài sáng tạo và ngân hàng dẫn chứng nghị luận xã hội cập nhật hàng tuần.",
     videoDemo: "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=0",
@@ -319,7 +320,8 @@ export const mockTutors: TutorType[] = [
     coverImage: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200&auto=format&fit=crop",
     otherImages: [
       "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?q=80&w=600&auto=format&fit=crop"
+      "https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?q=80&w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?q=80&w=600&auto=format&fit=crop"
     ],
     title: "GV Giỏi Sư phạm Địa Lí - Chuyên gia Luyện thi 9+",
     rating: 4.9,
@@ -380,7 +382,9 @@ export const mockTutors: TutorType[] = [
     avatar: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?q=80&w=400&auto=format&fit=crop",
     coverImage: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=1200&auto=format&fit=crop",
     otherImages: [
-      "https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=1200&auto=format&fit=crop"
+      "https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1507668077129-56e32842fceb?q=80&w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?q=80&w=600&auto=format&fit=crop"
     ],
     title: "Thủ khoa, NCS Tiến sĩ - Giảng viên Công nghệ Hóa học MTA",
     rating: 5.0,
@@ -442,7 +446,9 @@ export const mockTutors: TutorType[] = [
     avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400&auto=format&fit=crop",
     coverImage: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?q=80&w=1200&auto=format&fit=crop",
     otherImages: [
-      "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?q=80&w=1200&auto=format&fit=crop"
+      "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1576086213369-97a306d36557?q=80&w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1507668077129-56e32842fceb?q=80&w=600&auto=format&fit=crop"
     ],
     title: "Chuyên gia Luyện thi Sinh học Khối B & Y Dược",
     rating: 4.9,
@@ -475,7 +481,7 @@ export const mockTutors: TutorType[] = [
     personality: ["Sôi nổi", "Truyền lửa", "Chiến thuật rõ ràng", "Bám sát đề thi"],
     teachingMethod: "Kỹ thuật giải nhanh Di truyền học và Sinh thái học trong 30 giây. Bấm Casio và áp dụng công thức siêu tốc.",
     philosophy: "Học đúng phương pháp, tốc độ giải đề sẽ tăng gấp đôi và điểm số sẽ tự khắc bứt phá.",
-    teachingAchievement: "8 năm luyện thi chuyên sâu môn Sinh học. Mỗi năm có hơn 1000 học sinh đạt 8.5+ trong kỳ thi THPT Quốc Gia.",
+    teachingAchievement: "8 năm luyện thi chuyên sâu môn Sinh học. Mỗi năm có hơn 1000 học sinh đạt 8.5+ trong kỳ thi THPT Quốc Gia. Hệ thống mẹo giải nhanh phả hệ và di truyền quần thể giúp học sinh đạt điểm tuyệt đối phần vận dụng cao.",
     achievementProofUrl: "https://images.unsplash.com/photo-1576086213369-97a306d36557?q=80&w=800",
     trainingMaterials: "Bộ 40 công thức giải nhanh Di truyền học, Cẩm nang chinh phục Phả hệ, Bộ đề thi thử độc quyền 2026.",
     videoDemo: "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=0",
@@ -502,7 +508,8 @@ export const mockTutors: TutorType[] = [
     coverImage: "https://images.unsplash.com/photo-1509228468518-180dd4864904?q=80&w=1200&auto=format&fit=crop",
     otherImages: [
       "https://images.unsplash.com/photo-1509228468518-180dd4864904?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=600&auto=format&fit=crop"
+      "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=600&auto=format&fit=crop"
     ],
     title: "Thủ khoa ĐH Bách Khoa - Chuyên gia Toán Thực chiến Casio & Vận dụng cao 9+",
     rating: 5.0,
@@ -564,7 +571,9 @@ export const mockTutors: TutorType[] = [
     avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=400&auto=format&fit=crop",
     coverImage: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=1200&auto=format&fit=crop",
     otherImages: [
-      "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=1200&auto=format&fit=crop"
+      "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=600&auto=format&fit=crop"
     ],
     title: "Thạc sĩ TESOL - Chuyên gia Luyện thi Tiếng Anh THPT & IELTS 8.5",
     rating: 5.0,
@@ -626,7 +635,9 @@ export const mockTutors: TutorType[] = [
     avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=400&auto=format&fit=crop",
     coverImage: "https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?q=80&w=1200&auto=format&fit=crop",
     otherImages: [
-      "https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?q=80&w=1200&auto=format&fit=crop"
+      "https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=600&auto=format&fit=crop"
     ],
     title: "Thủ khoa Sư phạm Vật lý - Chuyên gia Cơ, Sóng, Điện 9+",
     rating: 4.9,
@@ -688,7 +699,9 @@ export const mockTutors: TutorType[] = [
     avatar: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=400&auto=format&fit=crop",
     coverImage: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=1200&auto=format&fit=crop",
     otherImages: [
-      "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=1200&auto=format&fit=crop"
+      "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=600&auto=format&fit=crop"
     ],
     title: "Kỹ sư CNTT ĐH Bách Khoa - Chuyên gia Lập trình Python, C++ & Web",
     rating: 5.0,
@@ -750,7 +763,9 @@ export const mockTutors: TutorType[] = [
     avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=400&auto=format&fit=crop",
     coverImage: "https://images.unsplash.com/photo-1513407030348-c983a97b98d8?q=80&w=1200&auto=format&fit=crop",
     otherImages: [
-      "https://images.unsplash.com/photo-1513407030348-c983a97b98d8?q=80&w=1200&auto=format&fit=crop"
+      "https://images.unsplash.com/photo-1513407030348-c983a97b98d8?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=600&auto=format&fit=crop"
     ],
     title: "Thạc sĩ Ngôn ngữ Trung HSK 6 - Giảng viên ĐH Ngoại ngữ ĐHQGHN",
     rating: 5.0,
@@ -812,7 +827,9 @@ export const mockTutors: TutorType[] = [
     avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop",
     coverImage: "https://images.unsplash.com/photo-1520523839898-507127053e14?q=80&w=1200&auto=format&fit=crop",
     otherImages: [
-      "https://images.unsplash.com/photo-1520523839898-507127053e14?q=80&w=1200&auto=format&fit=crop"
+      "https://images.unsplash.com/photo-1520523839898-507127053e14?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1514119412350-e174d90d280e?q=80&w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=600&auto=format&fit=crop"
     ],
     title: "Thủ khoa Nhạc viện Hà Nội - Giảng viên Piano & Thanh nhạc",
     rating: 5.0,
