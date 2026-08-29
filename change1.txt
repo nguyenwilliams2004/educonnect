@@ -1,0 +1,10 @@
+
+thông tin quan trọng của giáo viên , dạy lớp mấy, nổi bật phải hiện thị ra ở trang chủ, tỉ lệ học thử, 6 cái ở phần 2 (từ 1 đến 6) để ngay ra bên ngoài, không hiển thị hết chữ(bên ngoài)
+thay vì sáng, chiều tối thì để khung giờ
+bên trong thì cho giới thiệu cơ bản, giáo viên tự viết, copy theo superprof
+phần review phải được tham gia lớp rồi và phải xác nhận đã học rồi thì mới được viết review
+phần mã zalo , mới bấm vào 1 đã nằm trong danh sách lớp học thử
+cơ chế thu tiền: để hs tự đóng tiền cho gv, gv có trách nhiệm gửi tiền hh cho mình , nhưng sẽ có lỗ hổng ở phần gia sư, vì sẽ có ít hs, nên riêng với gia sư sẽ thu tiền trước, tiền phụ huynh học sinh khi đăng kí học chính gia sư thì sẽ qua bên mình luôn, rồi mới qua gia sư( tách riêng 2 mục gia sư/giáo viên ngay từ mục đăng kí ban đầu)
+phần bộ lọc cho kéo xuống xong hover thay vì để 1 loạt rồi tick
+phần để ảnh bỏ fb cover, thêm phần duyệt hình ảnh tự động xem có đúng định dagnj không
+chưa đăng nhập đã đăng kí học thử được, đã viết đánh giá được
