@@ -1550,7 +1550,7 @@ function Hero() {
 
 function TutorCard({ tutor }: { tutor: any }) {
   const { openContactZaloModal } = useUI();
-  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
+  const [activePhoto, setActivePhoto] = useState<string>(tutor.avatar);
 
   const totalTrials = tutor.trialStats?.totalTrials || 0;
   const officialEnrolled = tutor.trialStats?.officialEnrolled || 0;
@@ -1560,187 +1560,188 @@ function TutorCard({ tutor }: { tutor: any }) {
 
   const isTeacher = tutor.type === 'Giáo viên' || (tutor.rolePrefix && (tutor.rolePrefix.includes('Cô') || tutor.rolePrefix.includes('Thầy')));
   
-  // 4. Danh sách 3 ảnh cá nhân khác (hoạt động thực tế)
-  const extraImages: string[] = Array.isArray(tutor.otherImages) && tutor.otherImages.length >= 3
-    ? tutor.otherImages.slice(0, 3)
-    : Array.isArray(tutor.otherImages) && tutor.otherImages.length > 0
-    ? [
-        ...tutor.otherImages,
-        "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=600&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=600&auto=format&fit=crop"
-      ].slice(0, 3)
+  // Danh sách ảnh hoạt động thực tế
+  const photoGallery: string[] = Array.isArray(tutor.otherImages) && tutor.otherImages.length > 0
+    ? [tutor.avatar, ...tutor.otherImages].slice(0, 4)
     : [
+        tutor.avatar,
         tutor.coverImage || "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?q=80&w=600&auto=format&fit=crop",
         "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=600&auto=format&fit=crop",
         "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=600&auto=format&fit=crop"
       ];
 
-  const currentDisplayPhoto = selectedPhoto || tutor.avatar;
-
   return (
-    <div className="group relative bg-white hover:bg-slate-50/80 rounded-3xl p-5 border border-slate-200/90 hover:border-blue-400 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between overflow-hidden">
-      {/* Top Meta Header: Tỉ lệ học thử + Phân loại Giáo viên/Gia sư */}
-      <div className="flex items-center justify-between gap-2 mb-3 pb-2.5 border-b border-slate-100 text-xs">
-        <span className={`px-2.5 py-0.5 rounded-full font-extrabold text-[11px] uppercase tracking-wide flex items-center gap-1 ${
-          isTeacher ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
-        }`}>
-          {isTeacher ? <Briefcase className="w-3.5 h-3.5" /> : <GraduationCap className="w-3.5 h-3.5" />}
-          {isTeacher ? 'Giáo viên' : 'Gia sư'}
-        </span>
+    <div className="group relative bg-white rounded-3xl border border-slate-100 hover:border-blue-200/80 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between overflow-hidden">
+      
+      {/* Visual Hero & Photo Showcase */}
+      <div className="relative p-3 pb-0">
+        {/* Main Photo Banner */}
+        <Link 
+          to={`/giao-vien/${tutor.id}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block relative aspect-16/10 rounded-2xl overflow-hidden bg-slate-100 shadow-inner group/banner"
+        >
+          <img 
+            src={activePhoto} 
+            alt={tutor.displayName || tutor.name} 
+            className="w-full h-full object-cover object-top group-hover/banner:scale-105 transition-transform duration-500"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
 
-        <span className="inline-flex items-center gap-1 font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/80 text-[11px]">
-          <Sparkles className="w-3 h-3 text-emerald-600 animate-pulse" />
-          {successRate}% chốt sau học thử
-        </span>
-      </div>
+          {/* Floating Top Pills */}
+          <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between pointer-events-none">
+            <span className={`px-2.5 py-1 rounded-full font-black text-[10px] tracking-wide uppercase backdrop-blur-md shadow-sm flex items-center gap-1.5 ${
+              isTeacher 
+                ? 'bg-blue-600/90 text-white' 
+                : 'bg-purple-600/90 text-white'
+            }`}>
+              {isTeacher ? <Briefcase className="w-3 h-3" /> : <GraduationCap className="w-3 h-3" />}
+              {isTeacher ? 'Giáo viên' : 'Gia sư'}
+            </span>
 
-      {/* Main Block Header: 3. Avatar & 1. Tên hiển thị & 2. Headline/Slogan */}
-      <Link 
-        to={`/giao-vien/${tutor.id}`} 
-        target="_blank" 
-        rel="noopener noreferrer" 
-        className="flex items-start gap-3.5 mb-3 group-hover:cursor-pointer text-left"
-        title={`Xem chi tiết hồ sơ ${tutor.name} (Mở tab mới)`}
-      >
-        {/* 3. Ảnh đại diện (Avatar) */}
-        <div className="relative shrink-0 flex flex-col items-center">
-          <div className="w-24 h-32 sm:w-28 sm:h-36 rounded-2xl overflow-hidden shadow-xs border-2 border-white bg-slate-200 ring-1 ring-slate-200">
-            <img 
-              src={currentDisplayPhoto} 
-              alt={tutor.displayName || tutor.name} 
-              className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
-            />
-          </div>
-          {/* Môn học badge */}
-          <div className="-mt-3 z-10">
-            <span className="bg-slate-900 text-white font-extrabold text-[10px] sm:text-[11px] px-2.5 py-0.5 rounded-full shadow-md tracking-wide text-center whitespace-nowrap block truncate max-w-[105px]">
-              {tutor.badgeSubject || tutor.subjects?.[0] || 'Môn học'}
+            <span className="px-2.5 py-1 rounded-full font-bold text-[10px] text-emerald-300 bg-emerald-950/80 backdrop-blur-md border border-emerald-500/30 flex items-center gap-1 shadow-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+              {successRate}% chốt sau học thử
             </span>
           </div>
-        </div>
 
-        {/* 1. Tên hiển thị trên web & 2. Slogan */}
-        <div className="flex-1 min-w-0 flex flex-col justify-between self-stretch">
-          <div>
-            {/* 1. Tên hiển thị trên web */}
-            <div className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">
-              {tutor.rolePrefix || (isTeacher ? 'Giáo viên' : 'Gia sư')}
-            </div>
-            <h3 className="font-black text-slate-900 text-base sm:text-lg leading-tight tracking-tight group-hover:text-blue-600 transition-colors">
-              {tutor.displayName || tutor.name}
-            </h3>
-            <p className="text-xs text-slate-500 font-semibold mt-0.5">
-              {tutor.shortBio || tutor.title}
-            </p>
-          </div>
-
-          {/* 2. Dòng giới thiệu ngắn (Headline / Slogan) */}
-          <div className="mt-2 p-2 bg-blue-50/80 border border-blue-100 rounded-xl">
-            <div className="text-[10px] font-extrabold text-blue-900 uppercase tracking-wider mb-0.5">
-              Slogan / Định hướng:
-            </div>
-            <p className="text-xs font-bold text-blue-800 leading-snug">
-              "{tutor.headline || tutor.title}"
-            </p>
-          </div>
-        </div>
-      </Link>
-
-      {/* 4. Ảnh cá nhân khác (3 ảnh - optional): Hiển thị rõ ràng 3 ảnh hoạt động */}
-      <div className="mb-3 p-2.5 bg-slate-50/90 rounded-2xl border border-slate-200/80">
-        <div className="flex items-center justify-between text-[11px] font-bold text-slate-700 mb-1.5">
-          <span className="flex items-center gap-1">
-            <Users className="w-3.5 h-3.5 text-blue-600" />
-            4. Ảnh hoạt động giảng dạy & cá nhân (3 ảnh):
-          </span>
-          <span className="text-[10px] text-slate-400 font-normal">Hover xem ảnh</span>
-        </div>
-        <div className="grid grid-cols-3 gap-2">
-          {extraImages.map((imgUrl, idx) => (
-            <div
-              key={idx}
-              onMouseEnter={() => setSelectedPhoto(imgUrl)}
-              onMouseLeave={() => setSelectedPhoto(null)}
-              className="relative aspect-4/3 rounded-xl overflow-hidden border border-slate-200 bg-white hover:border-blue-500 hover:ring-2 hover:ring-blue-300 transition-all cursor-pointer shadow-2xs group/subimg"
-            >
-              <img 
-                src={imgUrl} 
-                alt={`Ảnh hoạt động ${idx + 1}`} 
-                className="w-full h-full object-cover group-hover/subimg:scale-110 transition-transform duration-200" 
-              />
-              <span className="absolute bottom-0.5 right-1 bg-black/60 text-white text-[8px] font-bold px-1 rounded">
-                Ảnh {idx + 1}
+          {/* Floating Bottom Info over image */}
+          <div className="absolute bottom-2.5 left-3 right-3 flex items-end justify-between text-white pointer-events-none">
+            <div>
+              <span className="inline-block bg-white/20 backdrop-blur-md border border-white/30 text-white font-extrabold text-[10px] px-2.5 py-0.5 rounded-full mb-1">
+                {tutor.badgeSubject || tutor.subjects?.[0] || 'Môn học'}
               </span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* 6. Thành tích nổi bật (Rõ chữ, hiển thị đầy đủ) */}
-      <div className="mb-3 p-3 bg-amber-50/70 rounded-2xl border border-amber-200/80 text-left">
-        <div className="flex items-center gap-1.5 text-xs font-black text-amber-900 mb-1">
-          <Award className="w-4 h-4 text-amber-600 shrink-0" />
-          <span>6. Thành tích nổi bật & Phương pháp:</span>
-        </div>
-        <p className="text-xs text-slate-700 font-medium leading-relaxed">
-          {tutor.teachingAchievement || tutor.successStory || 'Giáo viên giàu kinh nghiệm bồi dưỡng học sinh giỏi và luyện thi đạt điểm cao.'}
-        </p>
-      </div>
-
-      {/* 5. Bảng giá dịch vụ: Học phí theo giờ & Mức giá theo từng cấp lớp */}
-      <div className="mb-3 p-3 bg-emerald-50/70 rounded-2xl border border-emerald-200/80 text-left space-y-1.5">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-black text-emerald-950 flex items-center gap-1">
-            <DollarSign className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-            5. Bảng giá dịch vụ học phí:
-          </span>
-          <span className="text-sm font-black text-emerald-700 whitespace-nowrap">
-            {tutor.hourlyRate}đ<span className="text-[10px] font-normal text-slate-500">/{tutor.priceUnit || 'giờ'}</span>
-          </span>
-        </div>
-
-        {/* Mức giá theo từng cấp lớp */}
-        {tutor.levelPrices && Object.keys(tutor.levelPrices).length > 0 && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 pt-1.5 border-t border-emerald-200/70">
-            {Object.entries(tutor.levelPrices).map(([lvl, prc]) => (
-              <div key={lvl} className="bg-white px-2 py-1 rounded-lg border border-emerald-100 text-[10px] font-semibold text-slate-700 flex flex-col shadow-2xs">
-                <span className="text-slate-500 truncate text-[9px]">{lvl}:</span>
-                <span className="text-emerald-800 font-black">{prc}đ/h</span>
+              <div className="font-extrabold text-sm sm:text-base leading-tight drop-shadow-sm truncate">
+                {tutor.displayName || tutor.name}
               </div>
-            ))}
+            </div>
+
+            {/* Quick Rating Badge */}
+            <div className="flex items-center gap-1 bg-black/50 backdrop-blur-md px-2 py-1 rounded-xl text-xs font-black text-amber-300 border border-white/10">
+              <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+              <span>{tutor.rating}</span>
+            </div>
+          </div>
+        </Link>
+
+        {/* Fluid Photo Switcher Dots / Mini Thumbnails */}
+        {photoGallery.length > 1 && (
+          <div className="flex items-center gap-2 px-1 pt-2.5 pb-1">
+            <span className="text-[10px] font-bold text-slate-400">Hình ảnh:</span>
+            <div className="flex items-center gap-1.5">
+              {photoGallery.map((img, idx) => {
+                const isActive = activePhoto === img;
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    onMouseEnter={() => setActivePhoto(img)}
+                    onClick={() => setActivePhoto(img)}
+                    className={`relative w-8 h-8 rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
+                      isActive 
+                        ? 'border-blue-600 scale-110 shadow-xs ring-2 ring-blue-100' 
+                        : 'border-slate-200 opacity-70 hover:opacity-100 hover:border-slate-400'
+                    }`}
+                    title={`Xem ảnh ${idx + 1}`}
+                  >
+                    <img src={img} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+                  </button>
+                );
+              })}
+            </div>
           </div>
         )}
       </div>
 
-      {/* Footer Actions: Đánh giá + Nút xem chi tiết & Zalo Học thử */}
-      <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2 mt-auto">
-        <div className="inline-flex items-center gap-1 text-xs font-bold text-slate-700">
-          <Star className="w-4 h-4 fill-amber-400 text-amber-400 shrink-0" />
-          <span>{tutor.rating}</span>
-          <span className="text-slate-400 font-normal text-[11px]">({tutor.reviews || 0} đánh giá)</span>
+      {/* Main Body: Creative & Natural Flow */}
+      <div className="p-4 sm:p-5 pt-2 flex-1 flex flex-col justify-between space-y-3.5">
+        {/* Slogan & Teaching Vision */}
+        <Link
+          to={`/giao-vien/${tutor.id}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block group-hover:text-blue-600 transition-colors"
+        >
+          <div className="text-sm sm:text-[15px] font-extrabold text-slate-900 leading-snug tracking-tight">
+            “{tutor.headline || tutor.title}”
+          </div>
+          <p className="text-xs text-slate-500 font-medium mt-1 leading-relaxed line-clamp-2">
+            {tutor.shortBio || tutor.teachingMethod || tutor.title}
+          </p>
+        </Link>
+
+        {/* Highlights & Achievements (Natural, no rigid box) */}
+        <div className="space-y-1.5 text-xs text-slate-700">
+          <div className="flex items-start gap-2">
+            <Award className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+            <div className="leading-relaxed">
+              <span className="font-bold text-slate-900">Thành tích & Phương pháp: </span>
+              <span className="text-slate-600 font-medium">
+                {tutor.teachingAchievement || tutor.successStory || 'Giáo viên giàu kinh nghiệm bồi dưỡng học sinh giỏi và luyện thi đạt điểm cao.'}
+              </span>
+            </div>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Link
-            to={`/giao-vien/${tutor.id}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-3 py-2 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
-          >
-            Hồ sơ
-          </Link>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              openContactZaloModal(tutor);
-            }}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-extrabold px-3.5 py-2 rounded-xl text-xs transition-all shadow-xs hover:shadow-md cursor-pointer whitespace-nowrap"
-          >
-            Học thử Zalo
-          </button>
+        {/* Pricing & Rate Breakdown (Modern & Integrated) */}
+        <div className="pt-2 border-t border-slate-100 space-y-2">
+          <div className="flex items-baseline justify-between">
+            <span className="text-xs font-semibold text-slate-500">Học phí dạy kèm:</span>
+            <div className="text-right">
+              <span className="text-base sm:text-lg font-black text-blue-700">
+                {tutor.hourlyRate}đ
+              </span>
+              <span className="text-xs font-normal text-slate-400">/{tutor.priceUnit || 'giờ'}</span>
+            </div>
+          </div>
+
+          {/* Level Prices as Soft Tags */}
+          {tutor.levelPrices && Object.keys(tutor.levelPrices).length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {Object.entries(tutor.levelPrices).map(([lvl, prc]) => (
+                <span 
+                  key={lvl} 
+                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-50 border border-slate-200/80 text-[11px] font-medium text-slate-700"
+                >
+                  <span className="text-slate-400">{lvl}:</span>
+                  <strong className="text-slate-900 font-extrabold">{prc}đ</strong>
+                </span>
+              ))}
+            </div>
+          )}
         </div>
+
+        {/* Bottom CTA Row */}
+        <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-3 mt-auto">
+          <div className="text-[11px] text-slate-500 font-semibold">
+            {tutor.reviews || 0} đánh giá phụ huynh
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Link
+              to={`/giao-vien/${tutor.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-2 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
+            >
+              Hồ sơ
+            </Link>
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openContactZaloModal(tutor);
+              }}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-extrabold px-4 py-2 rounded-xl text-xs transition-all shadow-sm hover:shadow-md cursor-pointer whitespace-nowrap"
+            >
+              Học thử Zalo
+            </button>
+          </div>
+        </div>
+
       </div>
     </div>
   );
