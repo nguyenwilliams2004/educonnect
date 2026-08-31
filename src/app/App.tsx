@@ -1565,11 +1565,33 @@ function TutorCard({ tutor }: { tutor: any }) {
 
   const isTeacher = tutor.type === 'Giáo viên' || (tutor.rolePrefix && (tutor.rolePrefix.includes('Cô') || tutor.rolePrefix.includes('Thầy')));
   
-  // Bullet points for achievements & methods (full clear text)
-  const bulletAchievements: string[] = [
-    tutor.teachingAchievement || 'Kinh nghiệm bồi dưỡng học sinh giỏi & ôn thi THPT Quốc Gia',
-    tutor.teachingMethod || 'Phương pháp cá nhân hóa 1-1 theo năng lực từng học viên'
-  ].filter(Boolean);
+  // Trích xuất tối đa 3 gạch đầu dòng ý chính ngắn gọn, không văn xuôi dài dòng
+  const keyBullets: string[] = [];
+
+  if (tutor.education) {
+    keyBullets.push(tutor.education.split(/[;,\n]/)[0].trim());
+  } else if (tutor.experience) {
+    keyBullets.push(`${tutor.experience} năm kinh nghiệm giảng dạy & luyện thi`);
+  }
+
+  if (tutor.teachingAchievement) {
+    const ach = tutor.teachingAchievement.split(/[.;\n]/)[0].trim();
+    if (ach && !keyBullets.includes(ach)) keyBullets.push(ach);
+  }
+
+  if (tutor.teachingMethod && keyBullets.length < 3) {
+    const met = tutor.teachingMethod.split(/[.;\n]/)[0].trim();
+    if (met && !keyBullets.includes(met)) keyBullets.push(met);
+  }
+
+  if (keyBullets.length === 0) {
+    keyBullets.push(
+      'Giáo viên giàu kinh nghiệm bồi dưỡng học sinh giỏi',
+      'Phương pháp giảng dạy cá nhân hóa 1-1'
+    );
+  }
+
+  const finalBullets = keyBullets.slice(0, 3);
 
   return (
     <div className="group relative bg-white rounded-3xl border border-slate-100 hover:border-blue-200/80 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between overflow-hidden">
@@ -1626,9 +1648,9 @@ function TutorCard({ tutor }: { tutor: any }) {
         </Link>
       </div>
 
-      {/* Main Body: Creative & Natural Flow */}
+      {/* Main Body: Ngắn gọn, súc tích, không văn xuôi dài dòng */}
       <div className="p-4 sm:p-5 pt-3 flex-1 flex flex-col justify-between space-y-3">
-        {/* Slogan & Teaching Vision (Rõ ràng nội dung) */}
+        {/* Slogan / Tiêu đề */}
         <Link
           to={`/giao-vien/${tutor.id}`}
           target="_blank"
@@ -1638,26 +1660,17 @@ function TutorCard({ tutor }: { tutor: any }) {
           <div className="text-sm sm:text-[15px] font-extrabold text-slate-900 leading-snug tracking-tight">
             “{tutor.headline || tutor.title}”
           </div>
-          <p className="text-xs text-slate-600 font-medium mt-1 leading-relaxed">
-            {tutor.shortBio || tutor.teachingMethod || tutor.title}
-          </p>
         </Link>
 
-        {/* Highlights & Achievements as Bullet Points (Rõ chữ, không cắt xén) */}
-        <div className="space-y-1.5 text-xs text-slate-700">
-          <div className="font-bold text-slate-900 flex items-center gap-1.5">
-            <Award className="w-4 h-4 text-amber-500 shrink-0" />
-            <span>Thành tích & Phương pháp:</span>
-          </div>
-          <ul className="space-y-1 pl-1 text-slate-600 text-xs">
-            {bulletAchievements.map((item, i) => (
-              <li key={i} className="flex items-start gap-1.5 leading-relaxed">
-                <span className="text-blue-600 font-bold shrink-0 mt-0.5">•</span>
-                <span className="text-slate-700">{item}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+        {/* Tối đa 3 gạch đầu dòng ý chính */}
+        <ul className="space-y-1.5 text-xs">
+          {finalBullets.map((item, i) => (
+            <li key={i} className="flex items-start gap-1.5 leading-snug">
+              <span className="text-blue-600 font-bold shrink-0 mt-0.5">•</span>
+              <span className="text-slate-700 font-medium">{item}</span>
+            </li>
+          ))}
+        </ul>
 
         {/* Pricing & Rate Breakdown */}
         <div className="pt-2 border-t border-slate-100 space-y-1.5">
@@ -1687,7 +1700,7 @@ function TutorCard({ tutor }: { tutor: any }) {
           )}
         </div>
 
-        {/* Bottom CTA Row (Hồ sơ & Học thử Zalo trên cùng 1 dòng, không bị xuống dòng chữ) */}
+        {/* Bottom CTA Row (Hồ sơ & Học thử Zalo trên cùng 1 dòng) */}
         <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2 mt-auto">
           <div className="text-[11px] text-slate-500 font-semibold leading-tight whitespace-nowrap">
             {tutor.reviews || 0} đánh giá
