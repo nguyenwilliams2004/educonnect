@@ -1556,7 +1556,6 @@ function Hero() {
 
 function TutorCard({ tutor }: { tutor: any }) {
   const { openContactZaloModal } = useUI();
-  const [activePhoto, setActivePhoto] = useState<string>(tutor.avatar);
 
   const totalTrials = tutor.trialStats?.totalTrials || 0;
   const officialEnrolled = tutor.trialStats?.officialEnrolled || 0;
@@ -1566,22 +1565,17 @@ function TutorCard({ tutor }: { tutor: any }) {
 
   const isTeacher = tutor.type === 'Giáo viên' || (tutor.rolePrefix && (tutor.rolePrefix.includes('Cô') || tutor.rolePrefix.includes('Thầy')));
   
-  // Danh sách ảnh hoạt động thực tế
-  const photoGallery: string[] = Array.isArray(tutor.otherImages) && tutor.otherImages.length > 0
-    ? [tutor.avatar, ...tutor.otherImages].slice(0, 4)
-    : [
-        tutor.avatar,
-        tutor.coverImage || "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?q=80&w=600&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=600&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=600&auto=format&fit=crop"
-      ];
+  // Bullet points for achievements & methods
+  const bulletAchievements: string[] = [
+    tutor.teachingAchievement ? tutor.teachingAchievement.split(/[.;]/)[0] : 'Kinh nghiệm bồi dưỡng học sinh giỏi & thi THPT',
+    tutor.teachingMethod ? tutor.teachingMethod.split(/[.;]/)[0] : 'Phương pháp cá nhân hóa 1-1 theo năng lực học viên'
+  ].filter(Boolean);
 
   return (
     <div className="group relative bg-white rounded-3xl border border-slate-100 hover:border-blue-200/80 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between overflow-hidden">
       
-      {/* Visual Hero & Photo Showcase */}
+      {/* Visual Hero Photo Banner (Single Main Avatar) */}
       <div className="relative p-3 pb-0">
-        {/* Main Photo Banner */}
         <Link 
           to={`/giao-vien/${tutor.id}`}
           target="_blank"
@@ -1589,7 +1583,7 @@ function TutorCard({ tutor }: { tutor: any }) {
           className="block relative aspect-16/10 rounded-2xl overflow-hidden bg-slate-100 shadow-inner group/banner"
         >
           <img 
-            src={activePhoto} 
+            src={tutor.avatar} 
             alt={tutor.displayName || tutor.name} 
             className="w-full h-full object-cover object-top group-hover/banner:scale-105 transition-transform duration-500"
           />
@@ -1630,39 +1624,11 @@ function TutorCard({ tutor }: { tutor: any }) {
             </div>
           </div>
         </Link>
-
-        {/* Fluid Photo Switcher Dots / Mini Thumbnails */}
-        {photoGallery.length > 1 && (
-          <div className="flex items-center gap-2 px-1 pt-2.5 pb-1">
-            <span className="text-[10px] font-bold text-slate-400">Hình ảnh:</span>
-            <div className="flex items-center gap-1.5">
-              {photoGallery.map((img, idx) => {
-                const isActive = activePhoto === img;
-                return (
-                  <button
-                    key={idx}
-                    type="button"
-                    onMouseEnter={() => setActivePhoto(img)}
-                    onClick={() => setActivePhoto(img)}
-                    className={`relative w-8 h-8 rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
-                      isActive 
-                        ? 'border-blue-600 scale-110 shadow-xs ring-2 ring-blue-100' 
-                        : 'border-slate-200 opacity-70 hover:opacity-100 hover:border-slate-400'
-                    }`}
-                    title={`Xem ảnh ${idx + 1}`}
-                  >
-                    <img src={img} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Main Body: Creative & Natural Flow */}
-      <div className="p-4 sm:p-5 pt-2 flex-1 flex flex-col justify-between space-y-3.5">
-        {/* Slogan & Teaching Vision */}
+      <div className="p-4 sm:p-5 pt-3 flex-1 flex flex-col justify-between space-y-3">
+        {/* Slogan & Teaching Vision (1 line summary) */}
         <Link
           to={`/giao-vien/${tutor.id}`}
           target="_blank"
@@ -1672,26 +1638,29 @@ function TutorCard({ tutor }: { tutor: any }) {
           <div className="text-sm sm:text-[15px] font-extrabold text-slate-900 leading-snug tracking-tight">
             “{tutor.headline || tutor.title}”
           </div>
-          <p className="text-xs text-slate-500 font-medium mt-1 leading-relaxed line-clamp-2">
+          <p className="text-xs text-slate-500 font-medium mt-1 leading-relaxed line-clamp-1 truncate">
             {tutor.shortBio || tutor.teachingMethod || tutor.title}
           </p>
         </Link>
 
-        {/* Highlights & Achievements (Natural, no rigid box) */}
-        <div className="space-y-1.5 text-xs text-slate-700">
-          <div className="flex items-start gap-2">
-            <Award className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-            <div className="leading-relaxed">
-              <span className="font-bold text-slate-900">Thành tích & Phương pháp: </span>
-              <span className="text-slate-600 font-medium">
-                {tutor.teachingAchievement || tutor.successStory || 'Giáo viên giàu kinh nghiệm bồi dưỡng học sinh giỏi và luyện thi đạt điểm cao.'}
-              </span>
-            </div>
+        {/* Highlights & Achievements as Bullet Points */}
+        <div className="space-y-1 text-xs text-slate-700">
+          <div className="font-bold text-slate-900 flex items-center gap-1.5">
+            <Award className="w-4 h-4 text-amber-500 shrink-0" />
+            <span>Thành tích & Phương pháp:</span>
           </div>
+          <ul className="space-y-1 pl-1 text-slate-600 text-xs">
+            {bulletAchievements.map((item, i) => (
+              <li key={i} className="flex items-start gap-1.5 leading-snug">
+                <span className="text-blue-600 font-bold shrink-0">•</span>
+                <span className="line-clamp-1">{item.trim()}</span>
+              </li>
+            ))}
+          </ul>
         </div>
 
-        {/* Pricing & Rate Breakdown (Modern & Integrated) */}
-        <div className="pt-2 border-t border-slate-100 space-y-2">
+        {/* Pricing & Rate Breakdown */}
+        <div className="pt-2 border-t border-slate-100 space-y-1.5">
           <div className="flex items-baseline justify-between">
             <span className="text-xs font-semibold text-slate-500">Học phí dạy kèm:</span>
             <div className="text-right">
@@ -2478,6 +2447,7 @@ function FindTutorsPage() {
 }
 
 // TeacherDetailPage - Giao diện thông tin giáo viên chuẩn Superprof 1:1
+// TeacherDetailPage - Giao diện thông tin giáo viên chuẩn Superprof (Tông xanh dương HanTutor)
 function TeacherDetailPage() {
   const { id } = useParams();
   const { tutors, myTrials, cancelTrialEnrollment, reviews } = useData();
@@ -2485,9 +2455,11 @@ function TeacherDetailPage() {
   const [activeProofModal, setActiveProofModal] = useState<string | null>(null);
   const [isLiked, setIsLiked] = useState(false);
   const [shareToast, setShareToast] = useState(false);
+  const [relatedPage, setRelatedPage] = useState(0);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
+    setRelatedPage(0);
   }, [id]);
 
   const tutor = tutors.find(t => String(t.id) === String(id) || String(t.slug) === String(id)) 
@@ -2539,11 +2511,28 @@ function TeacherDetailPage() {
     ? tutor.subjects
     : [tutor.badgeSubject || 'Môn học', 'Luyện thi Chuyên sâu', 'Giao tiếp & Ứng dụng'];
 
-  const hourlyNumber = parseInt(String(tutor.hourlyRate || '250000').replace(/[^0-9]/g, '')) || 250000;
-  const package5h = (hourlyNumber * 5 * 0.95).toLocaleString('vi-VN') + ' VNĐ';
-  const package10h = (hourlyNumber * 10 * 0.9).toLocaleString('vi-VN') + ' VNĐ';
+  // Trích xuất số tiền học phí cơ bản chính xác (xử lý cả khoảng '180.000 - 300.000')
+  const extractBaseHourlyRate = (rateInput: any): number => {
+    if (typeof rateInput === 'number') return rateInput;
+    if (!rateInput) return 200000;
+    const str = String(rateInput).trim();
+    const parts = str.split(/[-–—~đến]/);
+    const firstPart = parts[0]?.replace(/[^0-9]/g, '') || '';
+    const num = parseInt(firstPart, 10);
+    if (isNaN(num) || num === 0) return 200000;
+    if (num < 1000) return num * 1000;
+    return num;
+  };
 
-  const relatedTutors = tutors.filter(t => String(t.id) !== String(tutor.id));
+  const baseHourlyRate = extractBaseHourlyRate(tutor.hourlyRate);
+  const package5h = Math.round(baseHourlyRate * 5 * 0.95).toLocaleString('vi-VN') + ' VNĐ';
+  const package10h = Math.round(baseHourlyRate * 10 * 0.9).toLocaleString('vi-VN') + ' VNĐ';
+
+  // Danh sách giáo viên tương tự có phân trang thật (4 giáo viên / trang)
+  const allRelatedTutors = (tutors.length >= 8 ? tutors : mockTutors).filter(t => String(t.id) !== String(tutor.id));
+  const itemsPerPage = 4;
+  const totalPages = Math.max(1, Math.ceil(allRelatedTutors.length / itemsPerPage));
+  const displayedRelated = allRelatedTutors.slice(relatedPage * itemsPerPage, (relatedPage + 1) * itemsPerPage);
 
   const handleShare = () => {
     try {
@@ -2573,12 +2562,12 @@ function TeacherDetailPage() {
           {/* CỘT TRÁI (8 / 12 CỘT) - Nội dung chi tiết hồ sơ */}
           <div className="lg:col-span-8 space-y-8">
             
-            {/* 1. Category Tag Pills */}
+            {/* 1. Category Tag Pills (Tông xanh dương HanTutor) */}
             <div className="flex flex-wrap items-center gap-2">
               {subjectsList.map((sub: string, idx: number) => (
                 <span 
                   key={idx} 
-                  className="px-3.5 py-1 rounded-full text-xs font-bold text-[#ff5a5f] bg-[#fff0f1] border border-[#ffccd0]"
+                  className="px-3.5 py-1 rounded-full text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200"
                 >
                   {sub}
                 </span>
@@ -2595,12 +2584,12 @@ function TeacherDetailPage() {
               <h3 className="text-sm font-extrabold text-slate-900 mb-2.5">Địa điểm khóa học</h3>
               <div className="flex flex-wrap gap-2">
                 <span className="px-3 py-1.5 rounded-full border border-slate-300 text-xs font-semibold text-slate-800 inline-flex items-center gap-1.5 bg-white shadow-2xs">
-                  <Laptop className="w-3.5 h-3.5 text-slate-600" />
+                  <Laptop className="w-3.5 h-3.5 text-blue-600" />
                   Trực tuyến
                 </span>
                 {tutor.location && (
                   <span className="px-3 py-1.5 rounded-full border border-slate-300 text-xs font-semibold text-slate-800 inline-flex items-center gap-1.5 bg-white shadow-2xs">
-                    <MapPin className="w-3.5 h-3.5 text-slate-600" />
+                    <MapPin className="w-3.5 h-3.5 text-blue-600" />
                     {tutor.location}
                   </span>
                 )}
@@ -2608,8 +2597,11 @@ function TeacherDetailPage() {
             </div>
 
             {/* 4. Gia sư được đề xuất Banner */}
-            <div className="p-5 bg-[#f5efff] border border-[#e9d8fd] rounded-2xl space-y-1.5">
-              <h4 className="font-extrabold text-sm text-[#6b21a8]">Gia sư được đề xuất</h4>
+            <div className="p-5 bg-blue-50/60 border border-blue-200/80 rounded-2xl space-y-1.5">
+              <h4 className="font-extrabold text-sm text-blue-900 flex items-center gap-1.5">
+                <ShieldCheck className="w-4 h-4 text-blue-600" />
+                Gia sư được đề xuất
+              </h4>
               <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-normal">
                 {tutor.displayName || tutor.name} đã nhận được nhiều đề xuất nhờ tinh thần trách nhiệm, kỹ năng sư phạm và chất lượng bài giảng tuyệt vời. Đây là lựa chọn lý tưởng để bạn tiến bộ một cách tự tin nhất.
               </p>
@@ -2634,10 +2626,10 @@ function TeacherDetailPage() {
             <div className="space-y-3.5">
               <h2 className="text-xl font-black text-slate-900">Giới thiệu về khóa học</h2>
               <div className="flex flex-wrap gap-2 mb-1">
-                <span className="px-3.5 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-700 inline-flex items-center gap-1.5">
+                <span className="px-3.5 py-1.5 rounded-full border border-blue-200 bg-blue-50/50 text-xs font-semibold text-blue-800 inline-flex items-center gap-1.5">
                   🎯 Mọi trình độ
                 </span>
-                <span className="px-3.5 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-700 inline-flex items-center gap-1.5">
+                <span className="px-3.5 py-1.5 rounded-full border border-blue-200 bg-blue-50/50 text-xs font-semibold text-blue-800 inline-flex items-center gap-1.5">
                   🌐 {tutor.badgeSubject || tutor.subjects?.[0] || 'Môn học'}, Tiếng Việt
                 </span>
               </div>
@@ -2687,7 +2679,7 @@ function TeacherDetailPage() {
               </div>
             </div>
 
-            {/* 8. Mức học phí (Pricing Summary Grid from Image 2) */}
+            {/* 8. Mức học phí (Pricing Summary Grid) */}
             <div className="space-y-3.5 pt-4">
               <h2 className="text-xl font-black text-slate-900">Mức học phí</h2>
               <div className="rounded-2xl border border-slate-200/90 p-5 bg-white grid grid-cols-2 sm:grid-cols-4 gap-4 shadow-2xs">
@@ -2698,8 +2690,8 @@ function TeacherDetailPage() {
                 <div>
                   <span className="text-xs font-extrabold text-slate-800 block mb-1">Giá trọn gói cho gói học</span>
                   <div className="text-xs text-slate-600 space-y-0.5">
-                    <div>Gói 5 giờ học: <strong>{package5h}</strong></div>
-                    <div>Gói 10 giờ học: <strong>{package10h}</strong></div>
+                    <div>Gói 5 giờ học: <strong className="text-blue-700">{package5h}</strong></div>
+                    <div>Gói 10 giờ học: <strong className="text-blue-700">{package10h}</strong></div>
                   </div>
                 </div>
                 <div>
@@ -2713,26 +2705,36 @@ function TeacherDetailPage() {
               </div>
             </div>
 
-            {/* 9. Các giáo viên dạy tương tự (Slider / Grid from Image 2) */}
-            {relatedTutors.length > 0 && (
+            {/* 9. Các giáo viên dạy tương tự (Hoạt động chuyển trang 1/5 mượt mà) */}
+            {allRelatedTutors.length > 0 && (
               <div className="space-y-4 pt-6 border-t border-slate-200">
                 <div className="flex items-center justify-between">
                   <h2 className="text-base sm:text-lg font-black text-slate-900">
                     Các giáo viên dạy <strong>{tutor.badgeSubject || tutor.subjects?.[0] || 'môn học'}</strong> tương tự tại <strong>{tutor.location || 'Hà Nội'}</strong>
                   </h2>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-slate-400 font-medium">1/5</span>
-                    <button className="w-7 h-7 rounded-full border border-slate-200 flex items-center justify-center hover:bg-slate-50 text-slate-600 cursor-pointer">
+                    <span className="text-xs text-slate-500 font-bold">{relatedPage + 1}/{totalPages}</span>
+                    <button 
+                      type="button"
+                      onClick={() => setRelatedPage(p => (p > 0 ? p - 1 : totalPages - 1))}
+                      className="w-7 h-7 rounded-full border border-slate-200 flex items-center justify-center hover:bg-slate-50 hover:border-blue-300 text-slate-600 transition-colors cursor-pointer"
+                      title="Trang trước"
+                    >
                       <ChevronLeft className="w-4 h-4" />
                     </button>
-                    <button className="w-7 h-7 rounded-full border border-slate-200 flex items-center justify-center hover:bg-slate-50 text-slate-600 cursor-pointer">
+                    <button 
+                      type="button"
+                      onClick={() => setRelatedPage(p => (p < totalPages - 1 ? p + 1 : 0))}
+                      className="w-7 h-7 rounded-full border border-slate-200 flex items-center justify-center hover:bg-slate-50 hover:border-blue-300 text-slate-600 transition-colors cursor-pointer"
+                      title="Trang tiếp theo"
+                    >
                       <ChevronRight className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  {relatedTutors.slice(0, 4).map(rel => (
+                  {displayedRelated.map(rel => (
                     <Link 
                       key={rel.id} 
                       to={`/giao-vien/${rel.id}`} 
@@ -2754,10 +2756,10 @@ function TeacherDetailPage() {
                         <div className="text-[11px] font-bold text-amber-500 flex items-center gap-1">
                           ⭐ 5 ({rel.reviews || 2} lượt đánh giá)
                         </div>
-                        <div className="text-xs font-black text-[#ff5a5f]">
+                        <div className="text-xs font-black text-blue-700">
                           {rel.hourlyRate} VNĐ/giờ
                         </div>
-                        <div className="text-[10px] font-semibold text-[#ff5a5f] bg-[#fff0f1] px-2 py-0.5 rounded-md inline-block">
+                        <div className="text-[10px] font-semibold text-blue-700 bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-md inline-block">
                           Bài học đầu tiên miễn phí
                         </div>
                       </div>
@@ -2769,7 +2771,7 @@ function TeacherDetailPage() {
 
           </div>
 
-          {/* CỘT PHẢI (4 / 12 CỘT) - Sticky Action Card chuẩn Superprof */}
+          {/* CỘT PHẢI (4 / 12 CỘT) - Sticky Action Card (Tông xanh dương) */}
           <div className="lg:col-span-4">
             <div className="bg-white rounded-3xl border border-slate-200/90 shadow-xl p-6 sm:p-7 text-center sticky top-24 space-y-4">
               
@@ -2777,10 +2779,10 @@ function TeacherDetailPage() {
               <div className="flex justify-between items-center text-slate-400">
                 <button 
                   onClick={() => setIsLiked(!isLiked)} 
-                  className={`p-2 rounded-full hover:bg-slate-50 transition-colors cursor-pointer ${isLiked ? 'text-rose-500' : 'hover:text-slate-600'}`}
+                  className={`p-2 rounded-full hover:bg-slate-50 transition-colors cursor-pointer ${isLiked ? 'text-blue-600' : 'hover:text-slate-600'}`}
                   title="Lưu hồ sơ"
                 >
-                  <Heart className={`w-5 h-5 ${isLiked ? 'fill-rose-500' : ''}`} />
+                  <Heart className={`w-5 h-5 ${isLiked ? 'fill-blue-600' : ''}`} />
                 </button>
                 <button 
                   onClick={handleShare}
@@ -2827,7 +2829,7 @@ function TeacherDetailPage() {
                 </div>
               </div>
 
-              {/* Primary CTA Button */}
+              {/* Primary CTA Button (Xanh dương HanTutor) */}
               <div className="space-y-2 pt-1">
                 {trialItem?.status === 'trial_in_progress' ? (
                   <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2.5 text-center">
@@ -2847,14 +2849,14 @@ function TeacherDetailPage() {
                   <button
                     type="button"
                     onClick={() => openContactZaloModal(tutor)}
-                    className="w-full bg-[#ff5a5f] hover:bg-[#ff4349] text-white font-bold py-3.5 rounded-2xl transition-all shadow-md shadow-rose-200 flex items-center justify-center gap-2 cursor-pointer text-sm"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-2xl transition-all shadow-md shadow-blue-200 flex items-center justify-center gap-2 cursor-pointer text-sm"
                   >
                     <MessageCircle className="w-4 h-4" />
                     Liên hệ
                   </button>
                 )}
 
-                <span className="text-xs font-bold text-[#ff5a5f] block">
+                <span className="text-xs font-bold text-blue-600 block">
                   Bài học đầu tiên miễn phí
                 </span>
               </div>
