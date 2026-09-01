@@ -1,53 +1,34 @@
-import React, { useState, createContext, useContext, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Link, useLocation, useParams, useNavigate } from 'react-router';
-import { 
-  Search, 
-  MapPin, 
-  Star, 
-  BookOpen, 
-  MessageCircle, 
-  Bell, 
-  ChevronDown, 
-  CheckCircle,
-  GraduationCap,
-  Users,
-  Briefcase,
-  Clock,
-  Menu,
-  X,
-  Filter,
-  UploadCloud,
-  Phone,
-  ExternalLink,
-  ShieldCheck,
-  Sparkles,
-  Play,
-  Check,
-  Copy,
-  Calendar,
-  Award,
-  TrendingUp,
-  Eye,
-  UserCheck,
-  UserX,
+import {
   AlertCircle,
-  ArrowRight,
-  ChevronRight,
+  BookOpen,
+  Briefcase,
+  Check,
+  CheckCircle,
+  ChevronDown,
   ChevronLeft,
-  Heart,
-  Share2,
-  ThumbsUp,
-  Laptop,
-  Info,
-  Smile,
-  Zap,
-  DollarSign,
+  ChevronRight,
+  ExternalLink,
+  Eye,
   Globe,
-  User
+  GraduationCap,
+  Heart,
+  Laptop,
+  MapPin,
+  Menu,
+  MessageCircle,
+  Search,
+  Share2,
+  ShieldCheck,
+  Star,
+  ThumbsUp,
+  UploadCloud,
+  Users,
+  X
 } from 'lucide-react';
-import { supabase } from '../lib/supabase';
-import { mockTutors, mockPendingTutors, mockAdminStats, TutorType, defaultTutorReviews, TutorReviewItem } from './data';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { BrowserRouter, Link, Route, Routes, useLocation, useNavigate, useParams } from 'react-router';
 import FloatingContactDock from './components/FloatingContactDock';
+import { defaultTutorReviews, mockAdminStats, mockPendingTutors, mockTutors, TutorReviewItem, TutorType } from './data';
 
 export interface StudentTrialItem {
   tutorId: string | number;
@@ -86,20 +67,20 @@ function Logo({ light = false, size = "md" }: { light?: boolean; size?: "sm" | "
 
   return (
     <div className="flex items-center gap-2 cursor-pointer select-none">
-      <img 
-        src="/logo-icon.png" 
-        alt="HanTutor Icon" 
-        className={`${iconSizeClass} object-contain shrink-0 transition-transform duration-200 hover:scale-105`} 
+      <img
+        src="/logo-icon.png"
+        alt="HanTutor Icon"
+        className={`${iconSizeClass} object-contain shrink-0 transition-transform duration-200 hover:scale-105`}
       />
       {light ? (
         <span className="font-extrabold text-xl sm:text-2xl tracking-tight text-white flex items-center leading-none">
           Han<span className="text-[#FF9000]">tutor</span>
         </span>
       ) : (
-        <img 
-          src="/logo-wordmark.png" 
-          alt="HanTutor" 
-          className={`${wordmarkHeightClass} object-contain shrink-0`} 
+        <img
+          src="/logo-wordmark.png"
+          alt="HanTutor"
+          className={`${wordmarkHeightClass} object-contain shrink-0`}
         />
       )}
     </div>
@@ -153,16 +134,16 @@ export function useData() {
 // ==========================================
 // 1. AUTH MODAL (Role Student & Teacher, 3-Step Forgot Password)
 // ==========================================
-function AuthModal({ 
-  isOpen, 
-  onClose, 
-  initialView = 'login', 
-  defaultRole = 'student' 
-}: { 
-  isOpen: boolean; 
-  onClose: () => void; 
-  initialView?: 'login' | 'register'; 
-  defaultRole?: 'student' | 'teacher'; 
+function AuthModal({
+  isOpen,
+  onClose,
+  initialView = 'login',
+  defaultRole = 'student'
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  initialView?: 'login' | 'register';
+  defaultRole?: 'student' | 'teacher';
 }) {
   const [view, setView] = useState<'login' | 'register' | 'forgot_step1' | 'forgot_step2' | 'forgot_step3'>(initialView);
   const [role, setRole] = useState<'student' | 'teacher'>(defaultRole);
@@ -271,7 +252,7 @@ function AuthModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative border border-slate-100 animate-in zoom-in-95 duration-200">
-        <button 
+        <button
           onClick={onClose}
           className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-2 rounded-full transition-colors cursor-pointer"
         >
@@ -288,14 +269,14 @@ function AuthModal({
 
             {/* Role Switcher */}
             <div className="grid grid-cols-2 gap-2.5 mb-6">
-              <button 
+              <button
                 type="button"
                 onClick={() => setRole('student')}
                 className={`py-2.5 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${role === 'student' ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-2xs' : 'border-slate-200 text-slate-600 hover:bg-slate-50 bg-white'}`}
               >
                 <Users className="w-4 h-4" /> Tôi là học sinh
               </button>
-              <button 
+              <button
                 type="button"
                 onClick={() => setRole('teacher')}
                 className={`py-2.5 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${role === 'teacher' ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-2xs' : 'border-slate-200 text-slate-600 hover:bg-slate-50 bg-white'}`}
@@ -307,11 +288,11 @@ function AuthModal({
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">Email hoặc Số điện thoại</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={identifier}
                   onChange={e => setIdentifier(e.target.value)}
-                  placeholder="Nhập email hoặc SĐT..." 
+                  placeholder="Nhập email hoặc SĐT..."
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none text-sm"
                   required
                 />
@@ -320,26 +301,26 @@ function AuthModal({
               <div>
                 <div className="flex justify-between items-center mb-1">
                   <label className="text-xs font-bold text-slate-700">Mật khẩu</label>
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={() => setView('forgot_step1')}
                     className="text-xs text-blue-600 hover:underline font-semibold cursor-pointer"
                   >
                     Quên mật khẩu?
                   </button>
                 </div>
-                <input 
-                  type="password" 
+                <input
+                  type="password"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  placeholder="Nhập mật khẩu..." 
+                  placeholder="Nhập mật khẩu..."
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none text-sm"
                   required
                 />
               </div>
 
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 disabled={loading}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-md shadow-blue-200 text-sm cursor-pointer disabled:opacity-50"
               >
@@ -349,8 +330,8 @@ function AuthModal({
 
             <div className="mt-6 text-center text-xs text-slate-500">
               Chưa có tài khoản?{' '}
-              <button 
-                onClick={() => setView('register')} 
+              <button
+                onClick={() => setView('register')}
                 className="text-blue-600 font-bold hover:underline cursor-pointer"
               >
                 Đăng ký tài khoản mới
@@ -369,14 +350,14 @@ function AuthModal({
 
             {/* Role Switcher */}
             <div className="grid grid-cols-2 gap-2.5 mb-6">
-              <button 
+              <button
                 type="button"
                 onClick={() => setRole('student')}
                 className={`py-2.5 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${role === 'student' ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-2xs' : 'border-slate-200 text-slate-600 hover:bg-slate-50 bg-white'}`}
               >
                 <Users className="w-4 h-4" /> Tôi là học sinh
               </button>
-              <button 
+              <button
                 type="button"
                 onClick={() => setRole('teacher')}
                 className={`py-2.5 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${role === 'teacher' ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-2xs' : 'border-slate-200 text-slate-600 hover:bg-slate-50 bg-white'}`}
@@ -396,7 +377,7 @@ function AuthModal({
                     Tạo hồ sơ giảng dạy chuẩn quốc tế, công khai video demo, phương pháp dạy và nhận lớp học 1-1 với tỷ lệ thành công cao.
                   </p>
                 </div>
-                <button 
+                <button
                   onClick={() => {
                     onClose();
                     navigate('/dang-ky-gia-su');
@@ -410,29 +391,29 @@ function AuthModal({
               <form onSubmit={handleRegister} className="space-y-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">Email hoặc Số điện thoại</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={identifier}
                     onChange={e => setIdentifier(e.target.value)}
-                    placeholder="Nhập email hoặc SĐT..." 
+                    placeholder="Nhập email hoặc SĐT..."
                     className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none text-sm"
                     required
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">Mật khẩu</label>
-                  <input 
-                    type="password" 
+                  <input
+                    type="password"
                     value={password}
                     onChange={e => setPassword(e.target.value)}
-                    placeholder="Tạo mật khẩu (tối thiểu 6 ký tự)..." 
+                    placeholder="Tạo mật khẩu (tối thiểu 6 ký tự)..."
                     className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none text-sm"
                     required
                   />
                 </div>
 
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   disabled={loading}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-md shadow-blue-200 text-sm cursor-pointer disabled:opacity-50"
                 >
@@ -443,8 +424,8 @@ function AuthModal({
 
             <div className="mt-6 text-center text-xs text-slate-500">
               Đã có tài khoản?{' '}
-              <button 
-                onClick={() => setView('login')} 
+              <button
+                onClick={() => setView('login')}
                 className="text-blue-600 font-bold hover:underline cursor-pointer"
               >
                 Đăng nhập ngay
@@ -464,18 +445,18 @@ function AuthModal({
             <form onSubmit={handleSendOtp} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">Email hoặc SĐT đã đăng ký</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={identifier}
                   onChange={e => setIdentifier(e.target.value)}
-                  placeholder="Nhập email hoặc SĐT..." 
+                  placeholder="Nhập email hoặc SĐT..."
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 outline-none text-sm"
                   required
                 />
               </div>
 
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 disabled={loading}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl text-sm transition-all cursor-pointer"
               >
@@ -483,7 +464,7 @@ function AuthModal({
               </button>
             </form>
 
-            <button 
+            <button
               onClick={() => setView('login')}
               className="mt-4 w-full text-center text-xs text-slate-500 hover:text-slate-800 font-semibold"
             >
@@ -503,12 +484,12 @@ function AuthModal({
             <form onSubmit={handleVerifyOtp} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">Nhập mã OTP (6 chữ số)</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   maxLength={6}
                   value={otp}
                   onChange={e => setOtp(e.target.value.replace(/\D/g, ''))}
-                  placeholder="123456" 
+                  placeholder="123456"
                   className="w-full text-center tracking-widest text-lg font-bold px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 outline-none"
                   required
                 />
@@ -518,7 +499,7 @@ function AuthModal({
                 {countdown > 0 ? (
                   <span>Gửi lại mã sau <strong className="text-blue-600">{countdown}s</strong></span>
                 ) : (
-                  <button 
+                  <button
                     type="button"
                     onClick={() => { setCountdown(60); alert("Mã OTP mới đã được gửi!"); }}
                     className="text-blue-600 font-bold hover:underline"
@@ -528,8 +509,8 @@ function AuthModal({
                 )}
               </div>
 
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 disabled={loading || otp.length < 6}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl text-sm transition-all cursor-pointer disabled:opacity-50"
               >
@@ -550,18 +531,18 @@ function AuthModal({
             <form onSubmit={handleResetPassword} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">Xác nhận mật khẩu mới</label>
-                <input 
-                  type="password" 
+                <input
+                  type="password"
                   value={confirmPassword}
                   onChange={e => setConfirmPassword(e.target.value)}
-                  placeholder="Nhập lại mật khẩu mới..." 
+                  placeholder="Nhập lại mật khẩu mới..."
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 outline-none text-sm"
                   required
                 />
               </div>
 
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 disabled={loading}
                 className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl text-sm transition-all cursor-pointer shadow-md shadow-emerald-200"
               >
@@ -578,16 +559,16 @@ function AuthModal({
 // ==========================================
 // 2. MODAL LIÊN HỆ ZALO & HỌC THỬ 1-1 (MÃ QR ZALO TRỰC TIẾP)
 // ==========================================
-function ContactZaloModal({ 
-  tutor, 
-  isOpen, 
-  onClose, 
-  onOfficialEnroll 
-}: { 
-  tutor: any; 
-  isOpen: boolean; 
-  onClose: () => void; 
-  onOfficialEnroll: () => void; 
+function ContactZaloModal({
+  tutor,
+  isOpen,
+  onClose,
+  onOfficialEnroll
+}: {
+  tutor: any;
+  isOpen: boolean;
+  onClose: () => void;
+  onOfficialEnroll: () => void;
 }) {
   const { recordTrialContact } = useData();
 
@@ -609,7 +590,7 @@ function ContactZaloModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl relative border border-slate-100 animate-in zoom-in-95 duration-200 max-h-[95vh] overflow-y-auto">
-        <button 
+        <button
           onClick={onClose}
           className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-2 rounded-full transition-colors cursor-pointer"
           title="Đóng"
@@ -621,10 +602,10 @@ function ContactZaloModal({
           {/* Header Thông tin Giáo viên */}
           <div className="flex flex-col items-center">
             <div className="relative mb-2">
-              <img 
-                src={tutor.avatar} 
-                alt={tutor.name} 
-                className="w-20 h-20 rounded-2xl object-cover shadow-sm border-2 border-slate-100" 
+              <img
+                src={tutor.avatar}
+                alt={tutor.name}
+                className="w-20 h-20 rounded-2xl object-cover shadow-sm border-2 border-slate-100"
               />
               <span className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-2 border-white rounded-full flex items-center justify-center text-[10px] text-white" title="Trực tuyến">
                 ✓
@@ -655,9 +636,9 @@ function ContactZaloModal({
 
             {/* Ảnh mã QR */}
             <div className="w-48 h-48 sm:w-52 sm:h-52 mx-auto bg-white p-2.5 rounded-2xl shadow-md border border-slate-200/80 flex items-center justify-center relative group">
-              <img 
-                src={qrCodeUrl} 
-                alt={`Mã QR Zalo ${tutor.name}`} 
+              <img
+                src={qrCodeUrl}
+                alt={`Mã QR Zalo ${tutor.name}`}
                 className="w-full h-full object-contain rounded-xl"
               />
             </div>
@@ -669,7 +650,7 @@ function ContactZaloModal({
 
           {/* Nút hành động */}
           <div className="space-y-2 pt-1">
-            <a 
+            <a
               href={zaloUrl}
               target="_blank"
               rel="noopener noreferrer"
@@ -679,7 +660,7 @@ function ContactZaloModal({
               <ExternalLink className="w-4 h-4" />
             </a>
 
-            <button 
+            <button
               type="button"
               onClick={onOfficialEnroll}
               className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-2xl transition-colors cursor-pointer"
@@ -701,16 +682,16 @@ function ContactZaloModal({
 // ==========================================
 // 3. ENROLLMENT & CHECKOUT MODAL (Chia 30%/70%)
 // ==========================================
-function EnrollmentModal({ 
-  tutor, 
-  isOpen, 
-  onClose, 
-  onProceedToPayment 
-}: { 
-  tutor: any; 
-  isOpen: boolean; 
-  onClose: () => void; 
-  onProceedToPayment: (enrollmentId: string, amount: number, tutorId: string | number) => void; 
+function EnrollmentModal({
+  tutor,
+  isOpen,
+  onClose,
+  onProceedToPayment
+}: {
+  tutor: any;
+  isOpen: boolean;
+  onClose: () => void;
+  onProceedToPayment: (enrollmentId: string, amount: number, tutorId: string | number) => void;
 }) {
   const [selectedLevel, setSelectedLevel] = useState<string>('');
   const [totalSessions, setTotalSessions] = useState<number>(8);
@@ -737,7 +718,7 @@ function EnrollmentModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative border border-slate-100 animate-in zoom-in-95 duration-200">
-        <button 
+        <button
           onClick={onClose}
           className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-2 rounded-full transition-colors cursor-pointer"
         >
@@ -752,7 +733,7 @@ function EnrollmentModal({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1">Chọn cấp độ học</label>
-            <select 
+            <select
               value={currentLvl}
               onChange={e => setSelectedLevel(e.target.value)}
               className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold outline-none"
@@ -803,8 +784,8 @@ function EnrollmentModal({
             </div>
           </div>
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl text-sm transition-all shadow-md shadow-blue-200 cursor-pointer"
           >
             Tiến hành thanh toán VietQR ({totalTuition.toLocaleString()}đ)
@@ -815,18 +796,18 @@ function EnrollmentModal({
   );
 }
 
-function CheckoutModal({ 
-  enrollmentId, 
-  amount, 
-  tutorId, 
-  isOpen, 
-  onClose 
-}: { 
-  enrollmentId: string; 
-  amount: number; 
-  tutorId: string | number; 
-  isOpen: boolean; 
-  onClose: () => void; 
+function CheckoutModal({
+  enrollmentId,
+  amount,
+  tutorId,
+  isOpen,
+  onClose
+}: {
+  enrollmentId: string;
+  amount: number;
+  tutorId: string | number;
+  isOpen: boolean;
+  onClose: () => void;
 }) {
   const [paid, setPaid] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -844,7 +825,7 @@ function CheckoutModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative border border-slate-100 animate-in zoom-in-95 duration-200 text-center">
-        <button 
+        <button
           onClick={onClose}
           className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-2 rounded-full transition-colors cursor-pointer"
         >
@@ -857,9 +838,9 @@ function CheckoutModal({
             <p className="text-xs text-slate-500">Quét mã QR bằng ứng dụng ngân hàng bất kỳ để hoàn tất đăng ký</p>
 
             <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl inline-block">
-              <img 
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=HANTUTOR_${enrollmentId}_${amount}`} 
-                alt="VietQR" 
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=HANTUTOR_${enrollmentId}_${amount}`}
+                alt="VietQR"
                 className="w-48 h-48 mx-auto rounded-lg"
               />
             </div>
@@ -870,8 +851,8 @@ function CheckoutModal({
               <div><strong>Ngân hàng:</strong> MB Bank - STK: 999988882026 (HanTutor Platform)</div>
             </div>
 
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={handleConfirmPaid}
               disabled={loading}
               className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl text-sm transition-all shadow-md shadow-emerald-200 cursor-pointer disabled:opacity-50"
@@ -888,8 +869,8 @@ function CheckoutModal({
             <p className="text-xs text-slate-500 leading-relaxed">
               Giao dịch của bạn đã được ghi nhận. Học phí đã được phân bổ tự động (30% sàn duy trì và 70% chuyển cho giáo viên). Chúc bạn có những buổi học hiệu quả!
             </p>
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={onClose}
               className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl text-sm transition-colors cursor-pointer"
             >
@@ -994,12 +975,11 @@ function ReviewTutorModal({
                   onMouseLeave={() => setHoverRating(0)}
                   className="p-1 cursor-pointer transition-transform hover:scale-115"
                 >
-                  <Star 
-                    className={`w-7 h-7 transition-colors ${
-                      (hoverRating || rating) >= star 
-                        ? 'fill-amber-400 text-amber-400' 
+                  <Star
+                    className={`w-7 h-7 transition-colors ${(hoverRating || rating) >= star
+                        ? 'fill-amber-400 text-amber-400'
                         : 'fill-slate-200 text-slate-200'
-                    }`} 
+                      }`}
                   />
                 </button>
               ))}
@@ -1016,11 +996,10 @@ function ReviewTutorModal({
               <button
                 type="button"
                 onClick={() => setStage('trial')}
-                className={`p-3 rounded-2xl border text-left font-bold transition-all cursor-pointer ${
-                  stage === 'trial' 
-                    ? 'border-blue-600 bg-blue-50/70 text-blue-700 ring-2 ring-blue-100' 
+                className={`p-3 rounded-2xl border text-left font-bold transition-all cursor-pointer ${stage === 'trial'
+                    ? 'border-blue-600 bg-blue-50/70 text-blue-700 ring-2 ring-blue-100'
                     : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300'
-                }`}
+                  }`}
               >
                 <div className="text-xs">🎯 Sau buổi học thử 1-1</div>
                 <div className="text-[10px] font-normal text-slate-500 mt-0.5">Nhận xét tác phong, phương pháp buổi đầu</div>
@@ -1029,11 +1008,10 @@ function ReviewTutorModal({
               <button
                 type="button"
                 onClick={() => setStage('official')}
-                className={`p-3 rounded-2xl border text-left font-bold transition-all cursor-pointer ${
-                  stage === 'official' 
-                    ? 'border-blue-600 bg-blue-50/70 text-blue-700 ring-2 ring-blue-100' 
+                className={`p-3 rounded-2xl border text-left font-bold transition-all cursor-pointer ${stage === 'official'
+                    ? 'border-blue-600 bg-blue-50/70 text-blue-700 ring-2 ring-blue-100'
                     : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300'
-                }`}
+                  }`}
               >
                 <div className="text-xs">🎓 Đang học chính thức</div>
                 <div className="text-[10px] font-normal text-slate-500 mt-0.5">Nhận xét sự tiến bộ sau thời gian học</div>
@@ -1107,7 +1085,7 @@ function MyTrialsModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl relative border border-slate-200 animate-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col">
-        <button 
+        <button
           onClick={onClose}
           className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-2 rounded-full transition-colors cursor-pointer"
         >
@@ -1127,8 +1105,8 @@ function MyTrialsModal({
           <div className="py-12 text-center text-slate-400 space-y-3">
             <Users className="w-12 h-12 mx-auto text-slate-300" />
             <p className="text-sm font-medium">Bạn chưa liên hệ học thử với giáo viên nào.</p>
-            <Link 
-              to="/tim-gia-su" 
+            <Link
+              to="/tim-gia-su"
               onClick={onClose}
               className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition-all shadow-sm"
             >
@@ -1140,8 +1118,8 @@ function MyTrialsModal({
             {myTrials.map((item) => {
               const fullTutor = tutors.find(t => String(t.id) === String(item.tutorId));
               return (
-                <div 
-                  key={item.tutorId} 
+                <div
+                  key={item.tutorId}
                   className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-slate-300 transition-all"
                 >
                   <div className="flex items-center gap-3 min-w-0">
@@ -1154,7 +1132,7 @@ function MyTrialsModal({
                         </span>
                       </div>
                       <p className="text-xs text-slate-500 truncate mt-0.5">{item.headline || `Liên hệ ngày: ${item.date}`}</p>
-                      
+
                       {/* Trạng thái formal */}
                       <div className="mt-1 flex items-center gap-2">
                         {item.status === 'trial_in_progress' && (
@@ -1304,14 +1282,14 @@ function Navbar() {
 
         {/* Desktop Navigation Links */}
         <nav className="hidden md:flex items-center gap-8">
-          <Link 
-            to="/" 
+          <Link
+            to="/"
             className={`text-sm font-semibold transition-colors ${isActive('/') ? 'text-blue-600 font-bold' : 'text-slate-600 hover:text-blue-600'}`}
           >
             Trang chủ
           </Link>
-          <Link 
-            to="/tim-gia-su" 
+          <Link
+            to="/tim-gia-su"
             className={`text-sm font-semibold transition-colors ${isActive('/tim-gia-su') ? 'text-blue-600 font-bold' : 'text-slate-600 hover:text-blue-600'}`}
           >
             Tìm Gia Sư & Giáo Viên
@@ -1332,15 +1310,15 @@ function Navbar() {
 
         {/* Nút hành động */}
         <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
-          <Link 
-            to="/tim-gia-su" 
+          <Link
+            to="/tim-gia-su"
             className="p-1.5 sm:p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-xl transition-colors shrink-0"
             title="Tìm kiếm"
           >
             <Search className="w-4 h-4 sm:w-5 sm:h-5" />
           </Link>
 
-          <button 
+          <button
             type="button"
             onClick={() => openAuthModal('login')}
             className="text-slate-700 hover:text-blue-600 font-bold text-xs sm:text-sm px-2 py-1.5 sm:px-2.5 sm:py-2 cursor-pointer transition-colors whitespace-nowrap"
@@ -1348,7 +1326,7 @@ function Navbar() {
             Đăng nhập
           </button>
 
-          <button 
+          <button
             type="button"
             onClick={() => openAuthModal('register', 'student')}
             className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 sm:px-5 sm:py-2.5 rounded-full transition-all text-xs sm:text-sm shadow-xs shadow-blue-200 whitespace-nowrap shrink-0"
@@ -1370,14 +1348,14 @@ function Navbar() {
 
       {/* Thanh điều hướng 3 mục trên điện thoại (Không bao giờ bị khuất trên mobile) */}
       <div className="md:hidden border-t border-slate-100 bg-slate-50/95 px-2 py-1.5 flex items-center justify-around gap-1 overflow-x-auto scrollbar-none">
-        <Link 
-          to="/" 
+        <Link
+          to="/"
           className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${isActive('/') ? 'bg-white text-blue-600 shadow-2xs' : 'text-slate-600 hover:text-blue-600'}`}
         >
           Trang chủ
         </Link>
-        <Link 
-          to="/tim-gia-su" 
+        <Link
+          to="/tim-gia-su"
           className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${isActive('/tim-gia-su') ? 'bg-white text-blue-600 shadow-2xs' : 'text-slate-600 hover:text-blue-600'}`}
         >
           Tìm Gia Sư & Giáo Viên
@@ -1496,11 +1474,11 @@ function Hero() {
           <span className="w-2 h-2 rounded-full bg-blue-600"></span>
           100% Giáo viên/Gia sư được kiểm duyệt KYC & Năng lực giảng dạy
         </div>
-        
+
         <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[52px] font-extrabold text-slate-900 tracking-tight leading-tight mb-4">
-          Tìm kiếm <span className="text-blue-600">Giáo viên & Gia sư</span> <br className="hidden sm:inline"/> hoàn hảo cho bạn
+          Tìm kiếm <span className="text-blue-600">Giáo viên & Gia sư</span> <br className="hidden sm:inline" /> hoàn hảo cho bạn
         </h1>
-        
+
         <p className="max-w-2xl mx-auto text-sm sm:text-base text-slate-500 mb-8 md:mb-10 px-2 leading-relaxed font-normal">
           Nền tảng kết nối trực tiếp học sinh và giáo viên tại Hà Nội: Trao đổi Zalo 1-1, học thử miễn phí và đăng ký học chính thức minh bạch.
         </p>
@@ -1509,8 +1487,8 @@ function Hero() {
           <form onSubmit={handleHeroSearch} className="flex flex-col md:flex-row gap-2.5">
             <div className="flex-1 relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-              <input 
-                type="text" 
+              <input
+                type="text"
                 value={searchText}
                 onChange={e => setSearchText(e.target.value)}
                 placeholder="Môn học, lớp, kỹ năng (VD: Toán 10, Tiếng Anh, Piano, Bơi lội...)"
@@ -1519,7 +1497,7 @@ function Hero() {
             </div>
             <div className="flex-1 relative">
               <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-              <select 
+              <select
                 value={selectedLoc}
                 onChange={e => setSelectedLoc(e.target.value)}
                 className="w-full pl-11 pr-9 py-3 rounded-2xl bg-slate-100/70 border border-transparent focus:border-blue-200 focus:bg-white transition-all text-slate-800 appearance-none text-sm outline-none cursor-pointer font-medium"
@@ -1541,8 +1519,8 @@ function Hero() {
               </select>
               <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 pointer-events-none" />
             </div>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-2xl font-bold transition-all shadow-md shadow-blue-200 md:w-auto w-full flex justify-center items-center gap-1.5 text-sm cursor-pointer"
             >
               Tìm kiếm
@@ -1564,7 +1542,7 @@ function TutorCard({ tutor }: { tutor: any }) {
     : 95;
 
   const isTeacher = tutor.type === 'Giáo viên' || (tutor.rolePrefix && (tutor.rolePrefix.includes('Cô') || tutor.rolePrefix.includes('Thầy')));
-  
+
   // Trích xuất tối đa 3 gạch đầu dòng ý chính ngắn gọn, không văn xuôi dài dòng
   const keyBullets: string[] = [];
 
@@ -1595,29 +1573,28 @@ function TutorCard({ tutor }: { tutor: any }) {
 
   return (
     <div className="group relative bg-white rounded-3xl border border-slate-100 hover:border-blue-200/80 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between overflow-hidden">
-      
+
       {/* Visual Hero Photo Banner (Single Main Avatar) */}
       <div className="relative p-3 pb-0">
-        <Link 
+        <Link
           to={`/giao-vien/${tutor.id}`}
           target="_blank"
           rel="noopener noreferrer"
           className="block relative aspect-16/10 rounded-2xl overflow-hidden bg-slate-100 shadow-inner group/banner"
         >
-          <img 
-            src={tutor.avatar} 
-            alt={tutor.displayName || tutor.name} 
+          <img
+            src={tutor.avatar}
+            alt={tutor.displayName || tutor.name}
             className="w-full h-full object-cover object-top group-hover/banner:scale-105 transition-transform duration-500"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
 
           {/* Floating Top Pills */}
           <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between pointer-events-none">
-            <span className={`px-2.5 py-1 rounded-full font-black text-[10px] tracking-wide uppercase backdrop-blur-md shadow-sm flex items-center gap-1.5 ${
-              isTeacher 
-                ? 'bg-blue-600/90 text-white' 
+            <span className={`px-2.5 py-1 rounded-full font-black text-[10px] tracking-wide uppercase backdrop-blur-md shadow-sm flex items-center gap-1.5 ${isTeacher
+                ? 'bg-blue-600/90 text-white'
                 : 'bg-purple-600/90 text-white'
-            }`}>
+              }`}>
               {isTeacher ? <Briefcase className="w-3 h-3" /> : <GraduationCap className="w-3 h-3" />}
               {isTeacher ? 'Giáo viên' : 'Gia sư'}
             </span>
@@ -1688,8 +1665,8 @@ function TutorCard({ tutor }: { tutor: any }) {
           {tutor.levelPrices && Object.keys(tutor.levelPrices).length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {Object.entries(tutor.levelPrices).map(([lvl, prc]) => (
-                <span 
-                  key={lvl} 
+                <span
+                  key={lvl}
                   className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-50 border border-slate-200/80 text-[11px] font-medium text-slate-700"
                 >
                   <span className="text-slate-400">{lvl}:</span>
@@ -1741,52 +1718,113 @@ function TutorCard({ tutor }: { tutor: any }) {
 function HomePage() {
   const { openAuthModal } = useUI();
   const { tutors } = useData();
-  
+  const [selectedTab, setSelectedTab] = useState<'all' | 'teacher' | 'tutor' | 'math' | 'literature' | 'english' | 'science'>('all');
+
+  // Lọc danh sách giáo viên theo Tab tương tác trên trang chủ
+  const filteredTutors = tutors.filter(t => {
+    if (selectedTab === 'teacher') return t.type === 'Giáo viên';
+    if (selectedTab === 'tutor') return t.type === 'Sinh viên';
+    if (selectedTab === 'math') return t.badgeSubject?.includes('Toán') || (Array.isArray(t.subjects) && t.subjects.some(s => s.includes('Toán')));
+    if (selectedTab === 'literature') return t.badgeSubject?.includes('Văn') || (Array.isArray(t.subjects) && t.subjects.some(s => s.includes('Văn')));
+    if (selectedTab === 'english') return t.badgeSubject?.includes('Anh') || t.badgeSubject?.includes('IELTS') || (Array.isArray(t.subjects) && t.subjects.some(s => s.includes('Anh') || s.includes('IELTS')));
+    if (selectedTab === 'science') return t.badgeSubject?.includes('Lý') || t.badgeSubject?.includes('Hóa') || t.badgeSubject?.includes('Sinh') || (Array.isArray(t.subjects) && t.subjects.some(s => s.includes('Lý') || s.includes('Hóa') || s.includes('Sinh')));
+    return true;
+  });
+
+  const filterTabs = [
+    { id: 'all', label: '⭐ Tất cả nổi bật', count: tutors.length },
+    { id: 'teacher', label: '👨‍🏫 Giáo viên Chuyên môn', count: tutors.filter(t => t.type === 'Giáo viên').length },
+    { id: 'tutor', label: '🎓 Gia sư Sinh viên Giỏi', count: tutors.filter(t => t.type === 'Sinh viên').length },
+    { id: 'math', label: '📐 Môn Toán' },
+    { id: 'english', label: '🌐 Tiếng Anh & IELTS' },
+    { id: 'literature', label: '📖 Ngữ Văn' },
+    { id: 'science', label: '⚛️ Lý - Hóa - Sinh' }
+  ];
+
   return (
     <>
       <Hero />
 
-      {/* Section 1: Giáo viên / Gia sư Tiêu biểu */}
-      <section className="py-12 md:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Section 1: Giáo viên & Gia sư Tiêu biểu (Thiết kế mới Hiện đại & Tương tác) */}
+      <section className="py-14 md:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 md:mb-10 gap-4">
-          <div>
-            <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 mb-2">
-              Giáo viên / Gia sư <span className="text-blue-600">Tiêu biểu tại Hà Nội</span>
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-50 text-blue-700 font-extrabold text-xs border border-blue-200/80 shadow-2xs">
+              <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+              ĐỘI NGŨ GIÁO VIÊN & GIA SƯ TIÊU BIỂU
+            </div>
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">
+              Giáo viên & Gia sư <span className="text-blue-600">Được đánh giá cao</span>
             </h2>
-            <p className="text-slate-500 text-sm md:text-base max-w-2xl">
-              Hồ sơ giáo viên, gia sư được kiểm định và đánh giá cao tại TP. Hà Nội.
+            <p className="text-slate-500 text-sm md:text-base max-w-2xl font-normal leading-relaxed">
+              100% hồ sơ đã qua đối soát CCCD, bằng cấp chuyên môn và cam kết chất lượng qua buổi học thử 1-1 miễn phí.
             </p>
           </div>
-          <Link to="/tim-gia-su" className="text-blue-600 font-bold hover:text-blue-700 flex items-center gap-1 text-sm md:text-base">
-            Xem tất cả giáo viên →
+
+          <Link 
+            to="/tim-gia-su" 
+            className="group inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-slate-50 hover:bg-blue-50 border border-slate-200/80 hover:border-blue-200 text-slate-800 hover:text-blue-700 font-bold text-xs sm:text-sm transition-all shadow-2xs whitespace-nowrap"
+          >
+            <span>Khám phá tất cả {tutors.length}+ hồ sơ</span>
+            <ArrowRight className="w-4 h-4 text-slate-500 group-hover:text-blue-600 group-hover:translate-x-0.5 transition-transform" />
           </Link>
         </div>
 
-        {/* Nhóm Giáo viên chuyên nghiệp */}
-        <div className="mb-12">
-          <h3 className="text-lg md:text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
-            <span className="w-1.5 h-6 bg-blue-600 rounded-full inline-block"></span>
-            Giáo viên
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {tutors.filter(t => t.type === 'Giáo viên').slice(0, 4).map((tutor) => (
-              <TutorCard key={tutor.id} tutor={tutor} />
-            ))}
-          </div>
+        {/* Dynamic Category / Filter Tabs */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-8 no-scrollbar">
+          {filterTabs.map((tab) => {
+            const isActive = selectedTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setSelectedTab(tab.id as any)}
+                className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+                  isActive
+                    ? 'bg-blue-600 text-white shadow-md shadow-blue-200 scale-100'
+                    : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 border border-slate-200/80'
+                }`}
+              >
+                <span>{tab.label}</span>
+                {tab.count !== undefined && (
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-extrabold ${
+                    isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                  }`}>
+                    {tab.count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
 
-        {/* Nhóm Gia sư */}
-        <div>
-          <h3 className="text-lg md:text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
-            <span className="w-1.5 h-6 bg-emerald-500 rounded-full inline-block"></span>
-            Gia sư
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {tutors.filter(t => t.type === 'Sinh viên').slice(0, 4).map((tutor) => (
-              <TutorCard key={tutor.id} tutor={tutor} />
-            ))}
-          </div>
+        {/* Tutor Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {filteredTutors.slice(0, 8).map((tutor) => (
+            <TutorCard key={tutor.id} tutor={tutor} />
+          ))}
         </div>
+
+        {/* Bottom Explorer Banner */}
+        <div className="mt-12 bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 rounded-3xl p-6 sm:p-8 text-white flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xl">
+          <div className="space-y-1.5 text-center sm:text-left">
+            <h3 className="text-lg sm:text-xl font-black tracking-tight">
+              Bạn đang cần tìm gia sư cho môn học hoặc lớp khác?
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-300 max-w-xl font-normal leading-relaxed">
+              Bộ lọc nâng cao với hơn 20+ môn học từ Văn hóa, Ngoại ngữ IELTS, Năng khiếu đàn/vẽ đến Luyện thi THPT Quốc Gia.
+            </p>
+          </div>
+          <Link
+            to="/tim-gia-su"
+            className="whitespace-nowrap px-6 py-3.5 rounded-2xl bg-white hover:bg-blue-50 text-blue-900 font-extrabold text-xs sm:text-sm shadow-md transition-all shrink-0 hover:scale-105"
+          >
+            Mở bộ lọc chi tiết →
+          </Link>
+        </div>
+
       </section>
 
       {/* Section 2: QUY TRÌNH KẾT NỐI & HỌC THỬ (FORMAL, FONT IN ĐẬM, CỠ CHỮ TO, BỎ ICON) */}
@@ -1885,13 +1923,13 @@ function HomePage() {
             Hơn 140+ giáo viên và gia sư đã qua kiểm định chuyên môn tại Hà Nội. Bắt đầu học thử ngay hôm nay.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link 
-              to="/tim-gia-su" 
+            <Link
+              to="/tim-gia-su"
               className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3.5 rounded-2xl shadow-sm transition-all text-sm md:text-base"
             >
               Tìm kiếm Giáo viên & Gia sư
             </Link>
-            <button 
+            <button
               onClick={() => openAuthModal('register', 'teacher')}
               className="bg-slate-800 hover:bg-slate-700 text-white font-bold px-8 py-3.5 rounded-2xl border border-slate-700 transition-all text-sm md:text-base cursor-pointer"
             >
@@ -1909,7 +1947,7 @@ function FindTutorsPage() {
   const { tutors } = useData();
   const location = useLocation();
   const params = new URLSearchParams(location.search);
-  
+
   const [searchInput, setSearchInput] = useState(params.get('search') || '');
   const [appliedSearch, setAppliedSearch] = useState(params.get('search') || '');
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
@@ -1988,31 +2026,31 @@ function FindTutorsPage() {
   };
 
   const toggleSubject = (sub: string) => {
-    setSelectedSubjects(prev => 
+    setSelectedSubjects(prev =>
       prev.includes(sub) ? prev.filter(s => s !== sub) : [...prev, sub]
     );
   };
 
   const toggleType = (t: string) => {
-    setSelectedTypes(prev => 
+    setSelectedTypes(prev =>
       prev.includes(t) ? prev.filter(item => item !== t) : [...prev, t]
     );
   };
 
   const toggleLevel = (lvl: string) => {
-    setSelectedLevels(prev => 
+    setSelectedLevels(prev =>
       prev.includes(lvl) ? prev.filter(l => l !== lvl) : [...prev, lvl]
     );
   };
 
   const toggleFormat = (fmt: string) => {
-    setSelectedFormats(prev => 
+    setSelectedFormats(prev =>
       prev.includes(fmt) ? prev.filter(f => f !== fmt) : [...prev, fmt]
     );
   };
 
   const toggleDistrict = (district: string) => {
-    setSelectedDistricts(prev => 
+    setSelectedDistricts(prev =>
       prev.includes(district) ? prev.filter(d => d !== district) : [...prev, district]
     );
   };
@@ -2040,7 +2078,7 @@ function FindTutorsPage() {
 
     // Subjects filter (đa lựa chọn)
     if (selectedSubjects.length > 0) {
-      const hasSubject = selectedSubjects.some(sub => 
+      const hasSubject = selectedSubjects.some(sub =>
         t.subjects?.some((s: string) => s.toLowerCase().includes(sub.toLowerCase()) || sub.toLowerCase().includes(s.toLowerCase()))
       );
       if (!hasSubject) return false;
@@ -2099,260 +2137,133 @@ function FindTutorsPage() {
         </p>
       </div>
 
-        {/* TOP FILTER BAR: MODERN DROPDOWN POPOVER FILTERS */}
-        <div className="lg:col-span-4 bg-white rounded-3xl p-5 border border-slate-200/80 shadow-xs space-y-4 mb-2">
-          {/* Top Search Input & Action Row */}
-          <div className="flex flex-col md:flex-row items-center gap-3">
-            <form onSubmit={handleSearchSubmit} className="relative flex-1 w-full">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-              <input 
-                type="text" 
-                value={searchInput}
-                onChange={e => setSearchInput(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') handleSearchSubmit(e); }}
-                placeholder="Tìm nhanh theo tên giáo viên, môn học (Toán, Văn, Bơi, Piano, Tiếng Anh...)"
-                className="w-full pl-10 pr-9 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 focus:border-blue-500 focus:bg-white text-xs sm:text-sm text-slate-800 outline-none transition-colors"
-              />
-              {searchInput && (
-                <button 
-                  type="button" 
-                  onClick={() => { setSearchInput(''); setAppliedSearch(''); }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
-            </form>
-
-            <div className="flex items-center gap-2 w-full md:w-auto shrink-0">
+      {/* TOP FILTER BAR: MODERN DROPDOWN POPOVER FILTERS */}
+      <div className="lg:col-span-4 bg-white rounded-3xl p-5 border border-slate-200/80 shadow-xs space-y-4 mb-2">
+        {/* Top Search Input & Action Row */}
+        <div className="flex flex-col md:flex-row items-center gap-3">
+          <form onSubmit={handleSearchSubmit} className="relative flex-1 w-full">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+            <input
+              type="text"
+              value={searchInput}
+              onChange={e => setSearchInput(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') handleSearchSubmit(e); }}
+              placeholder="Tìm nhanh theo tên giáo viên, môn học (Toán, Văn, Bơi, Piano, Tiếng Anh...)"
+              className="w-full pl-10 pr-9 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 focus:border-blue-500 focus:bg-white text-xs sm:text-sm text-slate-800 outline-none transition-colors"
+            />
+            {searchInput && (
               <button
                 type="button"
-                onClick={() => handleSearchSubmit()}
-                className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-extrabold rounded-2xl text-xs shadow-xs transition-all cursor-pointer"
+                onClick={() => { setSearchInput(''); setAppliedSearch(''); }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
               >
-                Tìm kiếm
+                <X className="w-4 h-4" />
               </button>
-              {activeFiltersCount > 0 && (
-                <button 
-                  type="button" 
-                  onClick={resetFilters} 
-                  className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl text-xs transition-colors cursor-pointer"
-                >
-                  Xóa tất cả ({activeFiltersCount})
-                </button>
-              )}
+            )}
+          </form>
+
+          <div className="flex items-center gap-2 w-full md:w-auto shrink-0">
+            <button
+              type="button"
+              onClick={() => handleSearchSubmit()}
+              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-extrabold rounded-2xl text-xs shadow-xs transition-all cursor-pointer"
+            >
+              Tìm kiếm
+            </button>
+            {activeFiltersCount > 0 && (
+              <button
+                type="button"
+                onClick={resetFilters}
+                className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl text-xs transition-colors cursor-pointer"
+              >
+                Xóa tất cả ({activeFiltersCount})
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Interactive Dropdown Row (Kéo xuống / Hover mở menu chọn) */}
+        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
+          {/* Dropdown 1: Môn học */}
+          <div className="relative group">
+            <button
+              type="button"
+              className={`px-3.5 py-2 rounded-2xl text-xs font-bold border transition-all flex items-center gap-1.5 cursor-pointer select-none ${selectedSubjects.length > 0
+                  ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-2xs'
+                  : 'border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700'
+                }`}
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>Môn học {selectedSubjects.length > 0 && `(${selectedSubjects.length})`}</span>
+              <ChevronDown className="w-3.5 h-3.5 opacity-60 group-hover:rotate-180 transition-transform" />
+            </button>
+
+            {/* Hover Popover Dropdown Menu */}
+            <div className="invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 absolute left-0 top-full mt-2 w-80 sm:w-96 bg-white rounded-3xl p-4 shadow-2xl border border-slate-200 z-50 max-h-96 overflow-y-auto space-y-3">
+              <div className="text-xs font-extrabold text-slate-900 pb-2 border-b border-slate-100 flex justify-between items-center">
+                <span>Chọn môn học & năng khiếu:</span>
+                {selectedSubjects.length > 0 && (
+                  <button type="button" onClick={() => setSelectedSubjects([])} className="text-[11px] text-blue-600 hover:underline">Xóa chọn</button>
+                )}
+              </div>
+              {subjectGroups.map(grp => (
+                <div key={grp.group} className="space-y-1.5">
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{grp.group}</div>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {grp.items.map(sub => {
+                      const isSelected = selectedSubjects.includes(sub);
+                      return (
+                        <button
+                          type="button"
+                          key={sub}
+                          onClick={() => toggleSubject(sub)}
+                          className={`px-2.5 py-1.5 rounded-xl text-left text-xs font-semibold transition-colors flex items-center justify-between cursor-pointer ${isSelected ? 'bg-blue-600 text-white shadow-2xs' : 'bg-slate-50 hover:bg-slate-100 text-slate-700'
+                            }`}
+                        >
+                          <span className="truncate">{sub}</span>
+                          {isSelected && <Check className="w-3 h-3 shrink-0 ml-1" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Interactive Dropdown Row (Kéo xuống / Hover mở menu chọn) */}
-          <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
-            {/* Dropdown 1: Môn học */}
-            <div className="relative group">
-              <button 
-                type="button"
-                className={`px-3.5 py-2 rounded-2xl text-xs font-bold border transition-all flex items-center gap-1.5 cursor-pointer select-none ${
-                  selectedSubjects.length > 0
-                    ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-2xs'
-                    : 'border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700'
+          {/* Dropdown 2: Cấp học / Dạy lớp mấy */}
+          <div className="relative group">
+            <button
+              type="button"
+              className={`px-3.5 py-2 rounded-2xl text-xs font-bold border transition-all flex items-center gap-1.5 cursor-pointer select-none ${selectedLevels.length > 0
+                  ? 'border-indigo-600 bg-indigo-50 text-indigo-700 shadow-2xs'
+                  : 'border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700'
                 }`}
-              >
-                <BookOpen className="w-3.5 h-3.5" />
-                <span>Môn học {selectedSubjects.length > 0 && `(${selectedSubjects.length})`}</span>
-                <ChevronDown className="w-3.5 h-3.5 opacity-60 group-hover:rotate-180 transition-transform" />
-              </button>
+            >
+              <GraduationCap className="w-3.5 h-3.5" />
+              <span>Cấp học {selectedLevels.length > 0 && `(${selectedLevels.length})`}</span>
+              <ChevronDown className="w-3.5 h-3.5 opacity-60 group-hover:rotate-180 transition-transform" />
+            </button>
 
-              {/* Hover Popover Dropdown Menu */}
-              <div className="invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 absolute left-0 top-full mt-2 w-80 sm:w-96 bg-white rounded-3xl p-4 shadow-2xl border border-slate-200 z-50 max-h-96 overflow-y-auto space-y-3">
-                <div className="text-xs font-extrabold text-slate-900 pb-2 border-b border-slate-100 flex justify-between items-center">
-                  <span>Chọn môn học & năng khiếu:</span>
-                  {selectedSubjects.length > 0 && (
-                    <button type="button" onClick={() => setSelectedSubjects([])} className="text-[11px] text-blue-600 hover:underline">Xóa chọn</button>
-                  )}
-                </div>
-                {subjectGroups.map(grp => (
-                  <div key={grp.group} className="space-y-1.5">
-                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{grp.group}</div>
-                    <div className="grid grid-cols-2 gap-1.5">
-                      {grp.items.map(sub => {
-                        const isSelected = selectedSubjects.includes(sub);
-                        return (
-                          <button
-                            type="button"
-                            key={sub}
-                            onClick={() => toggleSubject(sub)}
-                            className={`px-2.5 py-1.5 rounded-xl text-left text-xs font-semibold transition-colors flex items-center justify-between cursor-pointer ${
-                              isSelected ? 'bg-blue-600 text-white shadow-2xs' : 'bg-slate-50 hover:bg-slate-100 text-slate-700'
-                            }`}
-                          >
-                            <span className="truncate">{sub}</span>
-                            {isSelected && <Check className="w-3 h-3 shrink-0 ml-1" />}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
+            <div className="invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 absolute left-0 top-full mt-2 w-64 bg-white rounded-3xl p-4 shadow-2xl border border-slate-200 z-50 space-y-2">
+              <div className="text-xs font-extrabold text-slate-900 pb-2 border-b border-slate-100 flex justify-between items-center">
+                <span>Chọn cấp học / độ tuổi:</span>
+                {selectedLevels.length > 0 && (
+                  <button type="button" onClick={() => setSelectedLevels([])} className="text-[11px] text-blue-600 hover:underline">Xóa chọn</button>
+                )}
               </div>
-            </div>
-
-            {/* Dropdown 2: Cấp học / Dạy lớp mấy */}
-            <div className="relative group">
-              <button 
-                type="button"
-                className={`px-3.5 py-2 rounded-2xl text-xs font-bold border transition-all flex items-center gap-1.5 cursor-pointer select-none ${
-                  selectedLevels.length > 0
-                    ? 'border-indigo-600 bg-indigo-50 text-indigo-700 shadow-2xs'
-                    : 'border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700'
-                }`}
-              >
-                <GraduationCap className="w-3.5 h-3.5" />
-                <span>Cấp học {selectedLevels.length > 0 && `(${selectedLevels.length})`}</span>
-                <ChevronDown className="w-3.5 h-3.5 opacity-60 group-hover:rotate-180 transition-transform" />
-              </button>
-
-              <div className="invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 absolute left-0 top-full mt-2 w-64 bg-white rounded-3xl p-4 shadow-2xl border border-slate-200 z-50 space-y-2">
-                <div className="text-xs font-extrabold text-slate-900 pb-2 border-b border-slate-100 flex justify-between items-center">
-                  <span>Chọn cấp học / độ tuổi:</span>
-                  {selectedLevels.length > 0 && (
-                    <button type="button" onClick={() => setSelectedLevels([])} className="text-[11px] text-blue-600 hover:underline">Xóa chọn</button>
-                  )}
-                </div>
-                <div className="space-y-1">
-                  {levelsList.map(lvl => {
-                    const isSelected = selectedLevels.includes(lvl);
-                    return (
-                      <button
-                        type="button"
-                        key={lvl}
-                        onClick={() => toggleLevel(lvl)}
-                        className={`w-full px-3 py-2 rounded-xl text-left text-xs font-semibold transition-colors flex items-center justify-between cursor-pointer ${
-                          isSelected ? 'bg-indigo-600 text-white shadow-2xs' : 'bg-slate-50 hover:bg-slate-100 text-slate-700'
-                        }`}
-                      >
-                        <span>{lvl}</span>
-                        {isSelected && <Check className="w-3.5 h-3.5 shrink-0" />}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            {/* Dropdown 3: Khu vực Quận / Huyện */}
-            <div className="relative group">
-              <button 
-                type="button"
-                className={`px-3.5 py-2 rounded-2xl text-xs font-bold border transition-all flex items-center gap-1.5 cursor-pointer select-none ${
-                  selectedDistricts.length > 0
-                    ? 'border-emerald-600 bg-emerald-50 text-emerald-700 shadow-2xs'
-                    : 'border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700'
-                }`}
-              >
-                <MapPin className="w-3.5 h-3.5" />
-                <span>Khu vực {selectedDistricts.length > 0 && `(${selectedDistricts.length})`}</span>
-                <ChevronDown className="w-3.5 h-3.5 opacity-60 group-hover:rotate-180 transition-transform" />
-              </button>
-
-              <div className="invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 absolute left-0 top-full mt-2 w-72 bg-white rounded-3xl p-4 shadow-2xl border border-slate-200 z-50 max-h-80 overflow-y-auto space-y-2">
-                <div className="text-xs font-extrabold text-slate-900 pb-2 border-b border-slate-100 flex justify-between items-center">
-                  <span>Quận/Huyện tại Hà Nội:</span>
-                  {selectedDistricts.length > 0 && (
-                    <button type="button" onClick={() => setSelectedDistricts([])} className="text-[11px] text-blue-600 hover:underline">Xóa chọn</button>
-                  )}
-                </div>
-                <div className="grid grid-cols-2 gap-1.5">
-                  {hanoiDistrictsList.map(dist => {
-                    const isSelected = selectedDistricts.includes(dist);
-                    return (
-                      <button
-                        type="button"
-                        key={dist}
-                        onClick={() => toggleDistrict(dist)}
-                        className={`px-2.5 py-1.5 rounded-xl text-left text-xs font-semibold transition-colors flex items-center justify-between cursor-pointer ${
-                          isSelected ? 'bg-emerald-600 text-white shadow-2xs' : 'bg-slate-50 hover:bg-slate-100 text-slate-700'
-                        }`}
-                      >
-                        <span className="truncate">{dist}</span>
-                        {isSelected && <Check className="w-3 h-3 shrink-0 ml-1" />}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            {/* Dropdown 4: Đối tượng (Giáo viên vs Gia sư) */}
-            <div className="relative group">
-              <button 
-                type="button"
-                className={`px-3.5 py-2 rounded-2xl text-xs font-bold border transition-all flex items-center gap-1.5 cursor-pointer select-none ${
-                  selectedTypes.length > 0
-                    ? 'border-purple-600 bg-purple-50 text-purple-700 shadow-2xs'
-                    : 'border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700'
-                }`}
-              >
-                <Briefcase className="w-3.5 h-3.5" />
-                <span>Loại hình {selectedTypes.length > 0 && `(${selectedTypes.length})`}</span>
-                <ChevronDown className="w-3.5 h-3.5 opacity-60 group-hover:rotate-180 transition-transform" />
-              </button>
-
-              <div className="invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 absolute left-0 top-full mt-2 w-64 bg-white rounded-3xl p-4 shadow-2xl border border-slate-200 z-50 space-y-2">
-                <div className="text-xs font-extrabold text-slate-900 pb-2 border-b border-slate-100">Chọn đối tượng:</div>
-                <div className="space-y-1.5">
-                  {typesList.map(t => {
-                    const isSelected = selectedTypes.includes(t.value);
-                    return (
-                      <button
-                        type="button"
-                        key={t.value}
-                        onClick={() => toggleType(t.value)}
-                        className={`w-full px-3 py-2.5 rounded-xl text-left text-xs font-bold transition-all flex items-center justify-between cursor-pointer ${
-                          isSelected ? 'bg-purple-600 text-white shadow-2xs' : 'bg-slate-50 hover:bg-slate-100 text-slate-700'
-                        }`}
-                      >
-                        <div>
-                          <div>{t.label}</div>
-                          <div className={`text-[10px] font-normal mt-0.5 ${isSelected ? 'text-purple-100' : 'text-slate-400'}`}>
-                            {t.value === 'Giáo viên' ? 'Giảng viên, GV trường có kinh nghiệm' : 'Sinh viên giỏi, thủ khoa dạy kèm'}
-                          </div>
-                        </div>
-                        {isSelected && <Check className="w-4 h-4 shrink-0" />}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            {/* Dropdown 5: Hình thức học (Online vs Trực tiếp) */}
-            <div className="relative group">
-              <button 
-                type="button"
-                className={`px-3.5 py-2 rounded-2xl text-xs font-bold border transition-all flex items-center gap-1.5 cursor-pointer select-none ${
-                  selectedFormats.length > 0
-                    ? 'border-amber-600 bg-amber-50 text-amber-700 shadow-2xs'
-                    : 'border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700'
-                }`}
-              >
-                <Globe className="w-3.5 h-3.5" />
-                <span>Hình thức {selectedFormats.length > 0 && `(${selectedFormats.length})`}</span>
-                <ChevronDown className="w-3.5 h-3.5 opacity-60 group-hover:rotate-180 transition-transform" />
-              </button>
-
-              <div className="invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 absolute left-0 top-full mt-2 w-60 bg-white rounded-3xl p-4 shadow-2xl border border-slate-200 z-50 space-y-1.5">
-                <div className="text-xs font-extrabold text-slate-900 pb-2 border-b border-slate-100">Hình thức học:</div>
-                {formatsList.map(fmt => {
-                  const isSelected = selectedFormats.includes(fmt.value);
+              <div className="space-y-1">
+                {levelsList.map(lvl => {
+                  const isSelected = selectedLevels.includes(lvl);
                   return (
                     <button
                       type="button"
-                      key={fmt.value}
-                      onClick={() => toggleFormat(fmt.value)}
-                      className={`w-full px-3 py-2 rounded-xl text-left text-xs font-semibold transition-colors flex items-center justify-between cursor-pointer ${
-                        isSelected ? 'bg-amber-600 text-white shadow-2xs' : 'bg-slate-50 hover:bg-slate-100 text-slate-700'
-                      }`}
+                      key={lvl}
+                      onClick={() => toggleLevel(lvl)}
+                      className={`w-full px-3 py-2 rounded-xl text-left text-xs font-semibold transition-colors flex items-center justify-between cursor-pointer ${isSelected ? 'bg-indigo-600 text-white shadow-2xs' : 'bg-slate-50 hover:bg-slate-100 text-slate-700'
+                        }`}
                     >
-                      <span>{fmt.label}</span>
+                      <span>{lvl}</span>
                       {isSelected && <Check className="w-3.5 h-3.5 shrink-0" />}
                     </button>
                   );
@@ -2361,101 +2272,218 @@ function FindTutorsPage() {
             </div>
           </div>
 
-          {/* Active Filters Chips Bar */}
-          {activeFiltersCount > 0 && (
-            <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-100">
-              <span className="text-[11px] font-bold text-slate-400 mr-1">Đang lọc:</span>
-              {selectedSubjects.map(sub => (
-                <span key={sub} className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded-full text-xs font-semibold">
-                  {sub}
-                  <button type="button" onClick={() => toggleSubject(sub)} className="hover:text-blue-900 cursor-pointer"><X className="w-3 h-3" /></button>
-                </span>
-              ))}
-              {selectedLevels.map(lvl => (
-                <span key={lvl} className="inline-flex items-center gap-1 px-2.5 py-1 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-full text-xs font-semibold">
-                  {lvl}
-                  <button type="button" onClick={() => toggleLevel(lvl)} className="hover:text-indigo-900 cursor-pointer"><X className="w-3 h-3" /></button>
-                </span>
-              ))}
-              {selectedDistricts.map(dist => (
-                <span key={dist} className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-xs font-semibold">
-                  {dist}
-                  <button type="button" onClick={() => toggleDistrict(dist)} className="hover:text-emerald-900 cursor-pointer"><X className="w-3 h-3" /></button>
-                </span>
-              ))}
-              {selectedTypes.map(t => (
-                <span key={t} className="inline-flex items-center gap-1 px-2.5 py-1 bg-purple-50 text-purple-700 border border-purple-200 rounded-full text-xs font-semibold">
-                  {t}
-                  <button type="button" onClick={() => toggleType(t)} className="hover:text-purple-900 cursor-pointer"><X className="w-3 h-3" /></button>
-                </span>
-              ))}
-              {selectedFormats.map(fmt => (
-                <span key={fmt} className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-xs font-semibold">
-                  {fmt === 'online' ? 'Online' : 'Offline'}
-                  <button type="button" onClick={() => toggleFormat(fmt)} className="hover:text-amber-900 cursor-pointer"><X className="w-3 h-3" /></button>
-                </span>
-              ))}
-              {appliedSearch && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 text-slate-700 border border-slate-300 rounded-full text-xs font-semibold">
-                  "{appliedSearch}"
-                  <button type="button" onClick={() => { setSearchInput(''); setAppliedSearch(''); }} className="hover:text-slate-900 cursor-pointer"><X className="w-3 h-3" /></button>
-                </span>
-              )}
-            </div>
-          )}
-        </div>
+          {/* Dropdown 3: Khu vực Quận / Huyện */}
+          <div className="relative group">
+            <button
+              type="button"
+              className={`px-3.5 py-2 rounded-2xl text-xs font-bold border transition-all flex items-center gap-1.5 cursor-pointer select-none ${selectedDistricts.length > 0
+                  ? 'border-emerald-600 bg-emerald-50 text-emerald-700 shadow-2xs'
+                  : 'border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700'
+                }`}
+            >
+              <MapPin className="w-3.5 h-3.5" />
+              <span>Khu vực {selectedDistricts.length > 0 && `(${selectedDistricts.length})`}</span>
+              <ChevronDown className="w-3.5 h-3.5 opacity-60 group-hover:rotate-180 transition-transform" />
+            </button>
 
-        {/* RESULTS SECTION: 4 COLUMNS GRID OF TUTOR CARDS */}
-        <main className="lg:col-span-4 space-y-6">
-          {/* Sắp xếp & Thống kê kết quả */}
-          <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-2xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-            <div className="text-xs sm:text-sm font-semibold text-slate-700">
-              Tìm thấy <strong className="text-blue-600 text-base">{filteredTutors.length}</strong> giáo viên tại Hà Nội
-              {appliedSearch && <span> cho từ khóa "<strong className="text-slate-900">{appliedSearch}</strong>"</span>}
-            </div>
-
-            <div className="flex items-center gap-2 text-xs">
-              <span className="text-slate-400 font-bold uppercase text-[10px]">Sắp xếp:</span>
-              <select 
-                value={sortBy}
-                onChange={e => setSortBy(e.target.value as any)}
-                className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700 outline-none cursor-pointer"
-              >
-                <option value="rating">Đánh giá cao nhất</option>
-                <option value="success_rate">Tỷ lệ nhận lớp cao nhất</option>
-                <option value="price_asc">Học phí: Thấp đến cao</option>
-                <option value="price_desc">Học phí: Cao đến thấp</option>
-              </select>
+            <div className="invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 absolute left-0 top-full mt-2 w-72 bg-white rounded-3xl p-4 shadow-2xl border border-slate-200 z-50 max-h-80 overflow-y-auto space-y-2">
+              <div className="text-xs font-extrabold text-slate-900 pb-2 border-b border-slate-100 flex justify-between items-center">
+                <span>Quận/Huyện tại Hà Nội:</span>
+                {selectedDistricts.length > 0 && (
+                  <button type="button" onClick={() => setSelectedDistricts([])} className="text-[11px] text-blue-600 hover:underline">Xóa chọn</button>
+                )}
+              </div>
+              <div className="grid grid-cols-2 gap-1.5">
+                {hanoiDistrictsList.map(dist => {
+                  const isSelected = selectedDistricts.includes(dist);
+                  return (
+                    <button
+                      type="button"
+                      key={dist}
+                      onClick={() => toggleDistrict(dist)}
+                      className={`px-2.5 py-1.5 rounded-xl text-left text-xs font-semibold transition-colors flex items-center justify-between cursor-pointer ${isSelected ? 'bg-emerald-600 text-white shadow-2xs' : 'bg-slate-50 hover:bg-slate-100 text-slate-700'
+                        }`}
+                    >
+                      <span className="truncate">{dist}</span>
+                      {isSelected && <Check className="w-3 h-3 shrink-0 ml-1" />}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
-          {/* Grid kết quả */}
-          {filteredTutors.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-              {filteredTutors.map(tutor => (
-                <TutorCard key={tutor.id} tutor={tutor} />
-              ))}
-            </div>
-          ) : (
-            <div className="bg-white rounded-3xl p-12 border border-slate-200/80 text-center space-y-4">
-              <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto">
-                <Search className="w-8 h-8" />
+          {/* Dropdown 4: Đối tượng (Giáo viên vs Gia sư) */}
+          <div className="relative group">
+            <button
+              type="button"
+              className={`px-3.5 py-2 rounded-2xl text-xs font-bold border transition-all flex items-center gap-1.5 cursor-pointer select-none ${selectedTypes.length > 0
+                  ? 'border-purple-600 bg-purple-50 text-purple-700 shadow-2xs'
+                  : 'border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700'
+                }`}
+            >
+              <Briefcase className="w-3.5 h-3.5" />
+              <span>Loại hình {selectedTypes.length > 0 && `(${selectedTypes.length})`}</span>
+              <ChevronDown className="w-3.5 h-3.5 opacity-60 group-hover:rotate-180 transition-transform" />
+            </button>
+
+            <div className="invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 absolute left-0 top-full mt-2 w-64 bg-white rounded-3xl p-4 shadow-2xl border border-slate-200 z-50 space-y-2">
+              <div className="text-xs font-extrabold text-slate-900 pb-2 border-b border-slate-100">Chọn đối tượng:</div>
+              <div className="space-y-1.5">
+                {typesList.map(t => {
+                  const isSelected = selectedTypes.includes(t.value);
+                  return (
+                    <button
+                      type="button"
+                      key={t.value}
+                      onClick={() => toggleType(t.value)}
+                      className={`w-full px-3 py-2.5 rounded-xl text-left text-xs font-bold transition-all flex items-center justify-between cursor-pointer ${isSelected ? 'bg-purple-600 text-white shadow-2xs' : 'bg-slate-50 hover:bg-slate-100 text-slate-700'
+                        }`}
+                    >
+                      <div>
+                        <div>{t.label}</div>
+                        <div className={`text-[10px] font-normal mt-0.5 ${isSelected ? 'text-purple-100' : 'text-slate-400'}`}>
+                          {t.value === 'Giáo viên' ? 'Giảng viên, GV trường có kinh nghiệm' : 'Sinh viên giỏi, thủ khoa dạy kèm'}
+                        </div>
+                      </div>
+                      {isSelected && <Check className="w-4 h-4 shrink-0" />}
+                    </button>
+                  );
+                })}
               </div>
-              <h3 className="text-lg font-bold text-slate-900">Không tìm thấy giáo viên nào phù hợp</h3>
-              <p className="text-xs text-slate-500 max-w-md mx-auto">
-                Hãy thử bỏ bớt các ô tích lọc hoặc tìm kiếm bằng từ khóa môn học khác.
-              </p>
-              <button 
-                type="button" 
-                onClick={resetFilters}
-                className="px-6 py-2.5 bg-blue-600 text-white font-bold text-xs rounded-xl hover:bg-blue-700 transition-colors shadow-sm"
-              >
-                Xóa tất cả bộ lọc
-              </button>
             </div>
-          )}
-        </main>
+          </div>
+
+          {/* Dropdown 5: Hình thức học (Online vs Trực tiếp) */}
+          <div className="relative group">
+            <button
+              type="button"
+              className={`px-3.5 py-2 rounded-2xl text-xs font-bold border transition-all flex items-center gap-1.5 cursor-pointer select-none ${selectedFormats.length > 0
+                  ? 'border-amber-600 bg-amber-50 text-amber-700 shadow-2xs'
+                  : 'border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700'
+                }`}
+            >
+              <Globe className="w-3.5 h-3.5" />
+              <span>Hình thức {selectedFormats.length > 0 && `(${selectedFormats.length})`}</span>
+              <ChevronDown className="w-3.5 h-3.5 opacity-60 group-hover:rotate-180 transition-transform" />
+            </button>
+
+            <div className="invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 absolute left-0 top-full mt-2 w-60 bg-white rounded-3xl p-4 shadow-2xl border border-slate-200 z-50 space-y-1.5">
+              <div className="text-xs font-extrabold text-slate-900 pb-2 border-b border-slate-100">Hình thức học:</div>
+              {formatsList.map(fmt => {
+                const isSelected = selectedFormats.includes(fmt.value);
+                return (
+                  <button
+                    type="button"
+                    key={fmt.value}
+                    onClick={() => toggleFormat(fmt.value)}
+                    className={`w-full px-3 py-2 rounded-xl text-left text-xs font-semibold transition-colors flex items-center justify-between cursor-pointer ${isSelected ? 'bg-amber-600 text-white shadow-2xs' : 'bg-slate-50 hover:bg-slate-100 text-slate-700'
+                      }`}
+                  >
+                    <span>{fmt.label}</span>
+                    {isSelected && <Check className="w-3.5 h-3.5 shrink-0" />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Active Filters Chips Bar */}
+        {activeFiltersCount > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-100">
+            <span className="text-[11px] font-bold text-slate-400 mr-1">Đang lọc:</span>
+            {selectedSubjects.map(sub => (
+              <span key={sub} className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded-full text-xs font-semibold">
+                {sub}
+                <button type="button" onClick={() => toggleSubject(sub)} className="hover:text-blue-900 cursor-pointer"><X className="w-3 h-3" /></button>
+              </span>
+            ))}
+            {selectedLevels.map(lvl => (
+              <span key={lvl} className="inline-flex items-center gap-1 px-2.5 py-1 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-full text-xs font-semibold">
+                {lvl}
+                <button type="button" onClick={() => toggleLevel(lvl)} className="hover:text-indigo-900 cursor-pointer"><X className="w-3 h-3" /></button>
+              </span>
+            ))}
+            {selectedDistricts.map(dist => (
+              <span key={dist} className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-xs font-semibold">
+                {dist}
+                <button type="button" onClick={() => toggleDistrict(dist)} className="hover:text-emerald-900 cursor-pointer"><X className="w-3 h-3" /></button>
+              </span>
+            ))}
+            {selectedTypes.map(t => (
+              <span key={t} className="inline-flex items-center gap-1 px-2.5 py-1 bg-purple-50 text-purple-700 border border-purple-200 rounded-full text-xs font-semibold">
+                {t}
+                <button type="button" onClick={() => toggleType(t)} className="hover:text-purple-900 cursor-pointer"><X className="w-3 h-3" /></button>
+              </span>
+            ))}
+            {selectedFormats.map(fmt => (
+              <span key={fmt} className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-xs font-semibold">
+                {fmt === 'online' ? 'Online' : 'Offline'}
+                <button type="button" onClick={() => toggleFormat(fmt)} className="hover:text-amber-900 cursor-pointer"><X className="w-3 h-3" /></button>
+              </span>
+            ))}
+            {appliedSearch && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 text-slate-700 border border-slate-300 rounded-full text-xs font-semibold">
+                "{appliedSearch}"
+                <button type="button" onClick={() => { setSearchInput(''); setAppliedSearch(''); }} className="hover:text-slate-900 cursor-pointer"><X className="w-3 h-3" /></button>
+              </span>
+            )}
+          </div>
+        )}
       </div>
+
+      {/* RESULTS SECTION: 4 COLUMNS GRID OF TUTOR CARDS */}
+      <main className="lg:col-span-4 space-y-6">
+        {/* Sắp xếp & Thống kê kết quả */}
+        <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-2xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <div className="text-xs sm:text-sm font-semibold text-slate-700">
+            Tìm thấy <strong className="text-blue-600 text-base">{filteredTutors.length}</strong> giáo viên tại Hà Nội
+            {appliedSearch && <span> cho từ khóa "<strong className="text-slate-900">{appliedSearch}</strong>"</span>}
+          </div>
+
+          <div className="flex items-center gap-2 text-xs">
+            <span className="text-slate-400 font-bold uppercase text-[10px]">Sắp xếp:</span>
+            <select
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value as any)}
+              className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700 outline-none cursor-pointer"
+            >
+              <option value="rating">Đánh giá cao nhất</option>
+              <option value="success_rate">Tỷ lệ nhận lớp cao nhất</option>
+              <option value="price_asc">Học phí: Thấp đến cao</option>
+              <option value="price_desc">Học phí: Cao đến thấp</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Grid kết quả */}
+        {filteredTutors.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+            {filteredTutors.map(tutor => (
+              <TutorCard key={tutor.id} tutor={tutor} />
+            ))}
+          </div>
+        ) : (
+          <div className="bg-white rounded-3xl p-12 border border-slate-200/80 text-center space-y-4">
+            <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto">
+              <Search className="w-8 h-8" />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900">Không tìm thấy giáo viên nào phù hợp</h3>
+            <p className="text-xs text-slate-500 max-w-md mx-auto">
+              Hãy thử bỏ bớt các ô tích lọc hoặc tìm kiếm bằng từ khóa môn học khác.
+            </p>
+            <button
+              type="button"
+              onClick={resetFilters}
+              className="px-6 py-2.5 bg-blue-600 text-white font-bold text-xs rounded-xl hover:bg-blue-700 transition-colors shadow-sm"
+            >
+              Xóa tất cả bộ lọc
+            </button>
+          </div>
+        )}
+      </main>
+    </div>
   );
 }
 
@@ -2475,10 +2503,10 @@ function TeacherDetailPage() {
     setRelatedPage(0);
   }, [id]);
 
-  const tutor = tutors.find(t => String(t.id) === String(id) || String(t.slug) === String(id)) 
-             || mockTutors.find(t => String(t.id) === String(id) || String(t.slug) === String(id)) 
-             || tutors[0] 
-             || mockTutors[0];
+  const tutor = tutors.find(t => String(t.id) === String(id) || String(t.slug) === String(id))
+    || mockTutors.find(t => String(t.id) === String(id) || String(t.slug) === String(id))
+    || tutors[0]
+    || mockTutors[0];
 
   if (!tutor) {
     return <div className="p-12 text-center text-slate-500">Không tìm thấy giáo viên</div>;
@@ -2571,15 +2599,15 @@ function TeacherDetailPage() {
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-          
+
           {/* CỘT TRÁI (8 / 12 CỘT) - Nội dung chi tiết hồ sơ */}
           <div className="lg:col-span-8 space-y-8">
-            
+
             {/* 1. Category Tag Pills (Tông xanh dương HanTutor) */}
             <div className="flex flex-wrap items-center gap-2">
               {subjectsList.map((sub: string, idx: number) => (
-                <span 
-                  key={idx} 
+                <span
+                  key={idx}
                   className="px-3.5 py-1 rounded-full text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200"
                 >
                   {sub}
@@ -2727,7 +2755,7 @@ function TeacherDetailPage() {
                   </h2>
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-slate-500 font-bold">{relatedPage + 1}/{totalPages}</span>
-                    <button 
+                    <button
                       type="button"
                       onClick={() => setRelatedPage(p => (p > 0 ? p - 1 : totalPages - 1))}
                       className="w-7 h-7 rounded-full border border-slate-200 flex items-center justify-center hover:bg-slate-50 hover:border-blue-300 text-slate-600 transition-colors cursor-pointer"
@@ -2735,7 +2763,7 @@ function TeacherDetailPage() {
                     >
                       <ChevronLeft className="w-4 h-4" />
                     </button>
-                    <button 
+                    <button
                       type="button"
                       onClick={() => setRelatedPage(p => (p < totalPages - 1 ? p + 1 : 0))}
                       className="w-7 h-7 rounded-full border border-slate-200 flex items-center justify-center hover:bg-slate-50 hover:border-blue-300 text-slate-600 transition-colors cursor-pointer"
@@ -2748,16 +2776,16 @@ function TeacherDetailPage() {
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   {displayedRelated.map(rel => (
-                    <Link 
-                      key={rel.id} 
-                      to={`/giao-vien/${rel.id}`} 
+                    <Link
+                      key={rel.id}
+                      to={`/giao-vien/${rel.id}`}
                       className="group block space-y-2 select-none"
                     >
                       <div className="aspect-square rounded-2xl overflow-hidden relative bg-slate-100 shadow-2xs">
-                        <img 
-                          src={rel.avatar} 
-                          alt={rel.displayName || rel.name} 
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                        <img
+                          src={rel.avatar}
+                          alt={rel.displayName || rel.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                         <div className="absolute bottom-2.5 left-2.5 right-2.5 text-white">
@@ -2787,17 +2815,17 @@ function TeacherDetailPage() {
           {/* CỘT PHẢI (4 / 12 CỘT) - Sticky Action Card (Tông xanh dương) */}
           <div className="lg:col-span-4">
             <div className="bg-white rounded-3xl border border-slate-200/90 shadow-xl p-6 sm:p-7 text-center sticky top-24 space-y-4">
-              
+
               {/* Top actions: Favorite & Share */}
               <div className="flex justify-between items-center text-slate-400">
-                <button 
-                  onClick={() => setIsLiked(!isLiked)} 
+                <button
+                  onClick={() => setIsLiked(!isLiked)}
                   className={`p-2 rounded-full hover:bg-slate-50 transition-colors cursor-pointer ${isLiked ? 'text-blue-600' : 'hover:text-slate-600'}`}
                   title="Lưu hồ sơ"
                 >
                   <Heart className={`w-5 h-5 ${isLiked ? 'fill-blue-600' : ''}`} />
                 </button>
-                <button 
+                <button
                   onClick={handleShare}
                   className="p-2 rounded-full hover:bg-slate-50 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
                   title="Chia sẻ hồ sơ"
@@ -2808,9 +2836,9 @@ function TeacherDetailPage() {
 
               {/* Round Avatar */}
               <div className="relative inline-block mx-auto">
-                <img 
-                  src={tutor.avatar} 
-                  alt={tutor.displayName || tutor.name} 
+                <img
+                  src={tutor.avatar}
+                  alt={tutor.displayName || tutor.name}
                   className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-slate-100 shadow-md bg-slate-50"
                 />
                 <div className="absolute bottom-0 right-0 bg-emerald-500 text-white p-1 rounded-full border-2 border-white shadow-2xs" title="Đã đối soát KYC">
@@ -2882,16 +2910,16 @@ function TeacherDetailPage() {
 
       {/* Modal Xem Minh chứng thành tích (nếu có) */}
       {activeProofModal && (
-        <div 
+        <div
           className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4"
           onClick={() => setActiveProofModal(null)}
         >
-          <div 
+          <div
             className="bg-white rounded-3xl p-5 max-w-lg w-full shadow-2xl relative"
             onClick={e => e.stopPropagation()}
           >
-            <button 
-              onClick={() => setActiveProofModal(null)} 
+            <button
+              onClick={() => setActiveProofModal(null)}
               className="absolute top-4 right-4 p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 cursor-pointer"
             >
               <X className="w-5 h-5" />
@@ -2949,7 +2977,7 @@ function AdminDashboardPage() {
           <form onSubmit={handleAdminLogin} className="space-y-4 text-left">
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">Mật khẩu quản trị</label>
-              <input 
+              <input
                 type="password"
                 value={adminPassword}
                 onChange={e => setAdminPassword(e.target.value)}
@@ -3039,19 +3067,19 @@ function AdminDashboardPage() {
 
         {/* Tab Navigation */}
         <div className="flex gap-2 border-b border-slate-200 mb-6 overflow-x-auto">
-          <button 
+          <button
             onClick={() => setCurrentTab('kyc')}
             className={`pb-3 px-4 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${currentTab === 'kyc' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
           >
             Duyệt hồ sơ KYC ({pendingList.length})
           </button>
-          <button 
+          <button
             onClick={() => setCurrentTab('requests')}
             className={`pb-3 px-4 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${currentTab === 'requests' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
           >
             Yêu cầu Học thử & Giao dịch
           </button>
-          <button 
+          <button
             onClick={() => setCurrentTab('analytics')}
             className={`pb-3 px-4 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${currentTab === 'analytics' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
           >
@@ -3065,13 +3093,13 @@ function AdminDashboardPage() {
             <div className="flex justify-between items-center">
               <h2 className="text-lg font-bold text-slate-900">Danh sách hồ sơ cần phê duyệt KYC</h2>
               <div className="flex gap-2">
-                <button 
+                <button
                   onClick={() => setKycFilter('pending')}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer ${kycFilter === 'pending' ? 'bg-blue-600 text-white' : 'bg-white border border-slate-200 text-slate-600'}`}
                 >
                   Chờ duyệt ({pendingList.length})
                 </button>
-                <button 
+                <button
                   onClick={() => setKycFilter('approved')}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer ${kycFilter === 'approved' ? 'bg-blue-600 text-white' : 'bg-white border border-slate-200 text-slate-600'}`}
                 >
@@ -3087,7 +3115,7 @@ function AdminDashboardPage() {
                     <img src={tutor.avatar} alt={tutor.name} className="w-16 h-16 rounded-2xl object-cover" />
                     <div className="flex-1">
                       <div className="flex justify-between items-start">
-                        <Link 
+                        <Link
                           to={`/giao-vien/${tutor.id}`}
                           target="_blank"
                           rel="noopener noreferrer"
@@ -3259,11 +3287,11 @@ function AdminDashboardPage() {
 
       {/* Lightbox Zoom Modal */}
       {selectedDocPreview && selectedDocPreview.isOpen && (
-        <div 
+        <div
           className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
           onClick={() => setSelectedDocPreview(null)}
         >
-          <div 
+          <div
             className="bg-white max-w-4xl w-full rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-in zoom-in-95 duration-200 border border-slate-200"
             onClick={e => e.stopPropagation()}
           >
@@ -3273,15 +3301,15 @@ function AdminDashboardPage() {
                 <p className="text-xs text-slate-500 mt-0.5">Giáo viên: <strong className="text-slate-800">{selectedDocPreview.tutorName}</strong></p>
               </div>
               <div className="flex items-center gap-2">
-                <a 
-                  href={selectedDocPreview.imageUrl} 
-                  target="_blank" 
+                <a
+                  href={selectedDocPreview.imageUrl}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors inline-flex items-center gap-1"
                 >
                   <ExternalLink className="w-3.5 h-3.5" /> Mở ảnh gốc
                 </a>
-                <button 
+                <button
                   onClick={() => setSelectedDocPreview(null)}
                   className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
                 >
@@ -3291,16 +3319,16 @@ function AdminDashboardPage() {
             </div>
 
             <div className="flex-1 overflow-auto p-6 bg-slate-900/5 flex items-center justify-center min-h-[350px]">
-              <img 
-                src={selectedDocPreview.imageUrl} 
-                alt={selectedDocPreview.title} 
+              <img
+                src={selectedDocPreview.imageUrl}
+                alt={selectedDocPreview.title}
                 className="max-w-full max-h-[72vh] object-contain rounded-xl shadow-lg border border-slate-200 bg-white"
               />
             </div>
 
             <div className="px-6 py-3 border-t border-slate-200 bg-slate-50 flex justify-between items-center text-xs">
               <span className="text-slate-500">Kiểm tra thông tin họ tên, ngày sinh và số hiệu văn bằng khớp với hồ sơ.</span>
-              <button 
+              <button
                 onClick={() => setSelectedDocPreview(null)}
                 className="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl transition-colors cursor-pointer"
               >
@@ -3656,8 +3684,8 @@ function TutorRegistrationPage() {
         <p className="text-slate-600 mb-8 text-sm leading-relaxed">
           Hồ sơ của bạn đã được gửi đến ban kiểm duyệt HanTutor. Chúng tôi sẽ đối soát danh tính KYC tự động và kích hoạt hồ sơ trong thời gian sớm nhất.
         </p>
-        <Link 
-          to="/tim-gia-su" 
+        <Link
+          to="/tim-gia-su"
           className="inline-block bg-blue-600 text-white font-bold px-8 py-3.5 rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200 text-sm"
         >
           Xem danh sách giáo viên
@@ -3681,11 +3709,10 @@ function TutorRegistrationPage() {
           <div className="mt-6 mb-6 max-w-2xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-left">
             <div
               onClick={() => setRoleType('teacher')}
-              className={`p-4 rounded-2xl border-2 transition-all cursor-pointer select-none ${
-                roleType === 'teacher'
+              className={`p-4 rounded-2xl border-2 transition-all cursor-pointer select-none ${roleType === 'teacher'
                   ? 'border-blue-600 bg-blue-50/60 shadow-md ring-2 ring-blue-100'
                   : 'border-slate-200 bg-slate-50/70 hover:bg-slate-100/80 text-slate-700'
-              }`}
+                }`}
             >
               <div className="flex items-center justify-between mb-2">
                 <span className="font-extrabold text-sm text-slate-900 flex items-center gap-1.5">
@@ -3701,11 +3728,10 @@ function TutorRegistrationPage() {
 
             <div
               onClick={() => setRoleType('tutor')}
-              className={`p-4 rounded-2xl border-2 transition-all cursor-pointer select-none ${
-                roleType === 'tutor'
+              className={`p-4 rounded-2xl border-2 transition-all cursor-pointer select-none ${roleType === 'tutor'
                   ? 'border-purple-600 bg-purple-50/60 shadow-md ring-2 ring-purple-100'
                   : 'border-slate-200 bg-slate-50/70 hover:bg-slate-100/80 text-slate-700'
-              }`}
+                }`}
             >
               <div className="flex items-center justify-between mb-2">
                 <span className="font-extrabold text-sm text-slate-900 flex items-center gap-1.5">
@@ -3724,9 +3750,8 @@ function TutorRegistrationPage() {
             <button
               type="button"
               onClick={() => setStep(1)}
-              className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
-                step === 1 ? 'border-blue-600 bg-blue-50/80 text-blue-900 shadow-xs' : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
-              }`}
+              className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${step === 1 ? 'border-blue-600 bg-blue-50/80 text-blue-900 shadow-xs' : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
+                }`}
             >
               <div className="flex items-center gap-2">
                 <span className={`w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center ${step === 1 ? 'bg-blue-600 text-white' : 'bg-slate-300 text-slate-700'}`}>I</span>
@@ -3742,9 +3767,8 @@ function TutorRegistrationPage() {
                 if (err) { alert(err); return; }
                 setStep(2);
               }}
-              className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
-                step === 2 ? 'border-blue-600 bg-blue-50/80 text-blue-900 shadow-xs' : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
-              }`}
+              className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${step === 2 ? 'border-blue-600 bg-blue-50/80 text-blue-900 shadow-xs' : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
+                }`}
             >
               <div className="flex items-center gap-2">
                 <span className={`w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center ${step === 2 ? 'bg-blue-600 text-white' : 'bg-slate-300 text-slate-700'}`}>II</span>
@@ -4035,31 +4059,31 @@ function TutorRegistrationPage() {
 
               <div className="pt-3 border-t border-slate-200 space-y-2.5">
                 <label className="flex items-start gap-2.5 cursor-pointer text-xs text-slate-700 p-2.5 bg-white rounded-xl border border-slate-200 hover:bg-blue-50/30">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     checked={commitAccurate}
                     onChange={e => setCommitAccurate(e.target.checked)}
-                    className="mt-0.5 rounded text-blue-600 focus:ring-blue-500 shrink-0" 
+                    className="mt-0.5 rounded text-blue-600 focus:ring-blue-500 shrink-0"
                   />
                   <span>1. Cam kết thông tin bằng cấp, chứng chỉ đã tải lên là chính xác 100%.</span>
                 </label>
 
                 <label className="flex items-start gap-2.5 cursor-pointer text-xs text-slate-700 p-2.5 bg-white rounded-xl border border-slate-200 hover:bg-blue-50/30">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     checked={commitConduct}
                     onChange={e => setCommitConduct(e.target.checked)}
-                    className="mt-0.5 rounded text-blue-600 focus:ring-blue-500 shrink-0" 
+                    className="mt-0.5 rounded text-blue-600 focus:ring-blue-500 shrink-0"
                   />
                   <span>2. Cam kết tuân thủ quy tắc ứng xử sư phạm và thời gian nhận lớp sau khi kết nối.</span>
                 </label>
 
                 <label className="flex items-start gap-2.5 cursor-pointer text-xs text-slate-700 p-2.5 bg-white rounded-xl border border-slate-200 hover:bg-blue-50/30">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     checked={commitTerms}
                     onChange={e => setCommitTerms(e.target.checked)}
-                    className="mt-0.5 rounded text-blue-600 focus:ring-blue-500 shrink-0" 
+                    className="mt-0.5 rounded text-blue-600 focus:ring-blue-500 shrink-0"
                   />
                   <span>3. Đã đọc và đồng ý với các điều khoản của hợp đồng hợp tác đào tạo.</span>
                 </label>
@@ -4068,7 +4092,7 @@ function TutorRegistrationPage() {
 
             {/* Form Controls: Back & Submit */}
             <div className="pt-4 flex items-center justify-between gap-4 border-t border-slate-100">
-              <button 
+              <button
                 type="button"
                 onClick={() => {
                   setStep(1);
@@ -4079,7 +4103,7 @@ function TutorRegistrationPage() {
                 ← Quay lại Phần I
               </button>
 
-              <button 
+              <button
                 type="button"
                 onClick={handleSubmit}
                 disabled={loading}
@@ -4102,16 +4126,16 @@ function TutorRegistrationPage() {
 
       {/* Modal Phóng to Xem Kĩ Ảnh Mẫu Chuẩn */}
       {showSampleModal && (
-        <div 
+        <div
           className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"
           onClick={() => setShowSampleModal(false)}
         >
-          <div 
+          <div
             className="bg-white rounded-3xl p-5 sm:p-6 max-w-sm w-full shadow-2xl relative animate-in zoom-in-95 duration-200 flex flex-col items-center text-center"
             onClick={e => e.stopPropagation()}
           >
-            <button 
-              onClick={() => setShowSampleModal(false)} 
+            <button
+              onClick={() => setShowSampleModal(false)}
               className="absolute top-4 right-4 p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors cursor-pointer"
               title="Đóng"
             >
@@ -4123,9 +4147,9 @@ function TutorRegistrationPage() {
             </div>
 
             <div className="w-52 sm:w-60 h-72 sm:h-80 rounded-2xl overflow-hidden shadow-md border-4 border-slate-100 bg-white mb-3 flex items-center justify-center">
-              <img 
-                src="/sample-avatar-4x6.png" 
-                alt="Ảnh mẫu chân dung chuẩn" 
+              <img
+                src="/sample-avatar-4x6.png"
+                alt="Ảnh mẫu chân dung chuẩn"
                 className="w-full h-full object-cover object-top"
               />
             </div>
@@ -4154,10 +4178,10 @@ function Footer() {
     <footer className="bg-[#0d1424] text-slate-400 py-6 border-t border-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
         <Link to="/" className="flex items-center gap-2.5 group select-none">
-          <img 
-            src="/logo-icon.png" 
-            alt="HanTutor Icon" 
-            className="w-9 h-9 object-contain shrink-0 transition-transform duration-200 group-hover:scale-105" 
+          <img
+            src="/logo-icon.png"
+            alt="HanTutor Icon"
+            className="w-9 h-9 object-contain shrink-0 transition-transform duration-200 group-hover:scale-105"
           />
           <span className="font-extrabold text-2xl tracking-tight text-white flex items-center leading-none">
             Han<span className="text-[#FF9000]">tutor</span>
@@ -4195,7 +4219,7 @@ function AppLayout({
   return (
     <div className="min-h-screen bg-slate-50 font-sans flex flex-col relative">
       {!isAdmin && <Navbar />}
-      
+
       <main className="flex-1">
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -4212,16 +4236,16 @@ function AppLayout({
 
       {/* Global Modals */}
       {authModalState.isOpen && (
-        <AuthModal 
-          isOpen={authModalState.isOpen} 
-          initialView={authModalState.view} 
+        <AuthModal
+          isOpen={authModalState.isOpen}
+          initialView={authModalState.view}
           defaultRole={authModalState.defaultRole}
-          onClose={() => setAuthModalState({ ...authModalState, isOpen: false })} 
+          onClose={() => setAuthModalState({ ...authModalState, isOpen: false })}
         />
       )}
 
       {contactZaloModalTutor && (
-        <ContactZaloModal 
+        <ContactZaloModal
           tutor={contactZaloModalTutor}
           isOpen={!!contactZaloModalTutor}
           onClose={() => setContactZaloModalTutor(null)}
@@ -4234,7 +4258,7 @@ function AppLayout({
       )}
 
       {enrollmentModalTutor && (
-        <EnrollmentModal 
+        <EnrollmentModal
           tutor={enrollmentModalTutor}
           isOpen={true}
           onClose={() => setEnrollmentModalTutor(null)}
@@ -4246,7 +4270,7 @@ function AppLayout({
       )}
 
       {checkoutModalState.isOpen && (
-        <CheckoutModal 
+        <CheckoutModal
           enrollmentId={checkoutModalState.enrollmentId}
           amount={checkoutModalState.amount}
           tutorId={checkoutModalState.tutorId}
@@ -4256,7 +4280,7 @@ function AppLayout({
       )}
 
       {isMyTrialsOpen && (
-        <MyTrialsModal 
+        <MyTrialsModal
           isOpen={isMyTrialsOpen}
           onClose={() => setIsMyTrialsOpen(false)}
           onOpenEnrollment={(tutor) => setEnrollmentModalTutor(tutor)}
@@ -4294,14 +4318,14 @@ export default function App() {
           return [...mergedMock, ...customTutors];
         }
       }
-    } catch (e) {}
+    } catch (e) { }
     return mockTutors;
   });
   const [pendingTutors, setPendingTutors] = useState<any[]>(() => {
     try {
       const saved = localStorage.getItem('hantutor_pending_tutors');
       if (saved) return JSON.parse(saved);
-    } catch (e) {}
+    } catch (e) { }
     return mockPendingTutors;
   });
   const [adminStats, setAdminStats] = useState(mockAdminStats);
@@ -4310,7 +4334,7 @@ export default function App() {
     try {
       const saved = localStorage.getItem('hantutor_tutor_reviews');
       if (saved) return JSON.parse(saved);
-    } catch (e) {}
+    } catch (e) { }
     return defaultTutorReviews;
   });
 
@@ -4345,7 +4369,7 @@ export default function App() {
       const updated = [newReview, ...prev];
       try {
         localStorage.setItem('hantutor_tutor_reviews', JSON.stringify(updated));
-      } catch (e) {}
+      } catch (e) { }
       return updated;
     });
 
@@ -4367,7 +4391,7 @@ export default function App() {
       const updated = [newTutor, ...prev];
       try {
         localStorage.setItem('hantutor_pending_tutors', JSON.stringify(updated));
-      } catch (e) {}
+      } catch (e) { }
       return updated;
     });
     setAdminStats(prev => ({
@@ -4466,9 +4490,9 @@ export default function App() {
 
     // 2. Cập nhật trạng thái trong MyTrials sang 'enrolled'
     setMyTrials(prev => {
-      const updated = prev.map(item => 
-        String(item.tutorId) === String(tutorId) 
-          ? { ...item, status: 'enrolled' as const } 
+      const updated = prev.map(item =>
+        String(item.tutorId) === String(tutorId)
+          ? { ...item, status: 'enrolled' as const }
           : item
       );
       saveStoredTrials(updated);
@@ -4516,19 +4540,19 @@ export default function App() {
         personality: tutorToApprove.personality || ['Tận tâm', 'Trách nhiệm', 'Nhiệt tình'],
         certificates: tutorToApprove.certificates || ['Đã xác thực CCCD & Bằng cấp']
       };
-      
+
       const newPending = pendingTutors.filter(t => String(t.id) !== String(tutorId));
       setPendingTutors(newPending);
       try {
         localStorage.setItem('hantutor_pending_tutors', JSON.stringify(newPending));
-      } catch (e) {}
+      } catch (e) { }
 
       setTutors(prev => {
         const filtered = prev.filter(t => String(t.id) !== String(tutorId));
         const updated = [approved, ...filtered];
         try {
           localStorage.setItem('hantutor_tutors_list', JSON.stringify(updated));
-        } catch (e) {}
+        } catch (e) { }
         return updated;
       });
     }
@@ -4539,7 +4563,7 @@ export default function App() {
       const updated = prev.filter(t => String(t.id) !== String(tutorId));
       try {
         localStorage.setItem('hantutor_pending_tutors', JSON.stringify(updated));
-      } catch (e) {}
+      } catch (e) { }
       return updated;
     });
   };
@@ -4589,7 +4613,7 @@ export default function App() {
     <DataContext.Provider value={dataContextValue}>
       <UIContext.Provider value={uiContextValue}>
         <BrowserRouter>
-          <AppLayout 
+          <AppLayout
             authModalState={authModalState}
             setAuthModalState={setAuthModalState}
             contactZaloModalTutor={contactZaloModalTutor}
