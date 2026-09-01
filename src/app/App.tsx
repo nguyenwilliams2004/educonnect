@@ -1590,9 +1590,9 @@ function TutorCard({ tutor }: { tutor: any }) {
   const finalBullets = keyBullets.slice(0, 3);
 
   return (
-    <div className="group relative bg-white rounded-3xl border border-slate-100 hover:border-blue-200/80 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between overflow-hidden">
+    <div className="group relative bg-white rounded-3xl border border-slate-200/80 hover:border-blue-300 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.06)] hover:shadow-[0_16px_32px_-8px_rgba(37,99,235,0.14)] hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between overflow-hidden">
 
-      {/* Visual Hero Photo Banner (Single Main Avatar) */}
+      {/* Visual Hero Photo Banner (Single Main Avatar with Enhanced Gradient Depth) */}
       <div className="relative p-3 pb-0">
         <Link
           to={`/giao-vien/${tutor.id}`}
@@ -1605,19 +1605,20 @@ function TutorCard({ tutor }: { tutor: any }) {
             alt={tutor.displayName || tutor.name}
             className="w-full h-full object-cover object-top group-hover/banner:scale-105 transition-transform duration-500"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-900/30 to-black/10" />
 
           {/* Floating Top Pills */}
           <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between pointer-events-none">
-            <span className={`px-2.5 py-1 rounded-full font-black text-[10px] tracking-wide uppercase backdrop-blur-md shadow-sm flex items-center gap-1.5 ${isTeacher
-                ? 'bg-blue-600/90 text-white'
-                : 'bg-purple-600/90 text-white'
-              }`}>
+            <span className={`px-2.5 py-1 rounded-full font-black text-[10px] tracking-wide uppercase backdrop-blur-md shadow-sm flex items-center gap-1.5 ${
+              isTeacher
+                ? 'bg-blue-600/95 text-white'
+                : 'bg-purple-600/95 text-white'
+            }`}>
               {isTeacher ? <Briefcase className="w-3 h-3" /> : <GraduationCap className="w-3 h-3" />}
               {isTeacher ? 'Giáo viên' : 'Gia sư'}
             </span>
 
-            <span className="px-2.5 py-1 rounded-full font-bold text-[10px] text-emerald-300 bg-emerald-950/80 backdrop-blur-md border border-emerald-500/30 flex items-center gap-1 shadow-sm">
+            <span className="px-2.5 py-1 rounded-full font-bold text-[10px] text-emerald-300 bg-emerald-950/85 backdrop-blur-md border border-emerald-500/30 flex items-center gap-1 shadow-sm">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
               {successRate}% chốt sau học thử
             </span>
@@ -1626,25 +1627,25 @@ function TutorCard({ tutor }: { tutor: any }) {
           {/* Floating Bottom Info over image */}
           <div className="absolute bottom-2.5 left-3 right-3 flex items-end justify-between text-white pointer-events-none">
             <div>
-              <span className="inline-block bg-white/20 backdrop-blur-md border border-white/30 text-white font-extrabold text-[10px] px-2.5 py-0.5 rounded-full mb-1">
+              <span className="inline-block bg-white/20 backdrop-blur-md border border-white/30 text-white font-black text-[10px] px-2.5 py-0.5 rounded-full mb-1 shadow-xs">
                 {tutor.badgeSubject || tutor.subjects?.[0] || 'Môn học'}
               </span>
-              <div className="font-extrabold text-sm sm:text-base leading-tight drop-shadow-sm truncate">
+              <div className="font-black text-sm sm:text-base leading-tight drop-shadow-sm text-white truncate">
                 {tutor.displayName || tutor.name}
               </div>
             </div>
 
             {/* Quick Rating Badge */}
-            <div className="flex items-center gap-1 bg-black/50 backdrop-blur-md px-2 py-1 rounded-xl text-xs font-black text-amber-300 border border-white/10">
+            <div className="flex items-center gap-1 bg-black/60 backdrop-blur-md px-2 py-1 rounded-xl text-xs font-black text-amber-300 border border-white/15 shadow-xs">
               <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-              <span>{tutor.rating}</span>
+              <span className="tabular-nums">{tutor.rating}</span>
             </div>
           </div>
         </Link>
       </div>
 
-      {/* Main Body: Ngắn gọn, súc tích, không văn xuôi dài dòng */}
-      <div className="p-4 sm:p-5 pt-3 flex-1 flex flex-col justify-between space-y-3">
+      {/* Main Body: Ngắn gọn, súc tích, sang trọng */}
+      <div className="p-4 sm:p-5 pt-3.5 flex-1 flex flex-col justify-between space-y-3.5">
         {/* Slogan / Tiêu đề */}
         <Link
           to={`/giao-vien/${tutor.id}`}
@@ -1652,7 +1653,7 @@ function TutorCard({ tutor }: { tutor: any }) {
           rel="noopener noreferrer"
           className="block group-hover:text-blue-600 transition-colors"
         >
-          <div className="text-sm sm:text-[15px] font-extrabold text-slate-900 leading-snug tracking-tight">
+          <div className="text-sm sm:text-[15px] font-black text-slate-900 leading-snug tracking-tight line-clamp-2">
             “{tutor.headline || tutor.title}”
           </div>
         </Link>
@@ -1660,7 +1661,7 @@ function TutorCard({ tutor }: { tutor: any }) {
         {/* Tối đa 3 gạch đầu dòng ý chính */}
         <ul className="space-y-1.5 text-xs">
           {finalBullets.map((item, i) => (
-            <li key={i} className="flex items-start gap-1.5 leading-snug">
+            <li key={i} className="flex items-start gap-2 leading-snug">
               <span className="text-blue-600 font-bold shrink-0 mt-0.5">•</span>
               <span className="text-slate-700 font-medium">{item}</span>
             </li>
@@ -1668,14 +1669,14 @@ function TutorCard({ tutor }: { tutor: any }) {
         </ul>
 
         {/* Pricing & Rate Breakdown */}
-        <div className="pt-2 border-t border-slate-100 space-y-1.5">
+        <div className="pt-2.5 border-t border-slate-100 space-y-1.5">
           <div className="flex items-baseline justify-between">
             <span className="text-xs font-semibold text-slate-500">Học phí dạy kèm:</span>
             <div className="text-right">
-              <span className="text-base sm:text-lg font-black text-blue-700">
+              <span className="text-base sm:text-lg font-black text-blue-700 tabular-nums">
                 {tutor.hourlyRate}đ
               </span>
-              <span className="text-xs font-normal text-slate-400">/{tutor.priceUnit || 'giờ'}</span>
+              <span className="text-xs font-medium text-slate-400">/{tutor.priceUnit || 'giờ'}</span>
             </div>
           </div>
 
@@ -1685,10 +1686,10 @@ function TutorCard({ tutor }: { tutor: any }) {
               {Object.entries(tutor.levelPrices).map(([lvl, prc]) => (
                 <span
                   key={lvl}
-                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-50 border border-slate-200/80 text-[11px] font-medium text-slate-700"
+                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-slate-50 border border-slate-200/90 text-[11px] font-medium text-slate-700"
                 >
                   <span className="text-slate-400">{lvl}:</span>
-                  <strong className="text-slate-900 font-extrabold">{prc}đ</strong>
+                  <strong className="text-slate-900 font-extrabold tabular-nums">{prc}đ</strong>
                 </span>
               ))}
             </div>
@@ -1697,7 +1698,7 @@ function TutorCard({ tutor }: { tutor: any }) {
 
         {/* Bottom CTA Row (Hồ sơ & Học thử Zalo trên cùng 1 dòng) */}
         <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2 mt-auto">
-          <div className="text-[11px] text-slate-500 font-semibold leading-tight whitespace-nowrap">
+          <div className="text-[11px] text-slate-500 font-semibold leading-tight whitespace-nowrap tabular-nums">
             {tutor.reviews || 0} đánh giá
           </div>
 
@@ -1706,7 +1707,7 @@ function TutorCard({ tutor }: { tutor: any }) {
               to={`/giao-vien/${tutor.id}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="whitespace-nowrap px-3 py-2 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors inline-flex items-center justify-center"
+              className="whitespace-nowrap px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 hover:text-slate-900 active:scale-95 transition-all inline-flex items-center justify-center shadow-2xs"
             >
               Hồ sơ
             </Link>
@@ -1718,7 +1719,7 @@ function TutorCard({ tutor }: { tutor: any }) {
                 e.stopPropagation();
                 openContactZaloModal(tutor);
               }}
-              className="whitespace-nowrap bg-blue-600 hover:bg-blue-700 text-white font-extrabold px-3.5 py-2 rounded-xl text-xs transition-all shadow-sm hover:shadow-md cursor-pointer inline-flex items-center justify-center"
+              className="whitespace-nowrap bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-extrabold px-3.5 py-2 rounded-xl text-xs transition-all shadow-sm hover:shadow-md hover:shadow-blue-500/20 cursor-pointer inline-flex items-center justify-center gap-1"
             >
               Học thử Zalo
             </button>
@@ -2527,7 +2528,7 @@ function TeacherDetailPage() {
     || mockTutors[0];
 
   if (!tutor) {
-    return <div className="p-12 text-center text-slate-500">Không tìm thấy giáo viên</div>;
+    return <div className="p-12 text-center text-slate-500 font-medium">Không tìm thấy giáo viên</div>;
   }
 
   const trialItem = myTrials.find(t => String(t.tutorId) === String(tutor.id));
@@ -2624,7 +2625,7 @@ function TeacherDetailPage() {
   };
 
   return (
-    <div className="bg-slate-50/50 min-h-screen pb-24">
+    <div className="bg-[#f8fafc] min-h-screen pb-24">
       {/* Toast thông báo sao chép */}
       {shareToast && (
         <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-xl animate-in fade-in slide-in-from-bottom-2 duration-200 flex items-center gap-2">
@@ -2635,7 +2636,7 @@ function TeacherDetailPage() {
 
       {/* Top Breadcrumb Navigation */}
       <div className="bg-white border-b border-slate-200/80">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center gap-2 text-xs text-slate-500 font-medium">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center gap-2 text-xs text-slate-500 font-medium">
           <Link to="/" className="hover:text-blue-600 transition-colors">Trang chủ</Link>
           <span>/</span>
           <Link to="/tim-gia-su" className="hover:text-blue-600 transition-colors">Tìm giáo viên & gia sư</Link>
@@ -2651,19 +2652,19 @@ function TeacherDetailPage() {
           <div className="lg:col-span-8 space-y-8">
 
             {/* 1. Category Tag Pills */}
-            <div className="space-y-3">
+            <div className="space-y-3.5">
               <div className="flex flex-wrap items-center gap-2">
-                <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wide flex items-center gap-1.5 ${
+                <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wide flex items-center gap-1.5 shadow-2xs ${
                   isTeacher ? 'bg-blue-600 text-white' : 'bg-purple-600 text-white'
                 }`}>
-                  {isTeacher ? <Briefcase className="w-3 h-3" /> : <GraduationCap className="w-3 h-3" />}
+                  {isTeacher ? <Briefcase className="w-3.5 h-3.5" /> : <GraduationCap className="w-3.5 h-3.5" />}
                   {isTeacher ? 'Giáo viên Chuyên môn' : 'Gia sư Sinh viên Giỏi'}
                 </span>
 
                 {subjectsList.map((sub: string, idx: number) => (
                   <span
                     key={idx}
-                    className="px-3.5 py-1 rounded-full text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200"
+                    className="px-3.5 py-1 rounded-full text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200/80 shadow-2xs"
                   >
                     {sub}
                   </span>
@@ -2677,12 +2678,12 @@ function TeacherDetailPage() {
 
               {/* 3. Địa điểm & Hình thức giảng dạy */}
               <div className="flex flex-wrap items-center gap-2.5 pt-1">
-                <span className="px-3.5 py-1.5 rounded-full border border-slate-200 bg-white text-xs font-semibold text-slate-800 inline-flex items-center gap-1.5 shadow-2xs">
+                <span className="px-3.5 py-1.5 rounded-full border border-slate-200/90 bg-white text-xs font-semibold text-slate-800 inline-flex items-center gap-1.5 shadow-2xs">
                   <Laptop className="w-3.5 h-3.5 text-blue-600" />
                   Học trực tuyến (Google Meet / Zoom PRO)
                 </span>
                 {tutor.location && (
-                  <span className="px-3.5 py-1.5 rounded-full border border-slate-200 bg-white text-xs font-semibold text-slate-800 inline-flex items-center gap-1.5 shadow-2xs">
+                  <span className="px-3.5 py-1.5 rounded-full border border-slate-200/90 bg-white text-xs font-semibold text-slate-800 inline-flex items-center gap-1.5 shadow-2xs">
                     <MapPin className="w-3.5 h-3.5 text-blue-600" />
                     Tại nhà: {tutor.location}
                   </span>
@@ -2691,25 +2692,25 @@ function TeacherDetailPage() {
             </div>
 
             {/* 4. Banner Gia sư được đề xuất & KYC Verified (Thiết kế mới sang trọng) */}
-            <div className="bg-gradient-to-br from-blue-50 via-indigo-50/50 to-slate-50 border border-blue-200/80 rounded-3xl p-6 shadow-2xs space-y-2 relative overflow-hidden">
+            <div className="bg-gradient-to-br from-blue-50/90 via-indigo-50/40 to-slate-50 border border-blue-200/80 rounded-3xl p-6 shadow-sm space-y-2 relative overflow-hidden">
               <div className="flex items-center gap-2 text-blue-900 font-black text-sm">
                 <ShieldCheck className="w-5 h-5 text-blue-600 shrink-0" />
                 <span>Hồ sơ đã được kiểm định & Đối soát KYC 100%</span>
               </div>
               <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-normal">
-                {tutor.displayName || tutor.name} đã được ban chuyên môn HanTutor đối soát Căn cước công dân, Văn bằng tốt nghiệp và cam kết chất lượng thông qua buổi học thử 1-1 miễn phí. Tỷ lệ học sinh tiếp tục theo học đạt <strong className="text-blue-700 font-bold">{successRate}%</strong>.
+                {tutor.displayName || tutor.name} đã được ban chuyên môn HanTutor đối soát Căn cước công dân, Văn bằng tốt nghiệp và cam kết chất lượng thông qua buổi học thử 1-1 miễn phí. Tỷ lệ học sinh tiếp tục theo học đạt <strong className="text-blue-700 font-bold tabular-nums">{successRate}%</strong>.
               </p>
             </div>
 
             {/* 5. Về [Tên gia sư] (About the Tutor) */}
-            <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-2xs space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                <h2 className="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-2">
+            <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.04)] space-y-4">
+              <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
+                <h2 className="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-2 tracking-tight">
                   <User className="w-5 h-5 text-blue-600" />
                   Về {tutor.displayName || tutor.name}
                 </h2>
                 {tutor.experience && (
-                  <span className="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1 rounded-full">
+                  <span className="text-xs font-bold text-slate-700 bg-slate-100 px-3 py-1 rounded-full tabular-nums">
                     {tutor.experience} năm kinh nghiệm
                   </span>
                 )}
@@ -2722,8 +2723,8 @@ function TeacherDetailPage() {
               </div>
 
               {/* Bằng cấp & Trình độ học vấn */}
-              <div className="bg-slate-50/80 rounded-2xl p-4 border border-slate-200/70 space-y-2.5">
-                <span className="text-xs font-bold text-slate-900 uppercase tracking-wider block">
+              <div className="bg-slate-50/90 rounded-2xl p-4.5 border border-slate-200/70 space-y-2.5">
+                <span className="text-xs font-extrabold text-slate-900 uppercase tracking-wider block">
                   Trình độ học vấn & Chứng chỉ sư phạm:
                 </span>
                 <div className="space-y-2 text-xs sm:text-sm text-slate-700">
@@ -2745,29 +2746,29 @@ function TeacherDetailPage() {
             </div>
 
             {/* 6. Giới thiệu về khóa học & Phương pháp (About the Course) */}
-            <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-2xs space-y-4">
-              <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
+            <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.04)] space-y-4">
+              <div className="flex items-center gap-2 pb-3.5 border-b border-slate-100">
                 <BookOpen className="w-5 h-5 text-blue-600" />
-                <h2 className="text-lg sm:text-xl font-black text-slate-900">
+                <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
                   Giới thiệu về khóa học & Phương pháp giảng dạy
                 </h2>
               </div>
 
               <div className="flex flex-wrap gap-2">
-                <span className="px-3 py-1 rounded-full border border-blue-200 bg-blue-50/60 text-xs font-bold text-blue-800 inline-flex items-center gap-1.5">
+                <span className="px-3.5 py-1 rounded-full border border-blue-200 bg-blue-50/60 text-xs font-bold text-blue-800 inline-flex items-center gap-1.5 shadow-2xs">
                   🎯 Mọi trình độ từ cơ bản đến nâng cao
                 </span>
-                <span className="px-3 py-1 rounded-full border border-blue-200 bg-blue-50/60 text-xs font-bold text-blue-800 inline-flex items-center gap-1.5">
+                <span className="px-3.5 py-1 rounded-full border border-blue-200 bg-blue-50/60 text-xs font-bold text-blue-800 inline-flex items-center gap-1.5 shadow-2xs">
                   🌐 {tutor.badgeSubject || tutor.subjects?.[0] || 'Môn học'}
                 </span>
               </div>
 
-              <div className="text-sm text-slate-700 leading-relaxed font-normal space-y-2">
+              <div className="text-sm text-slate-700 leading-relaxed font-normal space-y-3">
                 <p>
                   {tutor.teachingMethod || 'Trước khi bắt đầu khóa học, mình sẽ có 1 buổi coaching FREE để xác định level hiện tại của bạn, lắng nghe nhu cầu và nguyện vọng của bạn khi học (ví dụ: phục vụ công việc, giao tiếp, thi cử lấy chứng chỉ...). Sau đó mình sẽ cho bạn xem lộ trình chi tiết, demo lesson 1 sẽ học như thế nào, nếu bạn thấy phù hợp thì chúng mình sẽ bắt đầu vào buổi tiếp theo.'}
                 </p>
                 {tutor.philosophy && (
-                  <div className="border-l-4 border-blue-600 bg-blue-50/50 p-3.5 rounded-r-2xl text-xs sm:text-sm italic text-slate-800 font-medium mt-3">
+                  <div className="border-l-4 border-blue-600 bg-blue-50/50 p-4 rounded-r-2xl text-xs sm:text-sm italic text-slate-800 font-medium">
                     "{tutor.philosophy}"
                   </div>
                 )}
@@ -2775,24 +2776,24 @@ function TeacherDetailPage() {
             </div>
 
             {/* 7. Lịch trống & Khung giờ nhận lớp (Availability Matrix) */}
-            <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-2xs space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
+            <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.04)] space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3.5 border-b border-slate-100">
                 <div className="flex items-center gap-2">
                   <Calendar className="w-5 h-5 text-blue-600" />
-                  <h2 className="text-lg sm:text-xl font-black text-slate-900">Lịch trống & Khung giờ nhận lớp</h2>
+                  <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">Lịch trống & Khung giờ nhận lớp</h2>
                 </div>
-                <span className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full self-start sm:self-auto">
+                <span className="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1 rounded-full self-start sm:self-auto">
                   Phản hồi: {tutor.responseTime || 'Dưới 30 phút'}
                 </span>
               </div>
 
-              <div className="border border-slate-200 rounded-2xl overflow-hidden">
+              <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-2xs">
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[540px] border-collapse text-xs text-center">
                     <thead>
                       <tr className="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
                         <th className="p-3 text-left pl-4 font-extrabold text-slate-800">Khung giờ nhận dạy</th>
-                        {days.map(d => <th key={d} className="p-3">{d}</th>)}
+                        {days.map(d => <th key={d} className="p-3 font-extrabold">{d}</th>)}
                       </tr>
                     </thead>
                     <tbody>
@@ -2809,7 +2810,7 @@ function TeacherDetailPage() {
                             return (
                               <td key={day} className="p-1.5">
                                 {isAvailable ? (
-                                  <span className="block py-1.5 px-2 bg-emerald-100 text-emerald-900 font-black rounded-lg text-xs">
+                                  <span className="block py-1.5 px-2 bg-emerald-100/90 text-emerald-900 font-black rounded-lg text-xs shadow-2xs">
                                     X
                                   </span>
                                 ) : (
@@ -2829,15 +2830,15 @@ function TeacherDetailPage() {
             </div>
 
             {/* 8. Video bài giảng mẫu (Video Player) */}
-            <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-2xs space-y-4">
-              <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
+            <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.04)] space-y-4">
+              <div className="flex items-center gap-2 pb-3.5 border-b border-slate-100">
                 <Play className="w-5 h-5 text-blue-600" />
-                <h2 className="text-lg sm:text-xl font-black text-slate-900">
+                <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
                   Video bài giảng mẫu & Tài liệu học tập
                 </h2>
               </div>
 
-              <div className="aspect-video bg-slate-900 rounded-2xl overflow-hidden shadow-inner relative">
+              <div className="aspect-video bg-slate-950 rounded-2xl overflow-hidden shadow-inner relative border border-slate-200">
                 <iframe
                   className="w-full h-full"
                   src={tutor.videoDemo || "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=0"}
@@ -2849,20 +2850,20 @@ function TeacherDetailPage() {
             </div>
 
             {/* 9. Đề xuất & Đánh giá từ học viên (Reviews & Testimonials) */}
-            <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-2xs space-y-5">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+            <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.04)] space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-slate-100">
                 <div className="flex items-center gap-2">
                   <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
-                  <h2 className="text-lg sm:text-xl font-black text-slate-900">
+                  <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
                     Đề xuất & Đánh giá học viên
                   </h2>
-                  <span className="bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-0.5 rounded-full text-xs font-extrabold">
+                  <span className="bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-0.5 rounded-full text-xs font-extrabold tabular-nums">
                     {displayedReviewsRaw.length} đánh giá
                   </span>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="bg-blue-50 text-blue-600 border border-blue-200 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                  <span className="bg-blue-50 text-blue-600 border border-blue-200 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs tabular-nums">
                     <ThumbsUp className="w-3.5 h-3.5 fill-blue-600" /> {displayedReviewsRaw.length}
                   </span>
                   <button
@@ -2943,22 +2944,22 @@ function TeacherDetailPage() {
             </div>
 
             {/* 10. Mức học phí (Pricing Summary Grid 4 cột) */}
-            <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-2xs space-y-4">
-              <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
+            <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.04)] space-y-4">
+              <div className="flex items-center gap-2 pb-3.5 border-b border-slate-100">
                 <DollarSign className="w-5 h-5 text-blue-600" />
-                <h2 className="text-lg sm:text-xl font-black text-slate-900">Mức học phí & Ưu đãi</h2>
+                <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">Mức học phí & Ưu đãi</h2>
               </div>
 
-              <div className="rounded-2xl border border-slate-200 p-5 bg-slate-50/50 grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="rounded-2xl border border-slate-200 p-5 bg-slate-50/60 grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div>
                   <span className="text-xs font-extrabold text-slate-800 block mb-1">Mức học phí</span>
-                  <span className="text-sm font-bold text-slate-900">{tutor.hourlyRate} VNĐ</span>
+                  <span className="text-sm font-bold text-slate-900 tabular-nums">{tutor.hourlyRate} VNĐ</span>
                 </div>
                 <div>
                   <span className="text-xs font-extrabold text-slate-800 block mb-1">Giá trọn gói gói học</span>
                   <div className="text-xs text-slate-600 space-y-0.5">
-                    <div>Gói 5 giờ: <strong className="text-blue-700">{package5h}</strong></div>
-                    <div>Gói 10 giờ: <strong className="text-blue-700">{package10h}</strong></div>
+                    <div>Gói 5 giờ: <strong className="text-blue-700 tabular-nums">{package5h}</strong></div>
+                    <div>Gói 10 giờ: <strong className="text-blue-700 tabular-nums">{package10h}</strong></div>
                   </div>
                 </div>
                 <div>
@@ -2980,11 +2981,11 @@ function TeacherDetailPage() {
                     Các giáo viên dạy <strong>{tutor.badgeSubject || tutor.subjects?.[0] || 'môn học'}</strong> tương tự tại <strong>{tutor.location || 'Hà Nội'}</strong>
                   </h2>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-slate-500 font-bold">{relatedPage + 1}/{totalPages}</span>
+                    <span className="text-xs text-slate-500 font-bold tabular-nums">{relatedPage + 1}/{totalPages}</span>
                     <button
                       type="button"
                       onClick={() => setRelatedPage(p => (p > 0 ? p - 1 : totalPages - 1))}
-                      className="w-7 h-7 rounded-full border border-slate-200 flex items-center justify-center hover:bg-slate-50 hover:border-blue-300 text-slate-600 transition-colors cursor-pointer"
+                      className="w-7 h-7 rounded-full border border-slate-200 flex items-center justify-center hover:bg-slate-50 hover:border-blue-300 text-slate-600 transition-colors cursor-pointer active:scale-95"
                       title="Trang trước"
                     >
                       <ChevronLeft className="w-4 h-4" />
@@ -2992,7 +2993,7 @@ function TeacherDetailPage() {
                     <button
                       type="button"
                       onClick={() => setRelatedPage(p => (p < totalPages - 1 ? p + 1 : 0))}
-                      className="w-7 h-7 rounded-full border border-slate-200 flex items-center justify-center hover:bg-slate-50 hover:border-blue-300 text-slate-600 transition-colors cursor-pointer"
+                      className="w-7 h-7 rounded-full border border-slate-200 flex items-center justify-center hover:bg-slate-50 hover:border-blue-300 text-slate-600 transition-colors cursor-pointer active:scale-95"
                       title="Trang tiếp theo"
                     >
                       <ChevronRight className="w-4 h-4" />
@@ -3020,10 +3021,10 @@ function TeacherDetailPage() {
                         </div>
                       </div>
                       <div className="space-y-0.5">
-                        <div className="text-[11px] font-bold text-amber-500 flex items-center gap-1">
+                        <div className="text-[11px] font-bold text-amber-500 flex items-center gap-1 tabular-nums">
                           ⭐ 5 ({rel.reviews || 2} lượt đánh giá)
                         </div>
-                        <div className="text-xs font-black text-blue-700">
+                        <div className="text-xs font-black text-blue-700 tabular-nums">
                           {rel.hourlyRate} VNĐ/giờ
                         </div>
                         <div className="text-[10px] font-semibold text-blue-700 bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-md inline-block">
@@ -3040,20 +3041,20 @@ function TeacherDetailPage() {
 
           {/* CỘT PHẢI (4 / 12 CỘT) - Sticky Action Card (Phong cách Hiện đại High-End) */}
           <div className="lg:col-span-4">
-            <div className="bg-white rounded-3xl border border-slate-200/90 shadow-xl p-6 sm:p-7 text-center sticky top-24 space-y-5">
+            <div className="bg-white rounded-3xl border border-slate-200/90 shadow-xl shadow-slate-900/5 p-6 sm:p-7 text-center sticky top-24 space-y-5">
 
               {/* Top actions: Favorite & Share */}
               <div className="flex justify-between items-center text-slate-400">
                 <button
                   onClick={() => setIsLiked(!isLiked)}
-                  className={`p-2 rounded-full hover:bg-slate-50 transition-colors cursor-pointer ${isLiked ? 'text-blue-600' : 'hover:text-slate-600'}`}
+                  className={`p-2 rounded-full hover:bg-slate-50 transition-colors cursor-pointer active:scale-90 ${isLiked ? 'text-blue-600' : 'hover:text-slate-600'}`}
                   title="Lưu hồ sơ"
                 >
                   <Heart className={`w-5 h-5 ${isLiked ? 'fill-blue-600' : ''}`} />
                 </button>
                 <button
                   onClick={handleShare}
-                  className="p-2 rounded-full hover:bg-slate-50 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                  className="p-2 rounded-full hover:bg-slate-50 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer active:scale-90"
                   title="Chia sẻ hồ sơ"
                 >
                   <Share2 className="w-5 h-5" />
@@ -3074,9 +3075,9 @@ function TeacherDetailPage() {
 
               {/* Name & Rating */}
               <div className="space-y-1">
-                <h2 className="text-xl font-black text-slate-900">{tutor.displayName || tutor.name}</h2>
+                <h2 className="text-xl font-black text-slate-900 tracking-tight">{tutor.displayName || tutor.name}</h2>
                 <div className="text-xs text-amber-500 font-bold flex items-center justify-center gap-1">
-                  ⭐ 5.0 <span className="text-slate-500 font-normal">({displayedReviewsRaw.length} các đánh giá)</span>
+                  ⭐ 5.0 <span className="text-slate-500 font-normal tabular-nums">({displayedReviewsRaw.length} các đánh giá)</span>
                 </div>
               </div>
 
@@ -3084,7 +3085,7 @@ function TeacherDetailPage() {
               <div className="space-y-2.5 py-3 border-y border-slate-100 text-xs text-left">
                 <div className="flex justify-between items-center">
                   <span className="text-slate-600 font-medium">Mức học phí</span>
-                  <strong className="text-slate-900 font-bold">{tutor.hourlyRate} VNĐ</strong>
+                  <strong className="text-slate-900 font-bold tabular-nums">{tutor.hourlyRate} VNĐ</strong>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-slate-600 font-medium">Phản hồi</span>
@@ -3092,11 +3093,11 @@ function TeacherDetailPage() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-slate-600 font-medium">Học viên đang kèm</span>
-                  <strong className="text-slate-900 font-bold">{officialEnrolled || 2}</strong>
+                  <strong className="text-slate-900 font-bold tabular-nums">{officialEnrolled || 2}</strong>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-slate-600 font-medium">Tỷ lệ chốt sau học thử</span>
-                  <strong className="text-emerald-700 font-bold">{successRate}%</strong>
+                  <strong className="text-emerald-700 font-bold tabular-nums">{successRate}%</strong>
                 </div>
               </div>
 
@@ -3111,7 +3112,7 @@ function TeacherDetailPage() {
                       href={`https://zalo.me/${(tutor.zalo || tutor.phone || '0912345678').replace(/[^0-9]/g, '')}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full bg-[#0068FF] hover:bg-[#0056d6] text-white font-bold py-3 rounded-xl transition-all text-xs flex items-center justify-center shadow-xs text-center"
+                      className="w-full bg-[#0068FF] hover:bg-[#0056d6] active:scale-95 text-white font-bold py-3 rounded-xl transition-all text-xs flex items-center justify-center shadow-xs text-center"
                     >
                       Nhắn Zalo giáo viên
                     </a>
@@ -3120,7 +3121,7 @@ function TeacherDetailPage() {
                   <button
                     type="button"
                     onClick={() => openContactZaloModal(tutor)}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-3.5 rounded-2xl transition-all shadow-md shadow-blue-200 flex items-center justify-center gap-2 cursor-pointer text-sm"
+                    className="w-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-black py-3.5 rounded-2xl transition-all shadow-md shadow-blue-200 flex items-center justify-center gap-2 cursor-pointer text-sm"
                   >
                     <MessageCircle className="w-4 h-4" />
                     Nhận 01 buổi học thử 1-1
