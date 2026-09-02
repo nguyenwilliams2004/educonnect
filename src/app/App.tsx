@@ -994,9 +994,6 @@ function CheckoutModal({
           </div>
         ) : (
           <div className="py-4 space-y-4">
-            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto text-emerald-600 animate-bounce">
-              <CheckCircle className="w-10 h-10" />
-            </div>
             <h3 className="text-2xl font-extrabold text-slate-900">Đăng ký thành công!</h3>
             <p className="text-xs text-slate-500 leading-relaxed">
               Lớp học đã được kích hoạt thành công. Giáo viên sẽ liên hệ và bắt đầu khóa học theo lịch đã chọn. Chúc bạn có những buổi học hiệu quả!
@@ -1016,7 +1013,7 @@ function CheckoutModal({
 }
 
 // ==========================================
-// 3.2. TEACHER WALLET MODAL (Ví Thu Nhập Giáo Viên - Minimalist Blue & White)
+// 3.2. TEACHER WALLET MODAL (Ví Thu Nhập Giáo Viên - High-End Visual Design)
 // ==========================================
 function TeacherWalletModal({
   isOpen,
@@ -1106,102 +1103,94 @@ function TeacherWalletModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl max-w-lg w-full shadow-2xl relative border border-slate-100 animate-in zoom-in-95 duration-200 overflow-hidden flex flex-col max-h-[92vh]">
-        {/* Header Minimalist Blue & White */}
-        <div className="p-6 pb-4 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-blue-50/50 via-white to-slate-50/50">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-bold shadow-xs">
-              <DollarSign className="w-5 h-5" />
+      <div className="bg-white rounded-[2rem] max-w-lg w-full shadow-2xl relative border border-slate-100 animate-in zoom-in-95 duration-200 overflow-hidden flex flex-col max-h-[92vh]">
+        {/* Header High-End Visual Design - No icon */}
+        <div className="p-6 pb-4 border-b border-slate-100 flex items-center justify-between bg-white">
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-black text-slate-900 tracking-tight">Ví Thu Nhập Giáo Viên</h3>
+              <span className="text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200/80 px-2.5 py-0.5 rounded-full">
+                Napas 24/7
+              </span>
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-lg font-extrabold text-slate-900 leading-tight">Ví Thu Nhập Giáo Viên</h3>
-                <span className="text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full">
-                  Napas 24/7
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Chủ ví: <strong className="text-slate-800">{activeTutor?.name}</strong>
-              </p>
-            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Chủ ví: <strong className="text-slate-800">{activeTutor?.name}</strong>
+            </p>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-2 rounded-full transition-colors cursor-pointer"
+            className="text-slate-400 hover:text-slate-700 hover:bg-slate-100 px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            Đóng
           </button>
         </div>
 
         <div className="p-6 overflow-y-auto space-y-5">
-          {/* Card Số dư Phong cách Minimalist Blue & White */}
-          <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white p-6 rounded-3xl shadow-[0_12px_36px_rgba(37,99,235,0.22)] relative overflow-hidden">
-            <div className="absolute right-0 top-0 w-48 h-48 bg-white/10 rounded-full blur-2xl pointer-events-none" />
+          {/* Double-Bezel Card Số dư */}
+          <div className="p-1.5 bg-blue-900/10 rounded-[2rem] border border-blue-500/20 shadow-sm">
+            <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white p-6 rounded-[calc(2rem-0.375rem)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.25)] relative overflow-hidden">
+              <div className="absolute right-0 top-0 w-48 h-48 bg-white/10 rounded-full blur-2xl pointer-events-none" />
 
-            <div className="flex justify-between items-start mb-2 relative z-10">
-              <span className="text-xs text-blue-100 font-medium flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                Số dư khả dụng
-              </span>
-              <span className="text-[10px] font-extrabold bg-white/15 text-white px-2.5 py-0.5 rounded-full border border-white/20">
-                Tự rút 24/7
-              </span>
-            </div>
-
-            <div className="text-3xl sm:text-4xl font-black text-white tracking-tight tabular-nums my-1.5 relative z-10 font-mono">
-              {wallet.balance.toLocaleString()} <span className="text-base font-bold text-blue-200">VNĐ</span>
-            </div>
-
-            <div className="mt-4 pt-3.5 border-t border-white/15 flex items-center justify-between text-xs text-blue-100 relative z-10">
-              <div>
-                Đã rút thành công: <strong className="text-white font-bold">{wallet.totalWithdrawn.toLocaleString()}đ</strong>
+              <div className="flex justify-between items-start mb-2 relative z-10">
+                <span className="text-xs text-blue-100 font-medium flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  Số dư khả dụng
+                </span>
+                <span className="text-[10px] font-bold bg-white/20 text-white px-2.5 py-0.5 rounded-full border border-white/25">
+                  Tự rút 24/7
+                </span>
               </div>
-              <div className="text-blue-200 text-[11px]">
-                {wallet.transactions.length} biến động
+
+              <div className="text-3xl sm:text-4xl font-black text-white tracking-tight tabular-nums my-1.5 relative z-10 font-mono">
+                {wallet.balance.toLocaleString()} <span className="text-base font-bold text-blue-200">VNĐ</span>
+              </div>
+
+              <div className="mt-4 pt-3.5 border-t border-white/15 flex items-center justify-between text-xs text-blue-100 relative z-10">
+                <div>
+                  Đã rút thành công: <strong className="text-white font-bold">{wallet.totalWithdrawn.toLocaleString()}đ</strong>
+                </div>
+                <div className="text-blue-200 text-[11px] font-medium">
+                  {wallet.transactions.length} biến động
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Tab Navigation: Rút tiền vs Lịch sử */}
+          {/* Tab Navigation: Rút tiền vs Lịch sử - No icons */}
           <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100/90 rounded-2xl">
             <button
               type="button"
               onClick={() => setActiveTab('withdraw')}
-              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${activeTab === 'withdraw'
+              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer text-center ${activeTab === 'withdraw'
                   ? 'bg-white text-blue-600 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
                 }`}
             >
-              <CreditCard className="w-4 h-4" /> Rút tiền về Ngân hàng
+              Rút tiền về Ngân hàng
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('history')}
-              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${activeTab === 'history'
+              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer text-center ${activeTab === 'history'
                   ? 'bg-white text-blue-600 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
                 }`}
             >
-              <History className="w-4 h-4" /> Lịch sử biến động ({wallet.transactions.length})
+              Lịch sử biến động ({wallet.transactions.length})
             </button>
           </div>
 
           {/* TAB 1: RÚT TIỀN */}
           {activeTab === 'withdraw' ? (
             <form onSubmit={handleWithdraw} className="space-y-4 text-left">
-              {/* Thẻ Ngân hàng Đã liên kết */}
-              <div className="p-3.5 bg-blue-50/40 border border-blue-100 rounded-2xl flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-blue-600 text-white font-black text-xs flex items-center justify-center shadow-xs">
-                    {activeTutor?.bankName?.substring(0, 2) || 'MB'}
+              {/* Thẻ Ngân hàng Đã liên kết - No icons */}
+              <div className="p-3.5 bg-blue-50/50 border border-blue-100 rounded-2xl flex items-center justify-between gap-3">
+                <div className="space-y-0.5">
+                  <div className="text-xs font-bold text-slate-900 flex items-center gap-2">
+                    <span>{bankAccount}</span>
+                    <span className="text-[10px] font-bold text-blue-700 bg-blue-100/70 px-1.5 py-0.2 rounded-md">Đã xác thực</span>
                   </div>
-                  <div>
-                    <div className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                      <span>{bankAccount}</span>
-                      <CheckCircle className="w-3.5 h-3.5 text-blue-600" />
-                    </div>
-                    <span className="text-[10px] text-slate-500">Tài khoản chính nhận chuyển khoản 24/7</span>
-                  </div>
+                  <span className="text-[10px] text-slate-500">Tài khoản chính nhận chuyển khoản Napas 24/7</span>
                 </div>
                 <button
                   type="button"
@@ -1223,7 +1212,7 @@ function TeacherWalletModal({
                     onClick={() => setWithdrawAmount(wallet.balance.toString())}
                     className="text-xs text-blue-600 font-bold hover:underline cursor-pointer"
                   >
-                    ⚡ Rút tất cả số dư
+                    Rút toàn bộ số dư
                   </button>
                 </div>
                 <div className="relative">
@@ -1259,7 +1248,7 @@ function TeacherWalletModal({
               {/* Thông tin phí và thời gian */}
               <div className="p-3.5 bg-blue-50/50 rounded-2xl border border-blue-100 text-[11px] text-slate-700 space-y-1">
                 <div className="flex justify-between items-center">
-                  <span>Phí giao dịch rút tiền:</span>
+                  <span>Phí giao dịch:</span>
                   <span className="font-extrabold text-blue-700">0đ (Miễn phí 100%)</span>
                 </div>
                 <div className="flex justify-between items-center">
@@ -1271,7 +1260,7 @@ function TeacherWalletModal({
               <button
                 type="submit"
                 disabled={loading || wallet.balance <= 0}
-                className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-3.5 rounded-2xl text-sm transition-all shadow-md shadow-blue-200 cursor-pointer flex items-center justify-center gap-2 active:scale-98"
+                className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-3.5 rounded-2xl text-sm transition-all shadow-sm shadow-blue-200 cursor-pointer flex items-center justify-center active:scale-[0.98]"
               >
                 {loading ? 'Đang tạo lệnh chuyển tiền Napas...' : `Xác nhận rút ${withdrawAmount ? parseInt(withdrawAmount).toLocaleString() + 'đ' : ''} về Ngân hàng`}
               </button>
@@ -1309,7 +1298,7 @@ function TeacherWalletModal({
                 ) : (
                   filteredTransactions.map((tx: WalletTransaction) => (
                     <div key={tx.id} className="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/90 flex items-center justify-between text-xs hover:border-blue-200 hover:bg-blue-50/20 transition-all">
-                      <div className="space-y-1 max-w-[65%]">
+                      <div className="space-y-0.5 max-w-[65%]">
                         <div className="font-bold text-slate-900 leading-snug">{tx.title}</div>
                         <div className="text-[10px] text-slate-500">{tx.date} • {tx.bankInfo || 'Tự động'}</div>
                       </div>
@@ -1334,7 +1323,7 @@ function TeacherWalletModal({
 }
 
 // ==========================================
-// 3.3. TEACHER PROFILE MODAL (Chỉnh Sửa Thông Tin Giáo Viên - Blue & White Minimalist)
+// 3.3. TEACHER PROFILE MODAL (Chỉnh Sửa Thông Tin Giáo Viên - High-End Visual Design)
 // ==========================================
 function TeacherProfileModal({
   isOpen,
@@ -1428,60 +1417,55 @@ function TeacherProfileModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl max-w-2xl w-full shadow-2xl relative border border-slate-100 animate-in zoom-in-95 duration-200 overflow-hidden flex flex-col max-h-[92vh]">
-        {/* Header */}
-        <div className="p-6 pb-4 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-blue-50/50 via-white to-slate-50/50">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-bold shadow-xs">
-              <User className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="text-lg font-extrabold text-slate-900 leading-tight">Chỉnh Sửa Hồ Sơ Giáo Viên</h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Cập nhật thông tin cá nhân, học phí các cấp và tài khoản ngân hàng
-              </p>
-            </div>
+      <div className="bg-white rounded-[2rem] max-w-2xl w-full shadow-2xl relative border border-slate-100 animate-in zoom-in-95 duration-200 overflow-hidden flex flex-col max-h-[92vh]">
+        {/* Header - No icon */}
+        <div className="p-6 pb-4 border-b border-slate-100 flex items-center justify-between bg-white">
+          <div>
+            <h3 className="text-lg font-black text-slate-900 tracking-tight">Chỉnh Sửa Hồ Sơ Giáo Viên</h3>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Cập nhật thông tin cá nhân, học phí các cấp và tài khoản ngân hàng
+            </p>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-2 rounded-full transition-colors cursor-pointer"
+            className="text-slate-400 hover:text-slate-700 hover:bg-slate-100 px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            Đóng
           </button>
         </div>
 
-        {/* Tab Selector */}
+        {/* Tab Selector - No icons */}
         <div className="px-6 pt-4 pb-0 bg-white">
           <div className="grid grid-cols-3 gap-2 p-1 bg-slate-100 rounded-2xl">
             <button
               type="button"
               onClick={() => setActiveTab('info')}
-              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${activeTab === 'info'
+              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer text-center ${activeTab === 'info'
                   ? 'bg-white text-blue-600 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
                 }`}
             >
-              <User className="w-3.5 h-3.5" /> Thông tin cá nhân
+              Thông tin cá nhân
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('pricing')}
-              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${activeTab === 'pricing'
+              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer text-center ${activeTab === 'pricing'
                   ? 'bg-white text-blue-600 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
                 }`}
             >
-              <BookOpen className="w-3.5 h-3.5" /> Môn dạy & Học phí
+              Môn dạy & Học phí
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('bank')}
-              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${activeTab === 'bank'
+              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer text-center ${activeTab === 'bank'
                   ? 'bg-white text-blue-600 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
                 }`}
             >
-              <CreditCard className="w-3.5 h-3.5" /> Ngân hàng rút tiền
+              Ngân hàng rút tiền
             </button>
           </div>
         </div>
@@ -1565,7 +1549,7 @@ function TeacherProfileModal({
           {activeTab === 'pricing' && (
             <div className="space-y-4">
               <div className="p-3 bg-blue-50/70 rounded-2xl border border-blue-200 text-xs text-blue-900 leading-relaxed">
-                💡 <strong>Lưu ý:</strong> Học phí dưới đây là mức học phí hiển thị công khai khi học sinh đăng ký khóa học và được tích lũy vào Ví Giảng Dạy ngay khi học sinh thanh toán.
+                Học phí dưới đây là mức học phí hiển thị công khai khi học sinh đăng ký khóa học và được tích lũy vào Ví Giảng Dạy ngay khi học sinh thanh toán.
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
@@ -1672,9 +1656,8 @@ function TeacherProfileModal({
                 />
               </div>
 
-              <div className="p-3 bg-blue-50/50 rounded-2xl border border-blue-100 text-[11px] text-slate-600 flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
-                <span>Thông tin tài khoản được mã hóa và bảo mật chuẩn RLS. Dùng để tự động xử lý các lệnh rút tiền 24/7.</span>
+              <div className="p-3 bg-blue-50/50 rounded-2xl border border-blue-100 text-[11px] text-slate-600">
+                Thông tin tài khoản được mã hóa và bảo mật chuẩn RLS. Dùng để tự động xử lý các lệnh rút tiền 24/7.
               </div>
             </div>
           )}
@@ -2200,30 +2183,28 @@ function Navbar() {
                   <button
                     type="button"
                     onClick={() => openTeacherProfileModal(currentSession.userId || 't1')}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 shadow-2xs cursor-pointer transition-all active:scale-95"
+                    className="inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 shadow-2xs cursor-pointer transition-all active:scale-95"
                     title="Chỉnh sửa thông tin hồ sơ giáo viên"
                   >
-                    <User className="w-3.5 h-3.5 text-blue-600" />
                     <span>Hồ sơ của tôi</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => openTeacherWalletModal(currentSession.userId || 't1')}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-extrabold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs cursor-pointer transition-all active:scale-95"
-                    title="Mở Ví Giảng Dạy - Tự Rút Tiền"
+                    className="inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-blue-600 hover:bg-blue-700 text-white shadow-xs shadow-blue-200 cursor-pointer transition-all active:scale-95"
+                    title="Mở Ví Thu Nhập"
                   >
-                    <DollarSign className="w-3.5 h-3.5" />
                     <span>Ví: {getTeacherWallet(currentSession.userId || 't1').balance.toLocaleString()}đ</span>
                   </button>
                 </>
               )}
 
-              <span className={`hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border ${currentSession.role === 'admin' ? 'bg-red-50 text-red-700 border-red-200' :
-                  currentSession.role === 'teacher' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                    'bg-blue-50 text-blue-700 border-blue-200'
-                }`}>
-                {currentSession.role === 'admin' ? <ShieldCheck className="w-3.5 h-3.5" /> : <User className="w-3.5 h-3.5" />}
+              <span className={`hidden sm:inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold border ${
+                currentSession.role === 'admin' ? 'bg-red-50 text-red-700 border-red-200' :
+                currentSession.role === 'teacher' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                'bg-blue-50 text-blue-700 border-blue-200'
+              }`}>
                 {currentSession.role === 'admin' ? 'Quản trị viên' : currentSession.role === 'teacher' ? 'Giáo viên' : 'Học sinh'}
               </span>
               <button
