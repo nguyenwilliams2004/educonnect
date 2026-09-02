@@ -291,14 +291,15 @@ function AuthModal({
       setLoading(false);
       RateLimiter.reset('AUTH_LOGIN', identifier);
       const isPhone = !identifier.includes('@');
+      const tutorId = role === 'teacher' ? 't1' : IDORGuard.toSecureId('usr', identifier);
       setCurrentSession({
-        userId: IDORGuard.toSecureId('usr', identifier),
+        userId: tutorId,
         role: role === 'student' ? 'student' : 'teacher',
-        phone: isPhone ? identifier : undefined,
-        email: isPhone ? undefined : identifier,
+        phone: isPhone ? identifier : '0912345678',
+        email: isPhone ? 'giaovien.demo@hantutor.vn' : identifier,
         sessionToken: 'tok_' + Math.random().toString(36).substring(2)
       });
-      alert(`Đăng nhập thành công với vai trò: ${role === 'student' ? 'Học sinh / Phụ huynh' : 'Giáo viên'}!`);
+      alert(`Đăng nhập thành công với vai trò: ${role === 'student' ? 'Học sinh / Phụ huynh' : 'Giáo viên (Cô Sương Mai)'}!`);
       onClose();
     }, 600);
   };
@@ -322,30 +323,31 @@ function AuthModal({
       setLoading(true);
       setTimeout(() => {
         setLoading(false);
-        const isPhone = !identifier.includes('@');
+        RateLimiter.reset('AUTH_REGISTER', identifier || 'anon_reg');
         setCurrentSession({
           userId: IDORGuard.toSecureId('usr', identifier),
           role: 'student',
-          phone: isPhone ? identifier : undefined,
-          email: isPhone ? undefined : identifier,
+          phone: !identifier.includes('@') ? identifier : undefined,
+          email: identifier.includes('@') ? identifier : undefined,
           sessionToken: 'tok_' + Math.random().toString(36).substring(2)
         });
-        alert("Đăng ký tài khoản học sinh thành công! Bạn có thể bắt đầu tìm kiếm giáo viên và liên hệ học thử miễn phí.");
+        alert("Đăng ký tài khoản học sinh thành công!");
         onClose();
       }, 600);
     }
   };
 
-  const handleSendOtp = (e: React.FormEvent) => {
+  const handleForgotPasswordStep1 = (e: React.FormEvent) => {
     e.preventDefault();
     if (!identifier.trim()) {
-      alert("Vui lòng nhập Email hoặc Số điện thoại đã đăng ký");
+      alert("Vui lòng nhập Email hoặc Số điện thoại để nhận mã OTP");
       return;
     }
 
+    // Rate limit for OTP
     const otpRate = RateLimiter.check('AUTH_OTP', identifier);
     if (!otpRate.allowed) {
-      alert(otpRate.errorMessage);
+      alert(otpRate.errorMessage || 'Yêu cầu gửi OTP quá thường xuyên. Vui lòng chờ.');
       return;
     }
 
@@ -407,7 +409,7 @@ function AuthModal({
             </div>
 
             {/* Role Switcher */}
-            <div className="grid grid-cols-2 gap-2.5 mb-6">
+            <div className="grid grid-cols-2 gap-2.5 mb-4">
               <button
                 type="button"
                 onClick={() => setRole('student')}
@@ -423,6 +425,28 @@ function AuthModal({
                 <Briefcase className="w-4 h-4" /> Tôi là giáo viên
               </button>
             </div>
+
+            {/* Quick Demo Credentials for Teacher */}
+            {role === 'teacher' && (
+              <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center justify-between text-xs">
+                <div>
+                  <div className="font-bold text-emerald-900 flex items-center gap-1">
+                    <span>👨‍🏫 Tài khoản Giáo viên Demo:</span>
+                  </div>
+                  <div className="text-[11px] text-emerald-700 font-mono">giaovien.demo@hantutor.vn • demo123456</div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIdentifier('giaovien.demo@hantutor.vn');
+                    setPassword('demo123456');
+                  }}
+                  className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] rounded-xl cursor-pointer shadow-xs transition-colors shrink-0"
+                >
+                  ⚡ Tự điền
+                </button>
+              </div>
+            )}
 
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
