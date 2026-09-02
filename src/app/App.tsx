@@ -197,6 +197,7 @@ interface UIContextType {
   openMyTrialsModal: () => void;
   openReviewModal: (tutor: any, defaultStage?: 'trial' | 'official') => void;
   openTeacherWalletModal: (tutorId?: string | number) => void;
+  openTeacherProfileModal: (tutorId?: string | number) => void;
 }
 
 const UIContext = createContext<UIContextType | null>(null);
@@ -227,6 +228,7 @@ interface DataContextType {
   approveTutorKyc: (tutorId: any) => void;
   rejectTutorKyc: (tutorId: any) => void;
   addMockTutor: (newTutor: any) => void;
+  updateTutorProfile: (tutorId: string | number, updatedData: Partial<any>) => void;
   addTutorReview: (review: Omit<TutorReviewItem, 'id' | 'date'>) => void;
   getMaskedTutor: (tutor: any) => any;
   securityLogs: SecurityAuditEvent[];
@@ -1046,7 +1048,7 @@ function CheckoutModal({
 }
 
 // ==========================================
-// 3.2. TEACHER WALLET MODAL (Ví Giảng Dạy - Tự Rút Tiền Shopee-Style)
+// 3.2. TEACHER WALLET MODAL (Ví Giảng Dạy - Tự Rút Tiền Shopee-Style Fintech)
 // ==========================================
 function TeacherWalletModal({
   isOpen,
@@ -1057,13 +1059,14 @@ function TeacherWalletModal({
   onClose: () => void;
   tutorId?: string | number;
 }) {
-  const { tutors, getTeacherWallet, requestWithdrawal } = useData();
+  const { tutors, getTeacherWallet, requestWithdrawal, openTeacherProfileModal } = useData() as any;
   const [activeTab, setActiveTab] = useState<'withdraw' | 'history'>('withdraw');
+  const [historyFilter, setHistoryFilter] = useState<'all' | 'income' | 'withdrawal'>('all');
   const [withdrawAmount, setWithdrawAmount] = useState<string>('');
-  const [bankAccount, setBankAccount] = useState('MB Bank - 0987654321');
+  const [bankAccount, setBankAccount] = useState('MB Bank - 0987654321 - NGUYEN SUONG MAI');
   const [loading, setLoading] = useState(false);
 
-  const activeTutor = tutors.find(t => String(t.id) === String(tutorId)) || tutors[0];
+  const activeTutor = tutors.find((t: any) => String(t.id) === String(tutorId)) || tutors[0];
   const wallet = getTeacherWallet(activeTutor?.id || 't1');
 
   if (!isOpen) return null;
@@ -1071,8 +1074,8 @@ function TeacherWalletModal({
   const handleWithdraw = (e: React.FormEvent) => {
     e.preventDefault();
     const amountNum = parseInt(withdrawAmount.replace(/\D/g, '')) || 0;
-    if (amountNum <= 0) {
-      alert("Vui lòng nhập số tiền hợp lệ muốn rút!");
+    if (amountNum < 50000) {
+      alert("Số tiền rút tối thiểu là 50.000 VNĐ!");
       return;
     }
     if (amountNum > wallet.balance) {
@@ -1094,146 +1097,597 @@ function TeacherWalletModal({
     }, 600);
   };
 
+  const filteredTransactions = wallet.transactions.filter(tx => {
+    if (historyFilter === 'income') return tx.type === 'tuition_income';
+    if (historyFilter === 'withdrawal') return tx.type === 'withdrawal';
+    return true;
+  });
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative border border-slate-100 animate-in zoom-in-95 duration-200">
-        <button
-          onClick={onClose}
-          className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-2 rounded-full transition-colors cursor-pointer"
-        >
-          <X className="w-5 h-5" />
-        </button>
-
-        <div className="flex items-center gap-3 mb-5">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-700 shadow-sm">
-            <DollarSign className="w-6 h-6" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="bg-white rounded-3xl max-w-lg w-full shadow-2xl relative border border-slate-200/90 animate-in zoom-in-95 duration-200 overflow-hidden flex flex-col max-h-[92vh]">
+        {/* Header */}
+        <div className="p-6 pb-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-100/80 border border-emerald-200 text-emerald-800 flex items-center justify-center font-bold">
+              <DollarSign className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-lg font-extrabold text-slate-900 leading-tight">Ví Thu Nhập Giáo Viên</h3>
+                <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">
+                  Shopee-Style
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Chủ ví: <strong className="text-slate-800">{activeTutor?.name}</strong>
+              </p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-xl font-extrabold text-slate-900">Ví Giảng Dạy (Shopee-Style)</h3>
-            <p className="text-xs text-slate-500">Giáo viên: <strong className="text-slate-800">{activeTutor?.name}</strong></p>
-          </div>
-        </div>
-
-        {/* Shopee-Style Balance Card */}
-        <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950 text-white p-5 rounded-2xl shadow-md mb-5 relative overflow-hidden">
-          <div className="flex justify-between items-start mb-2">
-            <span className="text-xs text-slate-300 font-medium">Số dư ví khả dụng (70% Học phí tích lũy)</span>
-            <span className="text-[10px] font-bold bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-400/30">
-              Napas 24/7 Miễn phí
-            </span>
-          </div>
-          <div className="text-3xl font-black text-emerald-400 tabular-nums">
-            {wallet.balance.toLocaleString()} <span className="text-lg font-bold text-white">VNĐ</span>
-          </div>
-          <div className="mt-3 pt-3 border-t border-slate-700/60 flex justify-between text-xs text-slate-300">
-            <span>Tổng tiền đã rút: <strong className="text-white">{wallet.totalWithdrawn.toLocaleString()}đ</strong></span>
-            <span>{wallet.transactions.length} giao dịch</span>
-          </div>
-        </div>
-
-        {/* Tabs: Rút tiền vs Lịch sử */}
-        <div className="grid grid-cols-2 gap-2 mb-4 border-b border-slate-100 pb-2">
           <button
-            type="button"
-            onClick={() => setActiveTab('withdraw')}
-            className={`py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${activeTab === 'withdraw' ? 'bg-[#111111] text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+            onClick={onClose}
+            className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-2 rounded-full transition-colors cursor-pointer"
           >
-            💳 Rút tiền về Ngân hàng
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('history')}
-            className={`py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${activeTab === 'history' ? 'bg-[#111111] text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
-          >
-            📜 Lịch sử biến động ví
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* TAB 1: RÚT TIỀN */}
-        {activeTab === 'withdraw' ? (
-          <form onSubmit={handleWithdraw} className="space-y-4 text-left">
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Tài khoản ngân hàng nhận tiền</label>
-              <input
-                type="text"
-                value={bankAccount}
-                onChange={e => setBankAccount(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold"
-                placeholder="VD: MB Bank - 0987654321 - NGUYEN VAN A"
-                required
-              />
+        <div className="p-6 overflow-y-auto space-y-5">
+          {/* Card Số dư Phong cách Fintech Dark Card */}
+          <div className="bg-gradient-to-br from-[#0B0F17] via-[#111827] to-[#042f2e] text-white p-5 sm:p-6 rounded-3xl shadow-[0_12px_36px_rgba(0,0,0,0.25)] border border-emerald-500/20 relative overflow-hidden">
+            <div className="absolute right-0 top-0 w-48 h-48 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
+
+            <div className="flex justify-between items-start mb-2 relative z-10">
+              <span className="text-xs text-slate-300 font-medium flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                Số dư ví khả dụng (70% Học phí)
+              </span>
+              <span className="text-[10px] font-extrabold bg-emerald-500/20 text-emerald-300 px-2.5 py-0.5 rounded-full border border-emerald-400/30">
+                Napas 24/7 Miễn phí
+              </span>
             </div>
 
-            <div>
-              <div className="flex justify-between items-center mb-1">
-                <label className="text-xs font-bold text-slate-700">Số tiền muốn rút</label>
-                <button
-                  type="button"
-                  onClick={() => setWithdrawAmount(wallet.balance.toString())}
-                  className="text-xs text-emerald-600 font-bold hover:underline cursor-pointer"
-                >
-                  Rút tất cả số dư
-                </button>
-              </div>
-              <div className="relative">
-                <input
-                  type="number"
-                  value={withdrawAmount}
-                  onChange={e => setWithdrawAmount(e.target.value)}
-                  placeholder="Nhập số tiền VNĐ..."
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold text-slate-900 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
-                  max={wallet.balance}
-                  min={50000}
-                  required
-                />
-                <span className="absolute right-4 top-3.5 text-xs text-slate-400 font-bold">VNĐ</span>
-              </div>
+            <div className="text-3xl sm:text-4xl font-black text-emerald-400 tracking-tight tabular-nums my-1 relative z-10 font-mono">
+              {wallet.balance.toLocaleString()} <span className="text-base font-bold text-slate-200">VNĐ</span>
             </div>
 
-            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-[11px] text-slate-500 space-y-1">
-              <div className="flex justify-between">
-                <span>Phí giao dịch rút tiền:</span>
-                <span className="font-bold text-emerald-600">0đ (Miễn phí 100%)</span>
+            <div className="mt-4 pt-3.5 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-300 relative z-10">
+              <div>
+                Đã rút thành công: <strong className="text-white font-bold">{wallet.totalWithdrawn.toLocaleString()}đ</strong>
               </div>
-              <div className="flex justify-between">
-                <span>Thời gian xử lý:</span>
-                <span className="font-semibold text-slate-700">Tức thì qua Napas 24/7 (1-3 phút)</span>
+              <div className="text-slate-400 text-[11px]">
+                {wallet.transactions.length} biến động
               </div>
             </div>
+          </div>
 
+          {/* Tab Navigation: Rút tiền vs Lịch sử */}
+          <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-2xl">
             <button
-              type="submit"
-              disabled={loading || wallet.balance <= 0}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold py-3.5 rounded-xl text-sm transition-all shadow-md shadow-emerald-200 cursor-pointer"
+              type="button"
+              onClick={() => setActiveTab('withdraw')}
+              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                activeTab === 'withdraw'
+                  ? 'bg-white text-slate-900 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
             >
-              {loading ? 'Đang tạo lệnh rút tiền...' : `Yêu cầu rút tiền về tài khoản`}
+              <CreditCard className="w-4 h-4" /> Rút tiền về Ngân hàng
             </button>
-          </form>
-        ) : (
-          /* TAB 2: LỊCH SỬ BIẾN ĐỘNG VÍ */
-          <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
-            {wallet.transactions.length === 0 ? (
-              <div className="py-8 text-center text-xs text-slate-400">Chưa có biến động số dư nào.</div>
-            ) : (
-              wallet.transactions.map((tx: WalletTransaction) => (
-                <div key={tx.id} className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
-                  <div className="space-y-0.5 max-w-[65%]">
-                    <div className="font-bold text-slate-800 truncate">{tx.title}</div>
-                    <div className="text-[10px] text-slate-400">{tx.date} • {tx.bankInfo || 'Tự động'}</div>
+            <button
+              type="button"
+              onClick={() => setActiveTab('history')}
+              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                activeTab === 'history'
+                  ? 'bg-white text-slate-900 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <History className="w-4 h-4" /> Lịch sử biến động ({wallet.transactions.length})
+            </button>
+          </div>
+
+          {/* TAB 1: RÚT TIỀN */}
+          {activeTab === 'withdraw' ? (
+            <form onSubmit={handleWithdraw} className="space-y-4 text-left">
+              {/* Thẻ Ngân hàng Đã liên kết */}
+              <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-blue-600 text-white font-black text-xs flex items-center justify-center shadow-xs">
+                    MB
                   </div>
-                  <div className="text-right">
-                    <div className={`font-extrabold text-sm tabular-nums ${tx.type === 'tuition_income' ? 'text-emerald-600' : 'text-slate-900'}`}>
-                      {tx.type === 'tuition_income' ? '+' : '-'}{tx.amount.toLocaleString()}đ
+                  <div>
+                    <div className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                      <span>{bankAccount}</span>
+                      <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
                     </div>
-                    <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded-full ${tx.status === 'completed' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
-                      {tx.status === 'completed' ? 'Thành công' : 'Chờ chuyển khoản'}
-                    </span>
+                    <span className="text-[10px] text-slate-500">Tài khoản chính nhận chuyển khoản 24/7</span>
                   </div>
                 </div>
-              ))
-            )}
+              </div>
+
+              <div>
+                <div className="flex justify-between items-center mb-1.5">
+                  <label className="text-xs font-bold text-slate-700">Số tiền muốn rút (VNĐ)</label>
+                  <button
+                    type="button"
+                    onClick={() => setWithdrawAmount(wallet.balance.toString())}
+                    className="text-xs text-emerald-600 font-bold hover:underline cursor-pointer"
+                  >
+                    ⚡ Rút tất cả số dư
+                  </button>
+                </div>
+                <div className="relative">
+                  <input
+                    type="number"
+                    value={withdrawAmount}
+                    onChange={e => setWithdrawAmount(e.target.value)}
+                    placeholder="VD: 500000"
+                    className="w-full px-4 py-3 rounded-2xl border border-slate-200 text-base font-bold text-slate-900 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 font-mono"
+                    max={wallet.balance}
+                    min={50000}
+                    required
+                  />
+                  <span className="absolute right-4 top-3.5 text-xs text-slate-400 font-bold">VNĐ</span>
+                </div>
+
+                {/* Preset Chips */}
+                <div className="grid grid-cols-4 gap-2 mt-2">
+                  {[200000, 500000, 1000000, wallet.balance].map((amt, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setWithdrawAmount(amt.toString())}
+                      disabled={amt <= 0 || amt > wallet.balance}
+                      className="py-1.5 px-2 bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 text-slate-700 hover:text-emerald-800 text-[11px] font-bold rounded-xl transition-all disabled:opacity-30 disabled:pointer-events-none cursor-pointer text-center"
+                    >
+                      {idx === 3 ? 'Toàn bộ' : `${(amt / 1000).toLocaleString()}k`}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Thông tin phí và thời gian */}
+              <div className="p-3.5 bg-emerald-50/60 rounded-2xl border border-emerald-200/80 text-[11px] text-emerald-950 space-y-1">
+                <div className="flex justify-between items-center">
+                  <span>Phí giao dịch rút tiền:</span>
+                  <span className="font-extrabold text-emerald-700">0đ (Miễn phí 100%)</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span>Thời gian chuyển khoản:</span>
+                  <span className="font-semibold text-slate-800">Tức thì qua Napas 24/7 (1 - 3 phút)</span>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading || wallet.balance <= 0}
+                className="w-full bg-[#111111] hover:bg-slate-800 disabled:opacity-50 text-white font-bold py-3.5 rounded-2xl text-sm transition-all shadow-md cursor-pointer flex items-center justify-center gap-2"
+              >
+                {loading ? 'Đang tạo lệnh chuyển tiền Napas...' : `Xác nhận rút ${withdrawAmount ? parseInt(withdrawAmount).toLocaleString() + 'đ' : ''} về Ngân hàng`}
+              </button>
+            </form>
+          ) : (
+            /* TAB 2: LỊCH SỬ BIẾN ĐỘNG VÍ */
+            <div className="space-y-3">
+              <div className="flex items-center gap-1.5 pb-1">
+                <button
+                  type="button"
+                  onClick={() => setHistoryFilter('all')}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${historyFilter === 'all' ? 'bg-[#111111] text-white' : 'bg-slate-100 text-slate-600'}`}
+                >
+                  Tất cả
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setHistoryFilter('income')}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${historyFilter === 'income' ? 'bg-emerald-700 text-white' : 'bg-slate-100 text-slate-600'}`}
+                >
+                  Học phí (+70%)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setHistoryFilter('withdrawal')}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${historyFilter === 'withdrawal' ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600'}`}
+                >
+                  Rút tiền (-)
+                </button>
+              </div>
+
+              <div className="space-y-2.5 max-h-[280px] overflow-y-auto pr-1">
+                {filteredTransactions.length === 0 ? (
+                  <div className="py-10 text-center text-xs text-slate-400">Không có giao dịch nào phù hợp.</div>
+                ) : (
+                  filteredTransactions.map((tx: WalletTransaction) => (
+                    <div key={tx.id} className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/90 flex items-center justify-between text-xs hover:border-slate-300 transition-colors">
+                      <div className="space-y-1 max-w-[65%]">
+                        <div className="font-bold text-slate-900 leading-snug">{tx.title}</div>
+                        <div className="text-[10px] text-slate-500">{tx.date} • {tx.bankInfo || 'Tự động'}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className={`font-black text-sm tabular-nums font-mono ${tx.type === 'tuition_income' ? 'text-emerald-600' : 'text-slate-900'}`}>
+                          {tx.type === 'tuition_income' ? '+' : '-'}{tx.amount.toLocaleString()}đ
+                        </div>
+                        <span className={`inline-block text-[9px] font-bold px-2 py-0.5 rounded-full mt-1 ${tx.status === 'completed' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+                          {tx.status === 'completed' ? 'Thành công' : 'Chờ xử lý'}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ==========================================
+// 3.3. TEACHER PROFILE MODAL (Chỉnh Sửa Thông Tin Giáo Viên)
+// ==========================================
+function TeacherProfileModal({
+  isOpen,
+  onClose,
+  tutorId
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  tutorId?: string | number;
+}) {
+  const { tutors, updateTutorProfile, currentSession, setCurrentSession } = useData() as any;
+  const activeTutor = tutors.find((t: any) => String(t.id) === String(tutorId)) || tutors[0];
+
+  const [activeTab, setActiveTab] = useState<'info' | 'pricing' | 'bank'>('info');
+
+  // Form State initialized from activeTutor
+  const [name, setName] = useState(activeTutor?.name || 'Cô Sương Mai');
+  const [headline, setHeadline] = useState(activeTutor?.headline || 'Cử nhân Sư phạm Toán ĐH Sư Phạm Hà Nội, 5 năm kinh nghiệm');
+  const [bio, setBio] = useState(activeTutor?.bio || 'Tận tâm, phương pháp giảng dạy dễ hiểu, giúp học sinh nắm vững kiến thức từ cơ bản đến nâng cao.');
+  const [phone, setPhone] = useState(activeTutor?.phone || '0912345678');
+  const [zalo, setZalo] = useState(activeTutor?.zalo || '0912345678');
+  const [avatar, setAvatar] = useState(activeTutor?.avatar || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=400');
+  
+  // Pricing state
+  const [primaryPrice, setPrimaryPrice] = useState(activeTutor?.levelPrices?.primary || 150000);
+  const [secondaryPrice, setSecondaryPrice] = useState(activeTutor?.levelPrices?.secondary || 200000);
+  const [highSchoolPrice, setHighSchoolPrice] = useState(activeTutor?.levelPrices?.high || 250000);
+  const [examPrepPrice, setExamPrepPrice] = useState(activeTutor?.levelPrices?.exam || 300000);
+
+  // Bank state
+  const [bankName, setBankName] = useState('MB Bank');
+  const [bankAccountNumber, setBankAccountNumber] = useState('0987654321');
+  const [bankAccountName, setBankAccountName] = useState('NGUYEN SUONG MAI');
+
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (activeTutor) {
+      setName(activeTutor.name || '');
+      setHeadline(activeTutor.headline || '');
+      setBio(activeTutor.bio || '');
+      setPhone(activeTutor.phone || '');
+      setZalo(activeTutor.zalo || '');
+      setAvatar(activeTutor.avatar || '');
+      if (activeTutor.levelPrices) {
+        setPrimaryPrice(activeTutor.levelPrices.primary || 150000);
+        setSecondaryPrice(activeTutor.levelPrices.secondary || 200000);
+        setHighSchoolPrice(activeTutor.levelPrices.high || 250000);
+        setExamPrepPrice(activeTutor.levelPrices.exam || 300000);
+      }
+    }
+  }, [activeTutor, isOpen]);
+
+  if (!isOpen) return null;
+
+  const handleSave = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    setTimeout(() => {
+      setSaving(false);
+      const updated = {
+        name,
+        headline,
+        bio,
+        phone,
+        zalo,
+        avatar,
+        pricePerSession: secondaryPrice || 200000,
+        levelPrices: {
+          primary: Number(primaryPrice),
+          secondary: Number(secondaryPrice),
+          high: Number(highSchoolPrice),
+          exam: Number(examPrepPrice)
+        }
+      };
+      updateTutorProfile(activeTutor?.id || 't1', updated);
+      alert("Cập nhật thông tin hồ sơ giáo viên thành công! Dữ liệu đã được lưu trực tiếp.");
+      onClose();
+    }, 500);
+  };
+
+  const sampleAvatars = [
+    'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=400',
+    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400',
+    'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=400',
+    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400'
+  ];
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="bg-white rounded-3xl max-w-2xl w-full shadow-2xl relative border border-slate-200 animate-in zoom-in-95 duration-200 overflow-hidden flex flex-col max-h-[92vh]">
+        {/* Header */}
+        <div className="p-6 pb-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-blue-100/80 border border-blue-200 text-blue-800 flex items-center justify-center font-bold">
+              <User className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-lg font-extrabold text-slate-900 leading-tight">Chỉnh Sửa Hồ Sơ Giáo Viên</h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Cập nhật thông tin cá nhân, học phí các cấp và tài khoản ngân hàng
+              </p>
+            </div>
           </div>
-        )}
+          <button
+            onClick={onClose}
+            className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-2 rounded-full transition-colors cursor-pointer"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Tab Selector */}
+        <div className="px-6 pt-4 pb-0 bg-white">
+          <div className="grid grid-cols-3 gap-2 p-1 bg-slate-100 rounded-2xl">
+            <button
+              type="button"
+              onClick={() => setActiveTab('info')}
+              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                activeTab === 'info'
+                  ? 'bg-white text-slate-900 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              👤 Thông tin cá nhân
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('pricing')}
+              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                activeTab === 'pricing'
+                  ? 'bg-white text-slate-900 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              📚 Môn dạy & Học phí
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('bank')}
+              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                activeTab === 'bank'
+                  ? 'bg-white text-slate-900 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              🏦 Ngân hàng rút tiền
+            </button>
+          </div>
+        </div>
+
+        {/* Form Body */}
+        <form onSubmit={handleSave} className="p-6 overflow-y-auto space-y-4 flex-1">
+          {/* TAB 1: THÔNG TIN CÁ NHÂN */}
+          {activeTab === 'info' && (
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">Ảnh đại diện</label>
+                <div className="flex items-center gap-4">
+                  <img src={avatar} alt="Avatar" className="w-16 h-16 rounded-2xl object-cover border-2 border-blue-500 shadow-sm" />
+                  <div className="space-y-1.5 flex-1">
+                    <span className="text-[11px] font-bold text-slate-500">Chọn ảnh mẫu nhanh:</span>
+                    <div className="flex items-center gap-2">
+                      {sampleAvatars.map((url, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => setAvatar(url)}
+                          className={`w-9 h-9 rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${avatar === url ? 'border-blue-600 scale-105 shadow-xs' : 'border-slate-200 opacity-70'}`}
+                        >
+                          <img src={url} alt="sample" className="w-full h-full object-cover" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Họ và tên giáo viên</label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:border-blue-500 outline-none"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Số điện thoại / Zalo</label>
+                  <input
+                    type="text"
+                    value={phone}
+                    onChange={e => { setPhone(e.target.value); setZalo(e.target.value); }}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:border-blue-500 outline-none"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Tiêu đề / Bằng cấp / Kinh nghiệm</label>
+                <input
+                  type="text"
+                  value={headline}
+                  onChange={e => setHeadline(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:border-blue-500 outline-none"
+                  placeholder="VD: Cử nhân Sư phạm Toán ĐH Sư Phạm Hà Nội, 5 năm kinh nghiệm"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Giới thiệu chi tiết & Phương pháp giảng dạy</label>
+                <textarea
+                  rows={3}
+                  value={bio}
+                  onChange={e => setBio(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-normal focus:border-blue-500 outline-none"
+                  placeholder="Mô tả phương pháp truyền đạt, thế mạnh dạy học sinh mất gốc hoặc bồi dưỡng nâng cao..."
+                />
+              </div>
+            </div>
+          )}
+
+          {/* TAB 2: MÔN DẠY & HỌC PHÍ */}
+          {activeTab === 'pricing' && (
+            <div className="space-y-4">
+              <div className="p-3 bg-blue-50/70 rounded-2xl border border-blue-200 text-xs text-blue-900 leading-relaxed">
+                💡 <strong>Lưu ý:</strong> Học phí dưới đây là mức học sinh nhìn thấy khi đăng ký khóa học. Giáo viên sẽ nhận <strong>70%</strong> học phí tích lũy vào Ví Giảng Dạy ngay khi học sinh hoàn tất thanh toán.
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Học phí Cấp 1 (Tiểu học / buổi)</label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      value={primaryPrice}
+                      onChange={e => setPrimaryPrice(Number(e.target.value))}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 focus:border-blue-500 outline-none font-mono"
+                      step={10000}
+                    />
+                    <span className="absolute right-3 top-2.5 text-[11px] font-bold text-slate-400">VNĐ</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Học phí Cấp 2 (THCS / buổi)</label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      value={secondaryPrice}
+                      onChange={e => setSecondaryPrice(Number(e.target.value))}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 focus:border-blue-500 outline-none font-mono"
+                      step={10000}
+                    />
+                    <span className="absolute right-3 top-2.5 text-[11px] font-bold text-slate-400">VNĐ</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Học phí Cấp 3 (THPT / buổi)</label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      value={highSchoolPrice}
+                      onChange={e => setHighSchoolPrice(Number(e.target.value))}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 focus:border-blue-500 outline-none font-mono"
+                      step={10000}
+                    />
+                    <span className="absolute right-3 top-2.5 text-[11px] font-bold text-slate-400">VNĐ</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Học phí Luyện thi ĐH / Chuyên</label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      value={examPrepPrice}
+                      onChange={e => setExamPrepPrice(Number(e.target.value))}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 focus:border-blue-500 outline-none font-mono"
+                      step={10000}
+                    />
+                    <span className="absolute right-3 top-2.5 text-[11px] font-bold text-slate-400">VNĐ</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: NGÂN HÀNG RÚT TIỀN */}
+          {activeTab === 'bank' && (
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Ngân hàng nhận tiền</label>
+                <select
+                  value={bankName}
+                  onChange={e => setBankName(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:border-blue-500 outline-none bg-white cursor-pointer"
+                >
+                  <option value="MB Bank">MB Bank (Ngân hàng Quân Đội)</option>
+                  <option value="Vietcombank">Vietcombank</option>
+                  <option value="Techcombank">Techcombank</option>
+                  <option value="VPBank">VPBank</option>
+                  <option value="ACB">ACB</option>
+                  <option value="BIDV">BIDV</option>
+                  <option value="TPBank">TPBank</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Số tài khoản ngân hàng</label>
+                <input
+                  type="text"
+                  value={bankAccountNumber}
+                  onChange={e => setBankAccountNumber(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-mono font-bold focus:border-blue-500 outline-none"
+                  placeholder="VD: 0987654321"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Tên chủ tài khoản (In hoa không dấu)</label>
+                <input
+                  type="text"
+                  value={bankAccountName}
+                  onChange={e => setBankAccountName(e.target.value.toUpperCase())}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold focus:border-blue-500 outline-none uppercase"
+                  placeholder="VD: NGUYEN SUONG MAI"
+                  required
+                />
+              </div>
+
+              <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-[11px] text-slate-500 flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>Thông tin tài khoản được mã hóa và bảo mật chuẩn RLS. Dùng để tự động xử lý các lệnh rút tiền 24/7.</span>
+              </div>
+            </div>
+          )}
+
+          {/* Footer Actions */}
+          <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-2.5">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer"
+            >
+              Hủy
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="px-5 py-2.5 bg-[#111111] hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+            >
+              {saving ? 'Đang lưu...' : '💾 Lưu & Cập nhật Hồ sơ'}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
@@ -1653,7 +2107,7 @@ function HeroRightIllustration() {
 }
 
 function Navbar() {
-  const { openAuthModal, openMyTrialsModal, openTeacherWalletModal } = useUI();
+  const { openAuthModal, openMyTrialsModal, openTeacherWalletModal, openTeacherProfileModal } = useUI();
   const { myTrials, currentSession, setCurrentSession, getTeacherWallet } = useData();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -1731,20 +2185,32 @@ function Navbar() {
           </Link>
 
           {currentSession.role !== 'anonymous' ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               {currentSession.role === 'teacher' && (
-                <button
-                  type="button"
-                  onClick={() => openTeacherWalletModal(currentSession.userId || 't1')}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-extrabold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs cursor-pointer transition-all active:scale-95"
-                  title="Mở Ví Giảng Dạy - Tự Rút Tiền"
-                >
-                  <DollarSign className="w-3.5 h-3.5" />
-                  <span>Ví: {getTeacherWallet(currentSession.userId || 't1').balance.toLocaleString()}đ</span>
-                </button>
+                <>
+                  <button
+                    type="button"
+                    onClick={() => openTeacherProfileModal(currentSession.userId || 't1')}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 shadow-2xs cursor-pointer transition-all active:scale-95"
+                    title="Chỉnh sửa thông tin hồ sơ giáo viên"
+                  >
+                    <User className="w-3.5 h-3.5 text-blue-600" />
+                    <span>Hồ sơ của tôi</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => openTeacherWalletModal(currentSession.userId || 't1')}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-extrabold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs cursor-pointer transition-all active:scale-95"
+                    title="Mở Ví Giảng Dạy - Tự Rút Tiền"
+                  >
+                    <DollarSign className="w-3.5 h-3.5" />
+                    <span>Ví: {getTeacherWallet(currentSession.userId || 't1').balance.toLocaleString()}đ</span>
+                  </button>
+                </>
               )}
 
-              <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border ${
+              <span className={`hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border ${
                 currentSession.role === 'admin' ? 'bg-red-50 text-red-700 border-red-200' :
                 currentSession.role === 'teacher' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
                 'bg-blue-50 text-blue-700 border-blue-200'
@@ -2957,8 +3423,8 @@ function FindTutorsPage() {
 // TeacherDetailPage - Giao diện chi tiết giáo viên chuẩn Minimalist & Editorial UI
 function TeacherDetailPage() {
   const { id } = useParams();
-  const { tutors, myTrials, cancelTrialEnrollment, reviews, getMaskedTutor } = useData();
-  const { openContactZaloModal, openEnrollmentModal, openReviewModal, openAuthModal } = useUI();
+  const { tutors, myTrials, cancelTrialEnrollment, reviews, getMaskedTutor, currentSession } = useData();
+  const { openContactZaloModal, openEnrollmentModal, openReviewModal, openAuthModal, openTeacherProfileModal } = useUI();
   const [activeProofModal, setActiveProofModal] = useState<string | null>(null);
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
   const [avatarZoom, setAvatarZoom] = useState(1);
@@ -3091,6 +3557,8 @@ function TeacherDetailPage() {
     }
   };
 
+  const isOwnProfile = currentSession.role === 'teacher' && (String(currentSession.userId) === String(tutor.id) || currentSession.userId === 't1' || String(tutor.id) === '1');
+
   return (
     <div className="bg-[#FAFAF9] min-h-screen pb-24 text-slate-900 selection:bg-slate-900 selection:text-white">
       {/* Toast thông báo sao chép */}
@@ -3113,6 +3581,34 @@ function TeacherDetailPage() {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-10">
+        {/* Banner dành riêng cho giáo viên khi xem hồ sơ của mình */}
+        {isOwnProfile && (
+          <div className="mb-6 p-4 sm:p-5 bg-gradient-to-r from-emerald-50 via-teal-50 to-blue-50 border border-emerald-200/90 rounded-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-bold shrink-0 shadow-xs">
+                <User className="w-6 h-6" />
+              </div>
+              <div>
+                <div className="text-sm font-black text-emerald-950 flex items-center gap-2">
+                  <span>Trang hồ sơ công khai của bạn</span>
+                  <span className="text-[10px] bg-emerald-200/70 text-emerald-900 font-bold px-2 py-0.5 rounded-full">Đang hiển thị</span>
+                </div>
+                <div className="text-xs text-emerald-800 mt-0.5 leading-relaxed">
+                  Phụ huynh & học sinh đang nhìn thấy hồ sơ này. Bạn có thể cập nhật thông tin, ảnh và bảng giá bất cứ lúc nào.
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => openTeacherProfileModal(tutor.id)}
+              className="px-5 py-2.5 bg-[#111111] hover:bg-slate-800 text-white font-bold text-xs rounded-2xl transition-all shadow-sm cursor-pointer shrink-0 flex items-center justify-center gap-2 active:scale-95"
+            >
+              <Edit3 className="w-4 h-4 text-emerald-400" />
+              <span>Chỉnh sửa hồ sơ của bạn</span>
+            </button>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
 
           {/* CỘT TRÁI (8 / 12 CỘT) - Nội dung chi tiết hồ sơ phong cách Minimalist */}
@@ -5490,30 +5986,6 @@ function TutorRegistrationPage() {
   );
 }
 
-// 7. Footer
-function Footer() {
-  return (
-    <footer className="bg-[#0d1424] text-slate-400 py-6 border-t border-slate-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-        <Link to="/" className="flex items-center gap-2.5 group select-none">
-          <img
-            src="/logo-icon.png"
-            alt="HanTutor Icon"
-            className="w-9 h-9 object-contain shrink-0 transition-transform duration-200 group-hover:scale-105"
-          />
-          <span className="font-extrabold text-2xl tracking-tight text-white flex items-center leading-none">
-            Han<span className="text-[#FF9000]">tutor</span>
-          </span>
-        </Link>
-
-        <div className="text-xs text-slate-400">
-          © 2026 HanTutor. Nền tảng kết nối gia sư thông minh.
-        </div>
-      </div>
-    </footer>
-  );
-}
-
 // 8. AppLayout & Root App
 function AppLayout({
   authModalState,
@@ -5531,7 +6003,9 @@ function AppLayout({
   reviewModalState,
   setReviewModalState,
   teacherWalletModalTutorId,
-  setTeacherWalletModalTutorId
+  setTeacherWalletModalTutorId,
+  teacherProfileModalTutorId,
+  setTeacherProfileModalTutorId
 }: any) {
   const location = useLocation();
   const isAdmin = location.pathname.startsWith('/admin');
@@ -5626,6 +6100,15 @@ function AppLayout({
         />
       )}
 
+      {/* Modal Chỉnh sửa hồ sơ giáo viên */}
+      {teacherProfileModalTutorId && (
+        <TeacherProfileModal
+          isOpen={!!teacherProfileModalTutorId}
+          tutorId={teacherProfileModalTutorId}
+          onClose={() => setTeacherProfileModalTutorId(null)}
+        />
+      )}
+
       {/* Floating Action Buttons: AI Chat & Facebook Messenger */}
       {!isAdmin && <FloatingContactDock />}
     </div>
@@ -5689,6 +6172,7 @@ export default function App() {
     defaultStage: 'trial'
   });
   const [teacherWalletModalTutorId, setTeacherWalletModalTutorId] = useState<string | number | null>(null);
+  const [teacherProfileModalTutorId, setTeacherProfileModalTutorId] = useState<string | number | null>(null);
 
   const [currentSession, setCurrentSession] = useState<UserSessionContext>(() => {
     try {
@@ -5781,6 +6265,21 @@ export default function App() {
 
   const approveWithdrawal = (transactionId: string) => {
     // Approve withdrawal
+  };
+
+  const updateTutorProfile = (tutorId: string | number, updatedData: Partial<any>) => {
+    setTutors(prev => {
+      const updated = prev.map(t => {
+        if (String(t.id) === String(tutorId) || (String(tutorId) === 't1' && String(t.id) === '1')) {
+          return { ...t, ...updatedData };
+        }
+        return t;
+      });
+      try {
+        localStorage.setItem('hantutor_tutors_list', JSON.stringify(updated));
+      } catch (e) { }
+      return updated;
+    });
   };
 
   const addTutorReview = (newReviewData: Omit<TutorReviewItem, 'id' | 'date'>) => {
@@ -6067,6 +6566,9 @@ export default function App() {
     },
     openTeacherWalletModal: (tutorId) => {
       setTeacherWalletModalTutorId(tutorId || currentSession.userId || 't1');
+    },
+    openTeacherProfileModal: (tutorId) => {
+      setTeacherProfileModalTutorId(tutorId || currentSession.userId || 't1');
     }
   };
 
@@ -6090,6 +6592,7 @@ export default function App() {
     approveTutorKyc,
     rejectTutorKyc,
     addMockTutor,
+    updateTutorProfile,
     addTutorReview,
     getMaskedTutor,
     securityLogs,
@@ -6117,6 +6620,8 @@ export default function App() {
             setReviewModalState={setReviewModalState}
             teacherWalletModalTutorId={teacherWalletModalTutorId}
             setTeacherWalletModalTutorId={setTeacherWalletModalTutorId}
+            teacherProfileModalTutorId={teacherProfileModalTutorId}
+            setTeacherProfileModalTutorId={setTeacherProfileModalTutorId}
           />
         </BrowserRouter>
       </UIContext.Provider>
