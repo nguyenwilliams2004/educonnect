@@ -34,6 +34,7 @@ import {
   Smile,
   Sparkles,
   Star,
+  Target,
   ThumbsUp,
   TrendingUp,
   UploadCloud,
@@ -2526,7 +2527,7 @@ function FindTutorsPage() {
   );
 }
 
-// TeacherDetailPage - Giao diện thông tin giáo viên chuẩn Hiện đại & Sang trọng (High-End Visual Design)
+// TeacherDetailPage - Giao diện chi tiết giáo viên chuẩn Minimalist & Editorial UI
 function TeacherDetailPage() {
   const { id } = useParams();
   const { tutors, myTrials, cancelTrialEnrollment, reviews } = useData();
@@ -2561,7 +2562,7 @@ function TeacherDetailPage() {
     || mockTutors[0];
 
   if (!tutor) {
-    return <div className="p-12 text-center text-slate-500 font-medium">Không tìm thấy giáo viên</div>;
+    return <div className="p-16 text-center text-slate-500 font-medium">Không tìm thấy thông tin giáo viên</div>;
   }
 
   const trialItem = myTrials.find(t => String(t.tutorId) === String(tutor.id));
@@ -2579,7 +2580,7 @@ function TeacherDetailPage() {
     {
       id: 'rev_1',
       studentName: 'Anna',
-      comment: `Mình được biết ${tutor.displayName || tutor.name} qua giới thiệu. Mình tìm đến cũng gấp gáp về thời gian nhưng ${tutor.displayName || tutor.name} không hề ngại đưa ra lộ trình riêng cho học viên, bạn ấy cũng tận tâm hay nhắc nhở học viên làm bài nữa. Các bài giảng của bạn cũng được chuẩn bị chỉn chu rồi cách bạn giải thích bài cũng dễ hiểu nữa. Nói chung là trong lúc học thì mình cảm thấy giáo viên vừa có tâm vừa có tầm. Highly recommend this tutor!!!`,
+      comment: `Mình được biết ${tutor.displayName || tutor.name} qua giới thiệu. Mình tìm đến cũng gấp gáp về thời gian nhưng ${tutor.displayName || tutor.name} không hề ngại đưa ra lộ trình riêng cho học viên, luôn tận tâm nhắc nhở và chuẩn bị bài giảng chu đáo. Giải thích cặn kẽ, dễ hiểu và truyền cảm hứng rất tốt. Rất khuyên các bạn nên học thử!`,
       stage: 'official' as const,
       rating: 5,
       date: 'Gần đây',
@@ -2588,7 +2589,7 @@ function TeacherDetailPage() {
     {
       id: 'rev_2',
       studentName: 'Tuấn Thành',
-      comment: `Mình theo học với ${tutor.displayName || tutor.name} để chuẩn bị cho kỳ thi và phỏng vấn. Học cùng ${tutor.displayName || tutor.name} 'lên trình' nhanh nhờ bài học liên hệ thực tế, tận tâm nhiệt tình và luôn giải đáp thắc mắc 24/7. Trộm vía đạt kết quả vượt cả kỳ vọng!`,
+      comment: `Mình theo học với ${tutor.displayName || tutor.name} để chuẩn bị cho kỳ thi và phỏng vấn. Học cùng ${tutor.displayName || tutor.name} tiến bộ rõ rệt nhờ phương pháp liên hệ thực tế, tận tâm nhiệt tình và giải đáp thắc mắc 24/7. Kết quả đạt được vượt ngoài mong đợi!`,
       stage: 'official' as const,
       rating: 5,
       date: '1 tháng trước',
@@ -2597,7 +2598,7 @@ function TeacherDetailPage() {
     {
       id: 'rev_3',
       studentName: 'Đạt',
-      comment: `Vô tình biết giáo viên qua kênh chia sẻ kiến thức, theo dõi 1 thời gian thì học thử thấy cũng cực kỳ oke, mọi người có thể thử nhé riêng mình thì đánh giá 10/10.`,
+      comment: `Theo dõi bài giảng trên nền tảng thấy rất ấn tượng, sau buổi học thử 1-1 thấy phương pháp truyền đạt rất dễ tiếp thu. Đánh giá 10/10 về độ tận tụy!`,
       stage: 'trial' as const,
       rating: 5,
       date: '2 tháng trước',
@@ -2615,7 +2616,7 @@ function TeacherDetailPage() {
     ? tutor.subjects
     : [tutor.badgeSubject || 'Môn học', 'Luyện thi Chuyên sâu', 'Bồi dưỡng Học sinh Giỏi'];
 
-  // Trích xuất số tiền học phí cơ bản chính xác (xử lý cả khoảng '180.000 - 300.000')
+  // Trích xuất học phí chuẩn xác
   const extractBaseHourlyRate = (rateInput: any): number => {
     if (typeof rateInput === 'number') return rateInput;
     if (!rateInput) return 200000;
@@ -2632,7 +2633,7 @@ function TeacherDetailPage() {
   const package5h = Math.round(baseHourlyRate * 5 * 0.95).toLocaleString('vi-VN') + ' VNĐ';
   const package10h = Math.round(baseHourlyRate * 10 * 0.9).toLocaleString('vi-VN') + ' VNĐ';
 
-  // Danh sách giáo viên tương tự có phân trang thật (4 giáo viên / trang)
+  // Phân trang giáo viên liên quan
   const allRelatedTutors = (tutors.length >= 8 ? tutors : mockTutors).filter(t => String(t.id) !== String(tutor.id));
   const itemsPerPage = 4;
   const totalPages = Math.max(1, Math.ceil(allRelatedTutors.length / itemsPerPage));
@@ -2653,15 +2654,15 @@ function TeacherDetailPage() {
         setTimeout(() => setShareToast(false), 2500);
       }
     } catch (e) {
-      alert("Đã sao chép link hồ sơ!");
+      alert("Đã sao chép liên kết hồ sơ!");
     }
   };
 
   return (
-    <div className="bg-[#f8fafc] min-h-screen pb-24">
+    <div className="bg-[#FAFAF9] min-h-screen pb-24 text-slate-900 selection:bg-slate-900 selection:text-white">
       {/* Toast thông báo sao chép */}
       {shareToast && (
-        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-xl animate-in fade-in slide-in-from-bottom-2 duration-200 flex items-center gap-2">
+        <div className="fixed bottom-6 right-6 z-50 bg-[#111111] text-white text-xs font-bold px-4 py-3 rounded-xl shadow-xl animate-in fade-in slide-in-from-bottom-2 duration-200 flex items-center gap-2">
           <CheckCircle className="w-4 h-4 text-emerald-400" />
           Đã sao chép liên kết hồ sơ vào khay nhớ tạm!
         </div>
@@ -2670,10 +2671,10 @@ function TeacherDetailPage() {
       {/* Top Breadcrumb Navigation */}
       <div className="bg-white border-b border-slate-200/80">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center gap-2 text-xs text-slate-500 font-medium">
-          <Link to="/" className="hover:text-blue-600 transition-colors">Trang chủ</Link>
-          <span>/</span>
-          <Link to="/tim-gia-su" className="hover:text-blue-600 transition-colors">Tìm giáo viên & gia sư</Link>
-          <span>/</span>
+          <Link to="/" className="hover:text-slate-900 transition-colors">Trang chủ</Link>
+          <span className="text-slate-300">/</span>
+          <Link to="/tim-gia-su" className="hover:text-slate-900 transition-colors">Tìm giáo viên & gia sư</Link>
+          <span className="text-slate-300">/</span>
           <span className="text-slate-900 font-bold truncate">{tutor.displayName || tutor.name}</span>
         </div>
       </div>
@@ -2681,15 +2682,13 @@ function TeacherDetailPage() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
 
-          {/* CỘT TRÁI (8 / 12 CỘT) - Nội dung chi tiết hồ sơ phong cách mới */}
+          {/* CỘT TRÁI (8 / 12 CỘT) - Nội dung chi tiết hồ sơ phong cách Minimalist */}
           <div className="lg:col-span-8 space-y-8">
 
-            {/* 1. Category Tag Pills */}
+            {/* 1. Header & Tags */}
             <div className="space-y-3.5">
               <div className="flex flex-wrap items-center gap-2">
-                <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wide flex items-center gap-1.5 shadow-2xs ${
-                  isTeacher ? 'bg-blue-600 text-white' : 'bg-purple-600 text-white'
-                }`}>
+                <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#111111] text-white tracking-wide flex items-center gap-1.5 shadow-2xs">
                   {isTeacher ? <Briefcase className="w-3.5 h-3.5" /> : <GraduationCap className="w-3.5 h-3.5" />}
                   {isTeacher ? 'Giáo viên Chuyên môn' : 'Gia sư Sinh viên Giỏi'}
                 </span>
@@ -2697,7 +2696,7 @@ function TeacherDetailPage() {
                 {subjectsList.map((sub: string, idx: number) => (
                   <span
                     key={idx}
-                    className="px-3.5 py-1 rounded-full text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200/80 shadow-2xs"
+                    className="px-3 py-1 rounded-full text-xs font-semibold bg-[#EDF3EC] text-[#346538] border border-[#d6e5d5]"
                   >
                     {sub}
                   </span>
@@ -2705,45 +2704,45 @@ function TeacherDetailPage() {
               </div>
 
               {/* 2. Headline Title (H1) */}
-              <h1 className="text-2xl sm:text-3xl lg:text-[32px] font-black text-slate-900 leading-[1.35] tracking-tight">
+              <h1 className="text-2xl sm:text-3xl lg:text-[32px] font-black text-[#111111] leading-[1.3] tracking-tight">
                 {tutor.headline || tutor.title || `${tutor.displayName || tutor.name} - Giáo viên giàu kinh nghiệm, tận tâm đồng hành cùng học viên đạt mục tiêu.`}
               </h1>
 
               {/* 3. Địa điểm & Hình thức giảng dạy */}
               <div className="flex flex-wrap items-center gap-2.5 pt-1">
-                <span className="px-3.5 py-1.5 rounded-full border border-slate-200/90 bg-white text-xs font-semibold text-slate-800 inline-flex items-center gap-1.5 shadow-2xs">
-                  <Laptop className="w-3.5 h-3.5 text-blue-600" />
-                  Học trực tuyến (Google Meet / Zoom PRO)
+                <span className="px-3.5 py-1.5 rounded-full border border-slate-200/90 bg-white text-xs font-semibold text-slate-700 inline-flex items-center gap-1.5 shadow-2xs">
+                  <Laptop className="w-3.5 h-3.5 text-slate-700" />
+                  Trực tuyến (Google Meet / Zoom PRO)
                 </span>
                 {tutor.location && (
-                  <span className="px-3.5 py-1.5 rounded-full border border-slate-200/90 bg-white text-xs font-semibold text-slate-800 inline-flex items-center gap-1.5 shadow-2xs">
-                    <MapPin className="w-3.5 h-3.5 text-blue-600" />
+                  <span className="px-3.5 py-1.5 rounded-full border border-slate-200/90 bg-white text-xs font-semibold text-slate-700 inline-flex items-center gap-1.5 shadow-2xs">
+                    <MapPin className="w-3.5 h-3.5 text-slate-700" />
                     Tại nhà: {tutor.location}
                   </span>
                 )}
               </div>
             </div>
 
-            {/* 4. Banner Gia sư được đề xuất & KYC Verified (Thiết kế mới sang trọng) */}
-            <div className="bg-gradient-to-br from-blue-50/90 via-indigo-50/40 to-slate-50 border border-blue-200/80 rounded-3xl p-6 shadow-sm space-y-2 relative overflow-hidden">
-              <div className="flex items-center gap-2 text-blue-900 font-black text-sm">
-                <ShieldCheck className="w-5 h-5 text-blue-600 shrink-0" />
+            {/* 4. Banner Kiểm định KYC (Minimalist Box) */}
+            <div className="bg-[#EDF3EC] border border-[#d6e5d5] rounded-2xl p-5 sm:p-6 space-y-2 relative">
+              <div className="flex items-center gap-2 text-[#2e5d32] font-bold text-sm">
+                <ShieldCheck className="w-5 h-5 text-[#346538] shrink-0" />
                 <span>Hồ sơ đã được kiểm định & Đối soát KYC 100%</span>
               </div>
               <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-normal">
-                {tutor.displayName || tutor.name} đã được ban chuyên môn HanTutor đối soát Căn cước công dân, Văn bằng tốt nghiệp và cam kết chất lượng thông qua buổi học thử 1-1 miễn phí. Tỷ lệ học sinh tiếp tục theo học đạt <strong className="text-blue-700 font-bold tabular-nums">{successRate}%</strong>.
+                {tutor.displayName || tutor.name} đã được ban chuyên môn HanTutor đối soát Căn cước công dân, Văn bằng tốt nghiệp và cam kết chất lượng thông qua buổi học thử 1-1 miễn phí. Tỷ lệ học viên tiếp tục theo học đạt <strong className="text-[#2e5d32] font-bold tabular-nums">{successRate}%</strong>.
               </p>
             </div>
 
-            {/* 5. Về [Tên gia sư] (About the Tutor) */}
-            <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.04)] space-y-4">
+            {/* 5. Về [Tên giáo viên] */}
+            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] space-y-5">
               <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
-                <h2 className="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-2 tracking-tight">
-                  <User className="w-5 h-5 text-blue-600" />
+                <h2 className="text-base sm:text-lg font-black text-[#111111] flex items-center gap-2 tracking-tight">
+                  <User className="w-4 h-4 text-slate-700" />
                   Về {tutor.displayName || tutor.name}
                 </h2>
                 {tutor.experience && (
-                  <span className="text-xs font-bold text-slate-700 bg-slate-100 px-3 py-1 rounded-full tabular-nums">
+                  <span className="text-xs font-semibold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md tabular-nums">
                     {tutor.experience} năm kinh nghiệm
                   </span>
                 )}
@@ -2756,31 +2755,31 @@ function TeacherDetailPage() {
               </div>
 
               {/* Bằng cấp & Trình độ học vấn */}
-              <div className="bg-slate-50/90 rounded-2xl p-4.5 border border-slate-200/70 space-y-2.5">
-                <span className="text-xs font-extrabold text-slate-900 uppercase tracking-wider block">
+              <div className="bg-[#F8FAFC] rounded-xl p-4.5 border border-slate-200/80 space-y-3">
+                <span className="text-xs font-bold text-slate-900 uppercase tracking-wider block">
                   Trình độ học vấn & Chứng chỉ sư phạm:
                 </span>
-                <div className="space-y-2 text-xs sm:text-sm text-slate-700">
+                <div className="space-y-2.5 text-xs sm:text-sm text-slate-700">
                   <div className="flex items-start gap-2">
-                    <GraduationCap className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                    <GraduationCap className="w-4 h-4 text-slate-700 shrink-0 mt-0.5" />
                     <span><strong>Trình độ:</strong> {tutor.education || 'Tốt nghiệp Đại học Sư phạm / Cử nhân Chuyên ngành'}</span>
                   </div>
                   {tutor.certificates && tutor.certificates.length > 0 && (
                     <div className="flex items-start gap-2">
-                      <Award className="w-4 h-4 text-amber-500 shrink-0 mt-1" />
-                      <div className="space-y-1">
+                      <Award className="w-4 h-4 text-amber-600 shrink-0 mt-1" />
+                      <div className="space-y-1.5">
                         <span className="font-bold text-slate-900 block">Chứng chỉ đã xác thực: </span>
-                        <div className="flex flex-wrap gap-1.5 pt-0.5">
+                        <div className="flex flex-wrap gap-1.5">
                           {tutor.certificates.map((cert: string, cIdx: number) => (
                             <button
                               key={cIdx}
                               type="button"
                               onClick={() => setActiveProofModal(tutor.kycData?.frontDoc || tutor.kycData?.degreeDoc || tutor.avatar)}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-50/90 hover:bg-amber-100 text-amber-900 border border-amber-200/80 text-xs font-semibold cursor-pointer transition-all active:scale-95 shadow-2xs"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 text-xs font-medium cursor-pointer transition-all active:scale-95 shadow-2xs"
                               title="Nhấp để xem văn bằng chứng thực"
                             >
                               <span>{cert}</span>
-                              <Eye className="w-3 h-3 text-amber-600 ml-0.5" />
+                              <Eye className="w-3 h-3 text-slate-500" />
                             </button>
                           ))}
                         </div>
@@ -2791,61 +2790,63 @@ function TeacherDetailPage() {
               </div>
             </div>
 
-            {/* 6. Giới thiệu về khóa học & Phương pháp (About the Course) */}
-            <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.04)] space-y-4">
+            {/* 6. Khóa học & Phương pháp */}
+            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] space-y-4">
               <div className="flex items-center gap-2 pb-3.5 border-b border-slate-100">
-                <BookOpen className="w-5 h-5 text-blue-600" />
-                <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
-                  Giới thiệu về khóa học & Phương pháp giảng dạy
+                <BookOpen className="w-4 h-4 text-slate-700" />
+                <h2 className="text-base sm:text-lg font-black text-[#111111] tracking-tight">
+                  Khóa học & Phương pháp giảng dạy
                 </h2>
               </div>
 
               <div className="flex flex-wrap gap-2">
-                <span className="px-3.5 py-1 rounded-full border border-blue-200 bg-blue-50/60 text-xs font-bold text-blue-800 inline-flex items-center gap-1.5 shadow-2xs">
-                  🎯 Mọi trình độ từ cơ bản đến nâng cao
+                <span className="px-3 py-1 rounded-md bg-slate-100 text-xs font-semibold text-slate-800 inline-flex items-center gap-1.5">
+                  <Target className="w-3.5 h-3.5 text-slate-600" />
+                  Mọi trình độ từ cơ bản đến nâng cao
                 </span>
-                <span className="px-3.5 py-1 rounded-full border border-blue-200 bg-blue-50/60 text-xs font-bold text-blue-800 inline-flex items-center gap-1.5 shadow-2xs">
-                  🌐 {tutor.badgeSubject || tutor.subjects?.[0] || 'Môn học'}
+                <span className="px-3 py-1 rounded-md bg-slate-100 text-xs font-semibold text-slate-800 inline-flex items-center gap-1.5">
+                  <Globe className="w-3.5 h-3.5 text-slate-600" />
+                  {tutor.badgeSubject || tutor.subjects?.[0] || 'Môn học'}
                 </span>
               </div>
 
               <div className="text-sm text-slate-700 leading-relaxed font-normal space-y-3">
                 <p>
-                  {tutor.teachingMethod || 'Trước khi bắt đầu khóa học, mình sẽ có 1 buổi coaching FREE để xác định level hiện tại của bạn, lắng nghe nhu cầu và nguyện vọng của bạn khi học (ví dụ: phục vụ công việc, giao tiếp, thi cử lấy chứng chỉ...). Sau đó mình sẽ cho bạn xem lộ trình chi tiết, demo lesson 1 sẽ học như thế nào, nếu bạn thấy phù hợp thì chúng mình sẽ bắt đầu vào buổi tiếp theo.'}
+                  {tutor.teachingMethod || 'Trước khi bắt đầu khóa học, giáo viên sẽ có 1 buổi trao đổi miễn phí để đánh giá năng lực hiện tại, lắng nghe mục tiêu và nguyện vọng của học viên. Sau đó sẽ thiết kế lộ trình cá nhân hóa và bắt đầu các bài giảng phù hợp.'}
                 </p>
                 {tutor.philosophy && (
-                  <div className="border-l-4 border-blue-600 bg-blue-50/50 p-4 rounded-r-2xl text-xs sm:text-sm italic text-slate-800 font-medium">
+                  <div className="border-l-2 border-[#111111] bg-[#F8FAFC] p-4 rounded-r-xl text-xs sm:text-sm italic text-slate-800 font-medium">
                     "{tutor.philosophy}"
                   </div>
                 )}
               </div>
             </div>
 
-            {/* 7. Lịch trống & Khung giờ nhận lớp (Availability Matrix) */}
-            <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.04)] space-y-4">
+            {/* 7. Lịch trống & Khung giờ nhận lớp */}
+            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3.5 border-b border-slate-100">
                 <div className="flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-blue-600" />
-                  <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">Lịch trống & Khung giờ nhận lớp</h2>
+                  <Calendar className="w-4 h-4 text-slate-700" />
+                  <h2 className="text-base sm:text-lg font-black text-[#111111] tracking-tight">Lịch trống & Khung giờ nhận lớp</h2>
                 </div>
-                <span className="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1 rounded-full self-start sm:self-auto">
+                <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md self-start sm:self-auto">
                   Phản hồi: {tutor.responseTime || 'Dưới 30 phút'}
                 </span>
               </div>
 
-              <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-2xs">
+              <div className="border border-slate-200/90 rounded-xl overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[540px] border-collapse text-xs text-center">
                     <thead>
-                      <tr className="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
-                        <th className="p-3 text-left pl-4 font-extrabold text-slate-800">Khung giờ nhận dạy</th>
-                        {days.map(d => <th key={d} className="p-3 font-extrabold">{d}</th>)}
+                      <tr className="bg-slate-50 text-slate-700 font-bold border-b border-slate-200/80">
+                        <th className="p-3 text-left pl-4 font-bold text-slate-900">Khung giờ nhận dạy</th>
+                        {days.map(d => <th key={d} className="p-3 font-semibold">{d}</th>)}
                       </tr>
                     </thead>
                     <tbody>
                       {shifts.map(shiftObj => (
                         <tr key={shiftObj.key} className="border-b border-slate-100 last:border-0">
-                          <td className="p-3 font-bold text-slate-700 text-left pl-4 bg-slate-50/60 whitespace-nowrap">
+                          <td className="p-3 font-semibold text-slate-800 text-left pl-4 bg-slate-50/50 whitespace-nowrap">
                             {shiftObj.label}
                           </td>
                           {days.map(day => {
@@ -2856,11 +2857,11 @@ function TeacherDetailPage() {
                             return (
                               <td key={day} className="p-1.5">
                                 {isAvailable ? (
-                                  <span className="block py-1.5 px-2 bg-emerald-100/90 text-emerald-900 font-black rounded-lg text-xs shadow-2xs">
-                                    X
+                                  <span className="inline-block py-1 px-2.5 bg-[#EDF3EC] text-[#2e5d32] font-black rounded text-[11px]">
+                                    ✓
                                   </span>
                                 ) : (
-                                  <span className="block py-1.5 px-2 text-slate-300 text-[11px]">
+                                  <span className="block py-1 text-slate-300 text-[11px]">
                                     —
                                   </span>
                                 )}
@@ -2875,16 +2876,16 @@ function TeacherDetailPage() {
               </div>
             </div>
 
-            {/* 8. Video bài giảng mẫu (Video Player) */}
-            <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.04)] space-y-4">
+            {/* 8. Video bài giảng mẫu */}
+            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] space-y-4">
               <div className="flex items-center gap-2 pb-3.5 border-b border-slate-100">
-                <Play className="w-5 h-5 text-blue-600" />
-                <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
+                <Play className="w-4 h-4 text-slate-700" />
+                <h2 className="text-base sm:text-lg font-black text-[#111111] tracking-tight">
                   Video bài giảng mẫu & Tài liệu học tập
                 </h2>
               </div>
 
-              <div className="aspect-video bg-slate-950 rounded-2xl overflow-hidden shadow-inner relative border border-slate-200">
+              <div className="aspect-video bg-black rounded-xl overflow-hidden border border-slate-200">
                 <iframe
                   className="w-full h-full"
                   src={tutor.videoDemo || "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=0"}
@@ -2895,27 +2896,27 @@ function TeacherDetailPage() {
               </div>
             </div>
 
-            {/* 9. Đề xuất & Đánh giá từ học viên (Reviews & Testimonials) */}
-            <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.04)] space-y-5">
+            {/* 9. Đề xuất & Đánh giá từ học viên */}
+            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] space-y-5">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-slate-100">
                 <div className="flex items-center gap-2">
-                  <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
-                  <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
+                  <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+                  <h2 className="text-base sm:text-lg font-black text-[#111111] tracking-tight">
                     Đề xuất & Đánh giá học viên
                   </h2>
-                  <span className="bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-0.5 rounded-full text-xs font-extrabold tabular-nums">
-                    {displayedReviewsRaw.length} đánh giá
+                  <span className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-xs font-bold tabular-nums">
+                    {displayedReviewsRaw.length}
                   </span>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="bg-blue-50 text-blue-600 border border-blue-200 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs tabular-nums">
-                    <ThumbsUp className="w-3.5 h-3.5 fill-blue-600" /> {displayedReviewsRaw.length}
+                  <span className="bg-[#EDF3EC] text-[#2e5d32] px-3 py-1 rounded-md text-xs font-bold flex items-center gap-1 tabular-nums">
+                    <ThumbsUp className="w-3.5 h-3.5 fill-[#2e5d32]" /> {displayedReviewsRaw.length}
                   </span>
                   <button
                     type="button"
                     onClick={() => openReviewModal(tutor, 'trial')}
-                    className="text-xs font-bold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                    className="text-xs font-bold text-slate-900 hover:underline cursor-pointer"
                   >
                     + Viết đánh giá
                   </button>
@@ -2923,13 +2924,13 @@ function TeacherDetailPage() {
               </div>
 
               {/* Review Filter Tabs */}
-              <div className="flex items-center gap-2 overflow-x-auto pb-1">
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
                 <button
                   type="button"
                   onClick={() => setReviewFilter('all')}
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                     reviewFilter === 'all'
-                      ? 'bg-slate-900 text-white shadow-2xs'
+                      ? 'bg-[#111111] text-white shadow-2xs'
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                   }`}
                 >
@@ -2938,9 +2939,9 @@ function TeacherDetailPage() {
                 <button
                   type="button"
                   onClick={() => setReviewFilter('trial')}
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                     reviewFilter === 'trial'
-                      ? 'bg-blue-600 text-white shadow-2xs'
+                      ? 'bg-[#111111] text-white shadow-2xs'
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                   }`}
                 >
@@ -2949,9 +2950,9 @@ function TeacherDetailPage() {
                 <button
                   type="button"
                   onClick={() => setReviewFilter('official')}
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                     reviewFilter === 'official'
-                      ? 'bg-emerald-600 text-white shadow-2xs'
+                      ? 'bg-[#111111] text-white shadow-2xs'
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                   }`}
                 >
@@ -2962,22 +2963,18 @@ function TeacherDetailPage() {
               {/* Danh sách review cards */}
               <div className="space-y-3">
                 {displayedReviews.map((rev: any) => (
-                  <div key={rev.id} className="p-4 sm:p-5 rounded-2xl border border-slate-200/90 bg-slate-50/50 hover:bg-slate-50 transition-colors space-y-2.5">
+                  <div key={rev.id} className="p-4 sm:p-5 rounded-xl border border-slate-200/80 bg-[#FBFBFA] space-y-2">
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                        <div className="w-7 h-7 rounded-full bg-[#111111] text-white font-bold text-xs flex items-center justify-center shrink-0">
                           {rev.studentName.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <span className="font-extrabold text-sm text-slate-900 block">{rev.studentName}</span>
+                          <span className="font-bold text-sm text-slate-900 block">{rev.studentName}</span>
                           <span className="text-[10px] text-slate-400">{rev.date || 'Gần đây'}</span>
                         </div>
                       </div>
-                      <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg ${
-                        rev.stage === 'trial'
-                          ? 'bg-blue-100/80 text-blue-800 border border-blue-200'
-                          : 'bg-emerald-100/80 text-emerald-800 border border-emerald-200'
-                      }`}>
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700">
                         {rev.stage === 'trial' ? 'Sau buổi học thử 1-1' : 'Đang học chính thức'}
                       </span>
                     </div>
@@ -2989,49 +2986,49 @@ function TeacherDetailPage() {
               </div>
             </div>
 
-            {/* 10. Mức học phí (Pricing Summary Grid 4 cột) */}
-            <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.04)] space-y-4">
+            {/* 10. Mức học phí & Ưu đãi */}
+            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] space-y-4">
               <div className="flex items-center gap-2 pb-3.5 border-b border-slate-100">
-                <DollarSign className="w-5 h-5 text-blue-600" />
-                <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">Mức học phí & Ưu đãi</h2>
+                <DollarSign className="w-4 h-4 text-slate-700" />
+                <h2 className="text-base sm:text-lg font-black text-[#111111] tracking-tight">Mức học phí & Ưu đãi</h2>
               </div>
 
-              <div className="rounded-2xl border border-slate-200 p-5 bg-slate-50/60 grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="rounded-xl border border-slate-200/90 p-5 bg-[#F8FAFC] grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div>
-                  <span className="text-xs font-extrabold text-slate-800 block mb-1">Mức học phí</span>
+                  <span className="text-xs font-bold text-slate-700 block mb-1">Học phí theo giờ</span>
                   <span className="text-sm font-bold text-slate-900 tabular-nums">{tutor.hourlyRate} VNĐ</span>
                 </div>
                 <div>
-                  <span className="text-xs font-extrabold text-slate-800 block mb-1">Giá trọn gói gói học</span>
+                  <span className="text-xs font-bold text-slate-700 block mb-1">Gói học linh hoạt</span>
                   <div className="text-xs text-slate-600 space-y-0.5">
-                    <div>Gói 5 giờ: <strong className="text-blue-700 tabular-nums">{package5h}</strong></div>
-                    <div>Gói 10 giờ: <strong className="text-blue-700 tabular-nums">{package10h}</strong></div>
+                    <div>Gói 5h: <strong className="text-slate-900 tabular-nums">{package5h}</strong></div>
+                    <div>Gói 10h: <strong className="text-slate-900 tabular-nums">{package10h}</strong></div>
                   </div>
                 </div>
                 <div>
-                  <span className="text-xs font-extrabold text-slate-800 block mb-1">Học thử miễn phí ⓘ</span>
-                  <span className="text-sm font-bold text-emerald-700">1 giờ (Free 100%)</span>
+                  <span className="text-xs font-bold text-slate-700 block mb-1">Học thử 1-1</span>
+                  <span className="text-sm font-bold text-[#2e5d32]">1 giờ (Miễn phí 100%)</span>
                 </div>
                 <div>
-                  <span className="text-xs font-extrabold text-slate-800 block mb-1">Hình thức học</span>
+                  <span className="text-xs font-bold text-slate-700 block mb-1">Hình thức</span>
                   <span className="text-sm font-bold text-slate-900">Online & Tại nhà</span>
                 </div>
               </div>
             </div>
 
-            {/* 11. Các giáo viên dạy tương tự (Slider / Grid có phân trang thật) */}
+            {/* 11. Các giáo viên dạy tương tự */}
             {allRelatedTutors.length > 0 && (
               <div className="space-y-4 pt-4 border-t border-slate-200">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-base sm:text-lg font-black text-slate-900">
-                    Các giáo viên dạy <strong>{tutor.badgeSubject || tutor.subjects?.[0] || 'môn học'}</strong> tương tự tại <strong>{tutor.location || 'Hà Nội'}</strong>
+                  <h2 className="text-sm sm:text-base font-bold text-slate-900">
+                    Giáo viên dạy <strong>{tutor.badgeSubject || tutor.subjects?.[0] || 'môn học'}</strong> tương tự
                   </h2>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-slate-500 font-bold tabular-nums">{relatedPage + 1}/{totalPages}</span>
+                    <span className="text-xs text-slate-500 font-medium tabular-nums">{relatedPage + 1}/{totalPages}</span>
                     <button
                       type="button"
                       onClick={() => setRelatedPage(p => (p > 0 ? p - 1 : totalPages - 1))}
-                      className="w-7 h-7 rounded-full border border-slate-200 flex items-center justify-center hover:bg-slate-50 hover:border-blue-300 text-slate-600 transition-colors cursor-pointer active:scale-95"
+                      className="w-7 h-7 rounded-lg border border-slate-200 flex items-center justify-center hover:bg-slate-50 text-slate-600 transition-colors cursor-pointer active:scale-95"
                       title="Trang trước"
                     >
                       <ChevronLeft className="w-4 h-4" />
@@ -3039,7 +3036,7 @@ function TeacherDetailPage() {
                     <button
                       type="button"
                       onClick={() => setRelatedPage(p => (p < totalPages - 1 ? p + 1 : 0))}
-                      className="w-7 h-7 rounded-full border border-slate-200 flex items-center justify-center hover:bg-slate-50 hover:border-blue-300 text-slate-600 transition-colors cursor-pointer active:scale-95"
+                      className="w-7 h-7 rounded-lg border border-slate-200 flex items-center justify-center hover:bg-slate-50 text-slate-600 transition-colors cursor-pointer active:scale-95"
                       title="Trang tiếp theo"
                     >
                       <ChevronRight className="w-4 h-4" />
@@ -3054,27 +3051,24 @@ function TeacherDetailPage() {
                       to={`/giao-vien/${rel.id}`}
                       className="group block space-y-2 select-none"
                     >
-                      <div className="aspect-square rounded-2xl overflow-hidden relative bg-slate-100 shadow-2xs">
+                      <div className="aspect-square rounded-xl overflow-hidden relative bg-slate-100 border border-slate-200/80">
                         <img
                           src={rel.avatar}
                           alt={rel.displayName || rel.name}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                        <div className="absolute bottom-2.5 left-2.5 right-2.5 text-white">
-                          <div className="font-extrabold text-sm leading-snug truncate">{rel.displayName || rel.name}</div>
-                          <div className="text-[11px] text-white/80 truncate">{rel.location || 'Hà Nội & Trực tuyến'}</div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent" />
+                        <div className="absolute bottom-2 left-2 right-2 text-white">
+                          <div className="font-bold text-xs leading-snug truncate">{rel.displayName || rel.name}</div>
+                          <div className="text-[10px] text-white/80 truncate">{rel.location || 'Hà Nội & Trực tuyến'}</div>
                         </div>
                       </div>
                       <div className="space-y-0.5">
-                        <div className="text-[11px] font-bold text-amber-500 flex items-center gap-1 tabular-nums">
-                          ⭐ 5 ({rel.reviews || 2} lượt đánh giá)
+                        <div className="text-[11px] font-bold text-amber-600 flex items-center gap-1 tabular-nums">
+                          ⭐ 5 ({rel.reviews || 2})
                         </div>
-                        <div className="text-xs font-black text-blue-700 tabular-nums">
-                          {rel.hourlyRate} VNĐ/giờ
-                        </div>
-                        <div className="text-[10px] font-semibold text-blue-700 bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-md inline-block">
-                          Bài học đầu tiên miễn phí
+                        <div className="text-xs font-bold text-slate-900 tabular-nums">
+                          {rel.hourlyRate} VNĐ/h
                         </div>
                       </div>
                     </Link>
@@ -3085,29 +3079,29 @@ function TeacherDetailPage() {
 
           </div>
 
-          {/* CỘT PHẢI (4 / 12 CỘT) - Sticky Action Card (Phong cách Hiện đại High-End) */}
+          {/* CỘT PHẢI (4 / 12 CỘT) - Sticky Action Card Phong cách Minimalist */}
           <div className="lg:col-span-4">
-            <div className="bg-white rounded-3xl border border-slate-200/90 shadow-xl shadow-slate-900/5 p-6 sm:p-7 text-center sticky top-24 space-y-5">
+            <div className="bg-white rounded-2xl border border-slate-200/90 shadow-[0_2px_12px_rgba(0,0,0,0.04)] p-6 text-center sticky top-24 space-y-5">
 
               {/* Top actions: Favorite & Share */}
               <div className="flex justify-between items-center text-slate-400">
                 <button
                   onClick={() => setIsLiked(!isLiked)}
-                  className={`p-2 rounded-full hover:bg-slate-50 transition-colors cursor-pointer active:scale-90 ${isLiked ? 'text-blue-600' : 'hover:text-slate-600'}`}
+                  className={`p-2 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer active:scale-90 ${isLiked ? 'text-red-600' : 'hover:text-slate-600'}`}
                   title="Lưu hồ sơ"
                 >
-                  <Heart className={`w-5 h-5 ${isLiked ? 'fill-blue-600' : ''}`} />
+                  <Heart className={`w-4 h-4 ${isLiked ? 'fill-red-600' : ''}`} />
                 </button>
                 <button
                   onClick={handleShare}
-                  className="p-2 rounded-full hover:bg-slate-50 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer active:scale-90"
+                  className="p-2 rounded-lg hover:bg-slate-50 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer active:scale-90"
                   title="Chia sẻ hồ sơ"
                 >
-                  <Share2 className="w-5 h-5" />
+                  <Share2 className="w-4 h-4" />
                 </button>
               </div>
 
-              {/* Round Avatar with Interactive Zoom Trigger & KYC Check */}
+              {/* Round Avatar with Zoom Trigger & KYC Check */}
               <div
                 onClick={() => { setIsAvatarModalOpen(true); setAvatarZoom(1); }}
                 className="relative inline-block mx-auto group/avatar cursor-pointer"
@@ -3116,9 +3110,9 @@ function TeacherDetailPage() {
                 <img
                   src={tutor.avatar}
                   alt={tutor.displayName || tutor.name}
-                  className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-slate-100 shadow-md bg-slate-50 group-hover/avatar:scale-105 transition-transform duration-300"
+                  className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-2 border-slate-100 shadow-sm bg-slate-50 group-hover/avatar:scale-105 transition-transform duration-300"
                 />
-                <div className="absolute inset-0 rounded-full bg-slate-950/40 opacity-0 group-hover/avatar:opacity-100 transition-opacity flex items-center justify-center text-white">
+                <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover/avatar:opacity-100 transition-opacity flex items-center justify-center text-white">
                   <ZoomIn className="w-6 h-6 drop-shadow-md" />
                 </div>
                 <div className="absolute bottom-0 right-0 bg-emerald-500 text-white p-1 rounded-full border-2 border-white shadow-2xs" title="Đã đối soát KYC">
@@ -3131,7 +3125,7 @@ function TeacherDetailPage() {
                 <button
                   type="button"
                   onClick={() => { setIsAvatarModalOpen(true); setAvatarZoom(1); }}
-                  className="text-[11px] font-semibold text-slate-500 hover:text-blue-600 transition-colors inline-flex items-center gap-1 cursor-pointer"
+                  className="text-[11px] font-medium text-slate-500 hover:text-slate-900 transition-colors inline-flex items-center gap-1 cursor-pointer"
                 >
                   <Eye className="w-3 h-3" />
                   Xem ảnh & hồ sơ xác thực
@@ -3140,20 +3134,20 @@ function TeacherDetailPage() {
 
               {/* Name & Rating */}
               <div className="space-y-1">
-                <h2 className="text-xl font-black text-slate-900 tracking-tight">{tutor.displayName || tutor.name}</h2>
-                <div className="text-xs text-amber-500 font-bold flex items-center justify-center gap-1">
-                  ⭐ 5.0 <span className="text-slate-500 font-normal tabular-nums">({displayedReviewsRaw.length} các đánh giá)</span>
+                <h2 className="text-xl font-black text-[#111111] tracking-tight">{tutor.displayName || tutor.name}</h2>
+                <div className="text-xs text-amber-600 font-bold flex items-center justify-center gap-1">
+                  ⭐ 5.0 <span className="text-slate-500 font-normal tabular-nums">({displayedReviewsRaw.length} đánh giá)</span>
                 </div>
               </div>
 
               {/* Key Values List */}
               <div className="space-y-2.5 py-3 border-y border-slate-100 text-xs text-left">
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-600 font-medium">Mức học phí</span>
+                  <span className="text-slate-600 font-medium">Học phí theo giờ</span>
                   <strong className="text-slate-900 font-bold tabular-nums">{tutor.hourlyRate} VNĐ</strong>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-600 font-medium">Phản hồi</span>
+                  <span className="text-slate-600 font-medium">Tốc độ phản hồi</span>
                   <strong className="text-slate-900 font-bold">{tutor.responseTime || 'Dưới 30 phút'}</strong>
                 </div>
                 <div className="flex justify-between items-center">
@@ -3162,14 +3156,14 @@ function TeacherDetailPage() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-slate-600 font-medium">Tỷ lệ chốt sau học thử</span>
-                  <strong className="text-emerald-700 font-bold tabular-nums">{successRate}%</strong>
+                  <strong className="text-[#2e5d32] font-bold tabular-nums">{successRate}%</strong>
                 </div>
               </div>
 
-              {/* Primary CTA Button (Xanh dương HanTutor) */}
+              {/* Primary Action Button (Solid #111111 Black Button) */}
               <div className="space-y-2 pt-1">
                 {trialItem?.status === 'trial_in_progress' ? (
-                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2.5 text-center">
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2.5 text-center">
                     <div className="text-xs text-slate-900 font-bold">
                       Đang kết nối cùng {tutor.displayName || tutor.name}
                     </div>
@@ -3177,7 +3171,7 @@ function TeacherDetailPage() {
                       href={`https://zalo.me/${(tutor.zalo || tutor.phone || '0912345678').replace(/[^0-9]/g, '')}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full bg-[#0068FF] hover:bg-[#0056d6] active:scale-95 text-white font-bold py-3 rounded-xl transition-all text-xs flex items-center justify-center shadow-xs text-center"
+                      className="w-full bg-[#0068FF] hover:bg-[#0056d6] active:scale-98 text-white font-bold py-3 rounded-xl transition-all text-xs flex items-center justify-center shadow-xs text-center"
                     >
                       Nhắn Zalo giáo viên
                     </a>
@@ -3186,15 +3180,15 @@ function TeacherDetailPage() {
                   <button
                     type="button"
                     onClick={() => openContactZaloModal(tutor)}
-                    className="w-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-black py-3.5 rounded-2xl transition-all shadow-md shadow-blue-200 flex items-center justify-center gap-2 cursor-pointer text-sm"
+                    className="w-full bg-[#111111] hover:bg-[#282828] active:scale-98 text-white font-bold py-3.5 rounded-xl transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer text-xs sm:text-sm"
                   >
                     <MessageCircle className="w-4 h-4" />
                     Nhận 01 buổi học thử 1-1
                   </button>
                 )}
 
-                <span className="text-xs font-bold text-blue-600 block">
-                  🎁 Bài học đầu tiên miễn phí
+                <span className="text-xs font-semibold text-slate-600 block">
+                  1 buổi học thử 1-1 hoàn toàn miễn phí
                 </span>
               </div>
 
@@ -3204,34 +3198,34 @@ function TeacherDetailPage() {
         </div>
       </div>
 
-      {/* MODAL 1: Teacher Photo & Profile Verification Dossier Modal (Thiết kế mới khi bấm vào ảnh giáo viên) */}
+      {/* MODAL 1: Teacher Photo & Profile Dossier Modal */}
       {isAvatarModalOpen && (
         <div
-          className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200"
+          className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200"
           onClick={() => setIsAvatarModalOpen(false)}
         >
           <div
-            className="bg-white rounded-3xl max-w-3xl w-full shadow-2xl border border-slate-200/90 overflow-hidden relative flex flex-col md:flex-row max-h-[90vh] animate-in zoom-in-95 duration-200"
+            className="bg-white rounded-2xl max-w-3xl w-full shadow-2xl border border-slate-200 overflow-hidden relative flex flex-col md:flex-row max-h-[90vh] animate-in zoom-in-95 duration-200"
             onClick={e => e.stopPropagation()}
           >
             {/* Top close button */}
             <button
               onClick={() => setIsAvatarModalOpen(false)}
-              className="absolute top-4 right-4 z-20 p-2.5 rounded-full bg-slate-900/80 hover:bg-slate-900 text-white transition-all cursor-pointer active:scale-90 shadow-md"
+              className="absolute top-4 right-4 z-20 p-2 rounded-full bg-[#111111] hover:bg-[#282828] text-white transition-all cursor-pointer active:scale-90"
               title="Đóng (ESC)"
             >
               <X className="w-4 h-4" />
             </button>
 
-            {/* Left Column: High-Res Image with Zoom Controls */}
-            <div className="md:w-5/12 bg-slate-950 flex flex-col items-center justify-between p-6 relative overflow-hidden select-none">
+            {/* Left Column: Image with Zoom Controls */}
+            <div className="md:w-5/12 bg-[#111111] flex flex-col items-center justify-between p-6 relative overflow-hidden select-none">
               
-              {/* Zoom Controls Overlay */}
+              {/* Zoom Controls */}
               <div className="w-full flex items-center justify-between text-white/80 z-10">
-                <span className="text-[11px] font-semibold bg-white/10 px-2.5 py-1 rounded-md backdrop-blur-md">
+                <span className="text-[11px] font-semibold bg-white/10 px-2.5 py-1 rounded-md">
                   Ảnh hồ sơ chính thức
                 </span>
-                <div className="flex items-center gap-1.5 bg-white/10 p-1 rounded-lg backdrop-blur-md">
+                <div className="flex items-center gap-1.5 bg-white/10 p-1 rounded-lg">
                   <button
                     type="button"
                     onClick={() => setAvatarZoom(z => Math.max(1, z - 0.25))}
@@ -3252,42 +3246,38 @@ function TeacherDetailPage() {
                 </div>
               </div>
 
-              {/* Main Photo Display */}
+              {/* Photo Display */}
               <div className="my-auto py-4 overflow-hidden flex items-center justify-center">
                 <img
                   src={tutor.avatar}
                   alt={tutor.displayName || tutor.name}
                   style={{ transform: `scale(${avatarZoom})` }}
-                  className="max-h-[50vh] md:max-h-[380px] w-auto rounded-2xl object-cover shadow-2xl transition-transform duration-200 border-2 border-white/20"
+                  className="max-h-[50vh] md:max-h-[380px] w-auto rounded-xl object-cover shadow-2xl transition-transform duration-200 border border-white/20"
                 />
               </div>
 
-              {/* Bottom KYC Seal in Photo column */}
-              <div className="w-full bg-emerald-950/80 border border-emerald-500/30 rounded-xl p-2.5 text-center text-emerald-300 text-xs font-bold flex items-center justify-center gap-1.5 backdrop-blur-md z-10">
+              {/* Bottom KYC Seal */}
+              <div className="w-full bg-emerald-950/90 border border-emerald-500/30 rounded-lg p-2 text-center text-emerald-300 text-xs font-bold flex items-center justify-center gap-1.5 z-10">
                 <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
                 <span>Hồ sơ đã đối soát KYC 100%</span>
               </div>
             </div>
 
-            {/* Right Column: Educator Verification Dossier & Actions */}
+            {/* Right Column: Dossier Details */}
             <div className="md:w-7/12 p-6 sm:p-7 overflow-y-auto space-y-4 flex flex-col justify-between">
               <div className="space-y-3.5">
                 
-                {/* Header tags */}
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide ${
-                    isTeacher ? 'bg-blue-600 text-white' : 'bg-purple-600 text-white'
-                  }`}>
+                  <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide bg-[#111111] text-white">
                     {isTeacher ? 'Giáo viên Chuyên môn' : 'Gia sư Sinh viên Giỏi'}
                   </span>
-                  <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold text-blue-800 bg-blue-50 border border-blue-200">
+                  <span className="px-2.5 py-0.5 rounded-md text-[10px] font-semibold bg-[#EDF3EC] text-[#346538] border border-[#d6e5d5]">
                     {tutor.badgeSubject || tutor.subjects?.[0] || 'Môn học'}
                   </span>
                 </div>
 
-                {/* Name & headline */}
                 <div>
-                  <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                  <h3 className="text-xl sm:text-2xl font-black text-[#111111] tracking-tight">
                     {tutor.displayName || tutor.name}
                   </h3>
                   <p className="text-xs text-slate-500 font-medium italic mt-0.5">
@@ -3295,7 +3285,6 @@ function TeacherDetailPage() {
                   </p>
                 </div>
 
-                {/* Key stats grid */}
                 <div className="grid grid-cols-2 gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200/80 text-xs">
                   <div>
                     <span className="text-slate-500 text-[11px] block">Đánh giá trung bình:</span>
@@ -3305,14 +3294,14 @@ function TeacherDetailPage() {
                   </div>
                   <div>
                     <span className="text-slate-500 text-[11px] block">Tỷ lệ nhận lớp:</span>
-                    <strong className="text-emerald-700 font-bold tabular-nums">
+                    <strong className="text-[#2e5d32] font-bold tabular-nums">
                       {successRate}% sau học thử
                     </strong>
                   </div>
                   <div>
-                    <span className="text-slate-500 text-[11px] block">Mức học phí:</span>
-                    <strong className="text-blue-700 font-bold tabular-nums">
-                      {tutor.hourlyRate} VNĐ/giờ
+                    <span className="text-slate-500 text-[11px] block">Học phí theo giờ:</span>
+                    <strong className="text-slate-900 font-bold tabular-nums">
+                      {tutor.hourlyRate} VNĐ/h
                     </strong>
                   </div>
                   <div>
@@ -3323,15 +3312,14 @@ function TeacherDetailPage() {
                   </div>
                 </div>
 
-                {/* Academic Qualifications */}
                 <div className="space-y-1.5 text-xs text-slate-700">
                   <div className="font-bold text-slate-900">Văn bằng & Chứng chỉ đã xác thực:</div>
-                  <div className="flex items-start gap-1.5 bg-blue-50/50 p-2.5 rounded-lg border border-blue-100">
-                    <GraduationCap className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                  <div className="flex items-start gap-1.5 bg-slate-50 p-2.5 rounded-lg border border-slate-200/70">
+                    <GraduationCap className="w-4 h-4 text-slate-700 shrink-0 mt-0.5" />
                     <span>{tutor.education || 'Cử nhân Sư phạm / Đại học Chuyên ngành'}</span>
                   </div>
                   {tutor.certificates && tutor.certificates.length > 0 && (
-                    <div className="flex items-start gap-1.5 bg-amber-50/50 p-2.5 rounded-lg border border-amber-100">
+                    <div className="flex items-start gap-1.5 bg-slate-50 p-2.5 rounded-lg border border-slate-200/70">
                       <Award className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                       <span>{tutor.certificates.join(', ')}</span>
                     </div>
@@ -3340,7 +3328,7 @@ function TeacherDetailPage() {
 
               </div>
 
-              {/* Modal Actions */}
+              {/* Modal CTA */}
               <div className="pt-3 border-t border-slate-100 space-y-2">
                 <button
                   type="button"
@@ -3348,13 +3336,13 @@ function TeacherDetailPage() {
                     setIsAvatarModalOpen(false);
                     openContactZaloModal(tutor);
                   }}
-                  className="w-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold py-3 rounded-xl transition-all text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
+                  className="w-full bg-[#111111] hover:bg-[#282828] active:scale-98 text-white font-bold py-3 rounded-xl transition-all text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
                 >
                   <MessageCircle className="w-4 h-4" />
                   Nhận 01 buổi học thử 1-1 miễn phí
                 </button>
                 <div className="flex items-center justify-between text-[11px] text-slate-500 px-1">
-                  <span>🎁 Buổi đầu tiên hoàn toàn miễn phí</span>
+                  <span>1 buổi học thử 1-1 miễn phí</span>
                   <button
                     type="button"
                     onClick={() => setIsAvatarModalOpen(false)}
@@ -3370,14 +3358,14 @@ function TeacherDetailPage() {
         </div>
       )}
 
-      {/* MODAL 2: Certificate & Document Proof Lightbox Modal (Thiết kế minh chứng bằng cấp) */}
+      {/* MODAL 2: Certificate Lightbox Modal */}
       {activeProofModal && (
         <div
-          className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
+          className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"
           onClick={() => setActiveProofModal(null)}
         >
           <div
-            className="bg-white rounded-3xl p-5 sm:p-6 max-w-lg w-full shadow-2xl relative border border-slate-200"
+            className="bg-white rounded-2xl p-5 sm:p-6 max-w-lg w-full shadow-2xl relative border border-slate-200"
             onClick={e => e.stopPropagation()}
           >
             <button
@@ -3388,10 +3376,10 @@ function TeacherDetailPage() {
               <X className="w-4 h-4" />
             </button>
             <div className="flex items-center gap-2 mb-3">
-              <Award className="w-5 h-5 text-amber-500" />
+              <Award className="w-4 h-4 text-amber-600" />
               <h3 className="text-base font-bold text-slate-900">Văn bằng & Chứng chỉ chuyên môn</h3>
             </div>
-            <div className="rounded-2xl overflow-hidden border border-slate-200 max-h-[65vh] flex items-center justify-center bg-slate-950">
+            <div className="rounded-xl overflow-hidden border border-slate-200 max-h-[65vh] flex items-center justify-center bg-[#111111]">
               <img src={activeProofModal} alt="Minh chứng thành tích" className="max-h-[60vh] w-auto object-contain" />
             </div>
             <div className="mt-3 text-center text-xs text-slate-500 font-medium">
