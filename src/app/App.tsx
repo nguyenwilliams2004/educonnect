@@ -80,6 +80,24 @@ export interface StudentTrialItem {
   studentPhone?: string;
 }
 
+export interface WalletTransaction {
+  id: string;
+  tutorId: string | number;
+  tutorName?: string;
+  type: 'tuition_income' | 'withdrawal';
+  amount: number;
+  title: string;
+  date: string;
+  status: 'completed' | 'pending';
+  bankInfo?: string;
+}
+
+export interface TeacherWallet {
+  balance: number;
+  totalWithdrawn: number;
+  transactions: WalletTransaction[];
+}
+
 // --- LOCALSTORAGE HELPERS (Quản lý trạng thái học thử và học chính thức) ---
 function getEnrolledTutors(): Record<string, string> {
   try { return JSON.parse(localStorage.getItem('hantutor_enrolled') || '{}'); } catch { return {}; }
@@ -94,6 +112,43 @@ function getStoredTrials(): StudentTrialItem[] {
 }
 function saveStoredTrials(trials: StudentTrialItem[]) {
   localStorage.setItem('hantutor_student_trials', JSON.stringify(trials));
+}
+function getStoredTeacherWallets(): Record<string, TeacherWallet> {
+  try {
+    const raw = localStorage.getItem('hantutor_teacher_wallets');
+    if (raw) return JSON.parse(raw);
+  } catch { }
+  return {
+    t1: {
+      balance: 1680000,
+      totalWithdrawn: 3500000,
+      transactions: [
+        {
+          id: 'tx_init_1',
+          tutorId: 't1',
+          tutorName: 'Cô Sương Mai',
+          type: 'tuition_income',
+          amount: 1120000,
+          title: 'Cộng 70% học phí khóa 8 buổi (Học sinh Hoàng Nam)',
+          date: '02/09/2026',
+          status: 'completed'
+        },
+        {
+          id: 'tx_init_2',
+          tutorId: 't1',
+          tutorName: 'Cô Sương Mai',
+          type: 'tuition_income',
+          amount: 560000,
+          title: 'Cộng 70% học phí khóa 4 buổi (Học sinh Bảo Anh)',
+          date: '01/09/2026',
+          status: 'completed'
+        }
+      ]
+    }
+  };
+}
+function saveStoredTeacherWallets(wallets: Record<string, TeacherWallet>) {
+  localStorage.setItem('hantutor_teacher_wallets', JSON.stringify(wallets));
 }
 
 function Logo({ light = false, size = "md" }: { light?: boolean; size?: "sm" | "md" | "lg" }) {
@@ -131,6 +186,7 @@ interface UIContextType {
   openTutorDetailModal: (tutor: any) => void;
   openMyTrialsModal: () => void;
   openReviewModal: (tutor: any, defaultStage?: 'trial' | 'official') => void;
+  openTeacherWalletModal: (tutorId?: string | number) => void;
 }
 
 const UIContext = createContext<UIContextType | null>(null);
@@ -151,8 +207,12 @@ interface DataContextType {
   reviews: TutorReviewItem[];
   currentSession: UserSessionContext;
   setCurrentSession: React.Dispatch<React.SetStateAction<UserSessionContext>>;
+  teacherWallets: Record<string, TeacherWallet>;
+  getTeacherWallet: (tutorId: string | number) => TeacherWallet;
+  requestWithdrawal: (tutorId: string | number, amount: number, bankInfo: string) => { success: boolean; message: string };
+  approveWithdrawal: (transactionId: string) => void;
   recordTrialContact: (tutor: any, studentInfo?: { name?: string, phone?: string }) => void;
-  recordOfficialEnrollment: (tutorId: any) => void;
+  recordOfficialEnrollment: (tutorId: any, totalTuition?: number) => void;
   cancelTrialEnrollment: (tutorId: any) => void;
   approveTutorKyc: (tutorId: any) => void;
   rejectTutorKyc: (tutorId: any) => void;
@@ -759,7 +819,7 @@ function ContactZaloModal({
 }
 
 // ==========================================
-// 3. ENROLLMENT & CHECKOUT MODAL (Chia 30%/70%)
+// 3. ENROLLMENT MODAL (Giao diện học sinh: chỉ hiển thị học phí khóa học)
 // ==========================================
 function EnrollmentModal({
   tutor,
@@ -782,9 +842,6 @@ function EnrollmentModal({
   const priceString = tutor.levelPrices?.[currentLvl] || '200.000';
   const pricePerSession = parseInt(priceString.replace(/\D/g, '')) || 200000;
   const totalTuition = pricePerSession * totalSessions;
-
-  const centerFee = Math.round(totalTuition * 0.3);
-  const tutorFee = Math.round(totalTuition * 0.7);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -839,26 +896,18 @@ function EnrollmentModal({
             </div>
           </div>
 
-          {/* Breakdown 30% / 70% */}
+          {/* Chi tiết học phí cho học sinh (không hiển thị 30/70) */}
           <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl space-y-2 text-xs">
             <div className="flex justify-between text-slate-600">
               <span>Học phí 1 buổi ({currentLvl}):</span>
               <span className="font-bold text-slate-900">{pricePerSession.toLocaleString()}đ</span>
             </div>
             <div className="flex justify-between text-slate-600">
-              <span>Tổng học phí ({totalSessions} buổi):</span>
-              <span className="font-bold text-slate-900">{totalTuition.toLocaleString()}đ</span>
-            </div>
-            <div className="pt-2 border-t border-slate-200/80 flex justify-between text-[11px] text-slate-500">
-              <span>• Phí vận hành sàn (30%):</span>
-              <span className="font-semibold text-blue-700">{centerFee.toLocaleString()}đ</span>
-            </div>
-            <div className="flex justify-between text-[11px] text-slate-500">
-              <span>• Giáo viên thực nhận (70%):</span>
-              <span className="font-semibold text-emerald-700">{tutorFee.toLocaleString()}đ</span>
+              <span>Số buổi đăng ký:</span>
+              <span className="font-bold text-slate-900">{totalSessions} buổi</span>
             </div>
             <div className="pt-2 border-t border-slate-200 flex justify-between text-sm font-extrabold text-slate-900">
-              <span>Tổng thanh toán:</span>
+              <span>Tổng thanh toán học phí:</span>
               <span className="text-blue-600 text-base">{totalTuition.toLocaleString()}đ</span>
             </div>
           </div>
@@ -946,7 +995,7 @@ function CheckoutModal({
             </div>
             <h3 className="text-2xl font-extrabold text-slate-900">Đăng ký thành công!</h3>
             <p className="text-xs text-slate-500 leading-relaxed">
-              Giao dịch của bạn đã được ghi nhận. Học phí đã được phân bổ tự động (30% sàn duy trì và 70% chuyển cho giáo viên). Chúc bạn có những buổi học hiệu quả!
+              Lớp học đã được kích hoạt thành công. Giáo viên sẽ liên hệ và bắt đầu khóa học theo lịch đã chọn. Chúc bạn có những buổi học hiệu quả!
             </p>
             <button
               type="button"
@@ -955,6 +1004,200 @@ function CheckoutModal({
             >
               Hoàn tất & Đóng
             </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ==========================================
+// 3.2. TEACHER WALLET MODAL (Ví Giảng Dạy - Tự Rút Tiền Shopee-Style)
+// ==========================================
+function TeacherWalletModal({
+  isOpen,
+  onClose,
+  tutorId
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  tutorId?: string | number;
+}) {
+  const { tutors, getTeacherWallet, requestWithdrawal } = useData();
+  const [activeTab, setActiveTab] = useState<'withdraw' | 'history'>('withdraw');
+  const [withdrawAmount, setWithdrawAmount] = useState<string>('');
+  const [bankAccount, setBankAccount] = useState('MB Bank - 0987654321');
+  const [loading, setLoading] = useState(false);
+
+  const activeTutor = tutors.find(t => String(t.id) === String(tutorId)) || tutors[0];
+  const wallet = getTeacherWallet(activeTutor?.id || 't1');
+
+  if (!isOpen) return null;
+
+  const handleWithdraw = (e: React.FormEvent) => {
+    e.preventDefault();
+    const amountNum = parseInt(withdrawAmount.replace(/\D/g, '')) || 0;
+    if (amountNum <= 0) {
+      alert("Vui lòng nhập số tiền hợp lệ muốn rút!");
+      return;
+    }
+    if (amountNum > wallet.balance) {
+      alert(`Số dư khả dụng không đủ! Số dư hiện tại là ${wallet.balance.toLocaleString()}đ`);
+      return;
+    }
+
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      const res = requestWithdrawal(activeTutor?.id || 't1', amountNum, bankAccount);
+      if (res.success) {
+        alert(res.message);
+        setWithdrawAmount('');
+        setActiveTab('history');
+      } else {
+        alert(res.message);
+      }
+    }, 600);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative border border-slate-100 animate-in zoom-in-95 duration-200">
+        <button
+          onClick={onClose}
+          className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-2 rounded-full transition-colors cursor-pointer"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-700 shadow-sm">
+            <DollarSign className="w-6 h-6" />
+          </div>
+          <div>
+            <h3 className="text-xl font-extrabold text-slate-900">Ví Giảng Dạy (Shopee-Style)</h3>
+            <p className="text-xs text-slate-500">Giáo viên: <strong className="text-slate-800">{activeTutor?.name}</strong></p>
+          </div>
+        </div>
+
+        {/* Shopee-Style Balance Card */}
+        <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950 text-white p-5 rounded-2xl shadow-md mb-5 relative overflow-hidden">
+          <div className="flex justify-between items-start mb-2">
+            <span className="text-xs text-slate-300 font-medium">Số dư ví khả dụng (70% Học phí tích lũy)</span>
+            <span className="text-[10px] font-bold bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-400/30">
+              Napas 24/7 Miễn phí
+            </span>
+          </div>
+          <div className="text-3xl font-black text-emerald-400 tabular-nums">
+            {wallet.balance.toLocaleString()} <span className="text-lg font-bold text-white">VNĐ</span>
+          </div>
+          <div className="mt-3 pt-3 border-t border-slate-700/60 flex justify-between text-xs text-slate-300">
+            <span>Tổng tiền đã rút: <strong className="text-white">{wallet.totalWithdrawn.toLocaleString()}đ</strong></span>
+            <span>{wallet.transactions.length} giao dịch</span>
+          </div>
+        </div>
+
+        {/* Tabs: Rút tiền vs Lịch sử */}
+        <div className="grid grid-cols-2 gap-2 mb-4 border-b border-slate-100 pb-2">
+          <button
+            type="button"
+            onClick={() => setActiveTab('withdraw')}
+            className={`py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${activeTab === 'withdraw' ? 'bg-[#111111] text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+          >
+            💳 Rút tiền về Ngân hàng
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('history')}
+            className={`py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${activeTab === 'history' ? 'bg-[#111111] text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+          >
+            📜 Lịch sử biến động ví
+          </button>
+        </div>
+
+        {/* TAB 1: RÚT TIỀN */}
+        {activeTab === 'withdraw' ? (
+          <form onSubmit={handleWithdraw} className="space-y-4 text-left">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">Tài khoản ngân hàng nhận tiền</label>
+              <input
+                type="text"
+                value={bankAccount}
+                onChange={e => setBankAccount(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold"
+                placeholder="VD: MB Bank - 0987654321 - NGUYEN VAN A"
+                required
+              />
+            </div>
+
+            <div>
+              <div className="flex justify-between items-center mb-1">
+                <label className="text-xs font-bold text-slate-700">Số tiền muốn rút</label>
+                <button
+                  type="button"
+                  onClick={() => setWithdrawAmount(wallet.balance.toString())}
+                  className="text-xs text-emerald-600 font-bold hover:underline cursor-pointer"
+                >
+                  Rút tất cả số dư
+                </button>
+              </div>
+              <div className="relative">
+                <input
+                  type="number"
+                  value={withdrawAmount}
+                  onChange={e => setWithdrawAmount(e.target.value)}
+                  placeholder="Nhập số tiền VNĐ..."
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold text-slate-900 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+                  max={wallet.balance}
+                  min={50000}
+                  required
+                />
+                <span className="absolute right-4 top-3.5 text-xs text-slate-400 font-bold">VNĐ</span>
+              </div>
+            </div>
+
+            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-[11px] text-slate-500 space-y-1">
+              <div className="flex justify-between">
+                <span>Phí giao dịch rút tiền:</span>
+                <span className="font-bold text-emerald-600">0đ (Miễn phí 100%)</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Thời gian xử lý:</span>
+                <span className="font-semibold text-slate-700">Tức thì qua Napas 24/7 (1-3 phút)</span>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading || wallet.balance <= 0}
+              className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold py-3.5 rounded-xl text-sm transition-all shadow-md shadow-emerald-200 cursor-pointer"
+            >
+              {loading ? 'Đang tạo lệnh rút tiền...' : `Yêu cầu rút tiền về tài khoản`}
+            </button>
+          </form>
+        ) : (
+          /* TAB 2: LỊCH SỬ BIẾN ĐỘNG VÍ */
+          <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+            {wallet.transactions.length === 0 ? (
+              <div className="py-8 text-center text-xs text-slate-400">Chưa có biến động số dư nào.</div>
+            ) : (
+              wallet.transactions.map((tx: WalletTransaction) => (
+                <div key={tx.id} className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
+                  <div className="space-y-0.5 max-w-[65%]">
+                    <div className="font-bold text-slate-800 truncate">{tx.title}</div>
+                    <div className="text-[10px] text-slate-400">{tx.date} • {tx.bankInfo || 'Tự động'}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className={`font-extrabold text-sm tabular-nums ${tx.type === 'tuition_income' ? 'text-emerald-600' : 'text-slate-900'}`}>
+                      {tx.type === 'tuition_income' ? '+' : '-'}{tx.amount.toLocaleString()}đ
+                    </div>
+                    <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded-full ${tx.status === 'completed' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+                      {tx.status === 'completed' ? 'Thành công' : 'Chờ chuyển khoản'}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         )}
       </div>
@@ -1334,8 +1577,8 @@ function HeroRightIllustration() {
 }
 
 function Navbar() {
-  const { openAuthModal, openMyTrialsModal } = useUI();
-  const { myTrials, currentSession, setCurrentSession } = useData();
+  const { openAuthModal, openMyTrialsModal, openTeacherWalletModal } = useUI();
+  const { myTrials, currentSession, setCurrentSession, getTeacherWallet } = useData();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -1399,6 +1642,18 @@ function Navbar() {
 
           {currentSession.role !== 'anonymous' ? (
             <div className="flex items-center gap-2">
+              {currentSession.role === 'teacher' && (
+                <button
+                  type="button"
+                  onClick={() => openTeacherWalletModal(currentSession.userId || 't1')}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-extrabold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs cursor-pointer transition-all active:scale-95"
+                  title="Mở Ví Giảng Dạy - Tự Rút Tiền"
+                >
+                  <DollarSign className="w-3.5 h-3.5" />
+                  <span>Ví: {getTeacherWallet(currentSession.userId || 't1').balance.toLocaleString()}đ</span>
+                </button>
+              )}
+
               <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border ${
                 currentSession.role === 'admin' ? 'bg-red-50 text-red-700 border-red-200' :
                 currentSession.role === 'teacher' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
@@ -3482,7 +3737,8 @@ function TeacherDetailPage() {
 
 // AdminDashboardPage
 function AdminDashboardPage() {
-  const { tutors, pendingTutors, adminStats, approveTutorKyc, rejectTutorKyc, securityLogs, refreshSecurityLogs, setCurrentSession } = useData();
+  const { tutors, pendingTutors, adminStats, approveTutorKyc, rejectTutorKyc, securityLogs, refreshSecurityLogs, setCurrentSession, teacherWallets, getTeacherWallet } = useData();
+  const { openTeacherWalletModal } = useUI();
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return sessionStorage.getItem('hantutor_admin_auth') === 'true';
   });
@@ -3717,7 +3973,7 @@ function AdminDashboardPage() {
             onClick={() => setCurrentTab('analytics')}
             className={`pb-3 px-4 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${currentTab === 'analytics' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
           >
-            Phân bổ Doanh thu (30%/70%)
+            Ví Giảng Dạy & Lệnh Rút Tiền
           </button>
           <button
             onClick={() => {
@@ -3911,24 +4167,85 @@ function AdminDashboardPage() {
           </div>
         )}
 
-        {/* TAB 3: REVENUE SPLIT */}
+        {/* TAB 3: TEACHER WALLET & WITHDRAWAL MANAGEMENT (SHOPEE-STYLE) */}
         {currentTab === 'analytics' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-xs">
+                <span className="text-xs text-slate-400 font-bold uppercase block">Tổng Quỹ Ví Giáo Viên</span>
+                <span className="text-2xl font-black text-emerald-600">
+                  {Object.values(teacherWallets).reduce((sum, w) => sum + (w.balance || 0), 0).toLocaleString()} VNĐ
+                </span>
+                <p className="text-[11px] text-slate-400 mt-1">70% học phí tích lũy sẵn sàng rút</p>
+              </div>
+
+              <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-xs">
+                <span className="text-xs text-slate-400 font-bold uppercase block">Tổng Tiền Đã Rút</span>
+                <span className="text-2xl font-black text-slate-900">
+                  {Object.values(teacherWallets).reduce((sum, w) => sum + (w.totalWithdrawn || 0), 0).toLocaleString()} VNĐ
+                </span>
+                <p className="text-[11px] text-slate-400 mt-1">Đã chuyển khoản qua Napas 24/7</p>
+              </div>
+
+              <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-xs">
+                <span className="text-xs text-slate-400 font-bold uppercase block">Doanh Thu Sàn Giữ Lại (30%)</span>
+                <span className="text-2xl font-black text-blue-600">
+                  {Math.round(Object.values(teacherWallets).reduce((sum, w) => sum + (w.balance + w.totalWithdrawn), 0) * (3 / 7)).toLocaleString()} VNĐ
+                </span>
+                <p className="text-[11px] text-slate-400 mt-1">Phí vận hành & bảo hiểm nền tảng</p>
+              </div>
+            </div>
+
+            {/* Table of teacher wallets and recent withdrawals */}
             <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-4">
-              <h3 className="font-bold text-slate-900 text-base">Cơ chế Phân bổ Doanh thu Học phí</h3>
-              <div className="p-4 rounded-2xl bg-blue-50/70 border border-blue-100 text-xs space-y-2">
-                <div className="flex justify-between font-bold text-slate-800">
-                  <span>Trung tâm vận hành (30%):</span>
-                  <span className="text-blue-700 font-extrabold">Tự động giữ lại duy trì sàn</span>
-                </div>
-                <div className="flex justify-between font-bold text-slate-800">
-                  <span>Giáo viên nhận (70%):</span>
-                  <span className="text-emerald-700 font-extrabold">Tự động chuyển vào STK đã đăng ký</span>
+              <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                <div>
+                  <h3 className="font-bold text-slate-900 text-base">Trạng thái Ví & Lệnh Rút Tiền của Giáo Viên</h3>
+                  <p className="text-xs text-slate-500">Giáo viên tự chủ rút tiền về tài khoản ngân hàng tương tự Shopee/ShopeePay</p>
                 </div>
               </div>
-              <p className="text-xs text-slate-500 leading-relaxed">
-                Tất cả các giao dịch thanh toán VietQR đều được chia tách tự động theo tỷ lệ quy định 30% / 70% và cập nhật trực tiếp vào cơ sở dữ liệu.
-              </p>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="border-b border-slate-200 text-slate-400 uppercase text-[10px]">
+                      <th className="pb-3">Giáo viên</th>
+                      <th className="pb-3">Số dư ví hiện tại</th>
+                      <th className="pb-3">Đã rút lũy kế</th>
+                      <th className="pb-3">Giao dịch gần nhất</th>
+                      <th className="pb-3">Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-slate-700">
+                    {tutors.slice(0, 6).map(tut => {
+                      const tw = getTeacherWallet(tut.id);
+                      const lastTx = tw.transactions[0];
+                      return (
+                        <tr key={tut.id} className="hover:bg-slate-50">
+                          <td className="py-3 font-bold text-slate-900 flex items-center gap-2">
+                            <img src={tut.avatar} alt={tut.name} className="w-7 h-7 rounded-full object-cover" />
+                            <span>{tut.name}</span>
+                          </td>
+                          <td className="py-3 font-black text-emerald-600 tabular-nums">{tw.balance.toLocaleString()}đ</td>
+                          <td className="py-3 text-slate-600 font-semibold tabular-nums">{tw.totalWithdrawn.toLocaleString()}đ</td>
+                          <td className="py-3 text-xs text-slate-500">
+                            {lastTx ? `${lastTx.title} (${lastTx.date})` : 'Chưa có giao dịch'}
+                          </td>
+                          <td className="py-3">
+                            <button
+                              type="button"
+                              onClick={() => openTeacherWalletModal(tut.id)}
+                              className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold rounded-lg text-xs cursor-pointer transition-colors"
+                            >
+                              Xem & Thử Rút Tiền
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
@@ -5122,7 +5439,9 @@ function AppLayout({
   isMyTrialsOpen,
   setIsMyTrialsOpen,
   reviewModalState,
-  setReviewModalState
+  setReviewModalState,
+  teacherWalletModalTutorId,
+  setTeacherWalletModalTutorId
 }: any) {
   const location = useLocation();
   const isAdmin = location.pathname.startsWith('/admin');
@@ -5174,7 +5493,7 @@ function AppLayout({
           isOpen={true}
           onClose={() => setEnrollmentModalTutor(null)}
           onProceedToPayment={(enrollmentId, amount, tutorId) => {
-            recordOfficialEnrollment(tutorId);
+            recordOfficialEnrollment(tutorId, amount);
             openCheckoutModal(enrollmentId, amount, tutorId);
           }}
         />
@@ -5205,6 +5524,15 @@ function AppLayout({
           isOpen={reviewModalState.isOpen}
           defaultStage={reviewModalState.defaultStage}
           onClose={() => setReviewModalState({ ...reviewModalState, isOpen: false })}
+        />
+      )}
+
+      {/* Ví Giảng Dạy - Tự Rút Tiền Shopee-Style */}
+      {teacherWalletModalTutorId && (
+        <TeacherWalletModal
+          isOpen={!!teacherWalletModalTutorId}
+          tutorId={teacherWalletModalTutorId}
+          onClose={() => setTeacherWalletModalTutorId(null)}
         />
       )}
 
@@ -5249,6 +5577,8 @@ export default function App() {
     return defaultTutorReviews;
   });
 
+  const [teacherWallets, setTeacherWallets] = useState<Record<string, TeacherWallet>>(() => getStoredTeacherWallets());
+
   const [authModalState, setAuthModalState] = useState<{ isOpen: boolean; view: 'login' | 'register'; defaultRole: 'student' | 'teacher' }>({
     isOpen: false,
     view: 'login',
@@ -5268,6 +5598,7 @@ export default function App() {
     tutor: null,
     defaultStage: 'trial'
   });
+  const [teacherWalletModalTutorId, setTeacherWalletModalTutorId] = useState<string | number | null>(null);
 
   const [currentSession, setCurrentSession] = useState<UserSessionContext>(() => {
     try {
@@ -5291,6 +5622,50 @@ export default function App() {
 
   const getMaskedTutor = (tutor: any) => {
     return RowLevelSecurity.applyTutorRLS(tutor, currentSession);
+  };
+
+  const getTeacherWallet = (tutorId: string | number): TeacherWallet => {
+    const idKey = String(tutorId);
+    return teacherWallets[idKey] || {
+      balance: 0,
+      totalWithdrawn: 0,
+      transactions: []
+    };
+  };
+
+  const requestWithdrawal = (tutorId: string | number, amount: number, bankInfo: string) => {
+    const idKey = String(tutorId);
+    const current = getTeacherWallet(idKey);
+    if (amount > current.balance) {
+      return { success: false, message: 'Số dư ví khả dụng không đủ!' };
+    }
+
+    const newTx: WalletTransaction = {
+      id: 'tx_wdr_' + Date.now(),
+      tutorId,
+      type: 'withdrawal',
+      amount,
+      title: `Rút tiền về ${bankInfo}`,
+      date: new Date().toLocaleDateString('vi-VN'),
+      status: 'completed',
+      bankInfo
+    };
+
+    const updated: TeacherWallet = {
+      balance: current.balance - amount,
+      totalWithdrawn: current.totalWithdrawn + amount,
+      transactions: [newTx, ...current.transactions]
+    };
+
+    const all = { ...teacherWallets, [idKey]: updated };
+    setTeacherWallets(all);
+    saveStoredTeacherWallets(all);
+
+    return { success: true, message: `Yêu cầu rút ${amount.toLocaleString()}đ thành công! Tiền sẽ về STK ${bankInfo} trong 1-3 phút qua Napas 24/7.` };
+  };
+
+  const approveWithdrawal = (transactionId: string) => {
+    // Approve withdrawal
   };
 
   const addTutorReview = (newReviewData: Omit<TutorReviewItem, 'id' | 'date'>) => {
@@ -5433,8 +5808,32 @@ export default function App() {
     }));
   };
 
-  const recordOfficialEnrollment = (tutorId: any) => {
-    // 1. Tăng số lượt nhận lớp chính thức thành công
+  const recordOfficialEnrollment = (tutorId: any, totalTuition = 1600000) => {
+    // 1. Tự động cộng 70% học phí vào Ví Giảng Dạy của giáo viên (Shopee-Style)
+    const tutorEarnings = Math.round(totalTuition * 0.7);
+    const idKey = String(tutorId);
+    const current = getTeacherWallet(idKey);
+    const incomeTx: WalletTransaction = {
+      id: 'tx_inc_' + Date.now(),
+      tutorId,
+      type: 'tuition_income',
+      amount: tutorEarnings,
+      title: `Cộng 70% học phí khóa học (#ENR_${Date.now().toString().slice(-6)})`,
+      date: new Date().toLocaleDateString('vi-VN'),
+      status: 'completed'
+    };
+
+    const updatedWallet: TeacherWallet = {
+      ...current,
+      balance: current.balance + tutorEarnings,
+      transactions: [incomeTx, ...current.transactions]
+    };
+
+    const allWallets = { ...teacherWallets, [idKey]: updatedWallet };
+    setTeacherWallets(allWallets);
+    saveStoredTeacherWallets(allWallets);
+
+    // 2. Tăng số lượt nhận lớp chính thức thành công
     setTutors(prev => prev.map(t => {
       if (String(t.id) === String(tutorId)) {
         const stats = t.trialStats || { totalTrials: 24, officialEnrolled: 22 };
@@ -5449,7 +5848,7 @@ export default function App() {
       return t;
     }));
 
-    // 2. Cập nhật trạng thái trong MyTrials sang 'enrolled'
+    // 3. Cập nhật trạng thái trong MyTrials sang 'enrolled'
     setMyTrials(prev => {
       const updated = prev.map(item =>
         String(item.tutorId) === String(tutorId)
@@ -5460,7 +5859,7 @@ export default function App() {
       return updated;
     });
 
-    // 3. Ghi nhận giao dịch admin
+    // 4. Ghi nhận giao dịch admin
     setAdminStats(prev => ({
       ...prev,
       totalOfficialEnrolled: prev.totalOfficialEnrolled + 1,
@@ -5471,7 +5870,7 @@ export default function App() {
           student: 'Học sinh chính thức',
           type: 'official_enrolled',
           time: 'Vừa xong',
-          status: 'Đăng ký chính thức (30%/70%)'
+          status: 'Đã thanh toán (70% vào Ví Giáo viên)'
         },
         ...prev.recentActivities
       ]
@@ -5550,6 +5949,9 @@ export default function App() {
     },
     openReviewModal: (tutor: any, defaultStage = 'trial') => {
       setReviewModalState({ isOpen: true, tutor, defaultStage });
+    },
+    openTeacherWalletModal: (tutorId) => {
+      setTeacherWalletModalTutorId(tutorId || currentSession.userId || 't1');
     }
   };
 
@@ -5563,6 +5965,10 @@ export default function App() {
     reviews,
     currentSession,
     setCurrentSession,
+    teacherWallets,
+    getTeacherWallet,
+    requestWithdrawal,
+    approveWithdrawal,
     recordTrialContact,
     recordOfficialEnrollment,
     cancelTrialEnrollment,
@@ -5594,6 +6000,8 @@ export default function App() {
             setIsMyTrialsOpen={setIsMyTrialsOpen}
             reviewModalState={reviewModalState}
             setReviewModalState={setReviewModalState}
+            teacherWalletModalTutorId={teacherWalletModalTutorId}
+            setTeacherWalletModalTutorId={setTeacherWalletModalTutorId}
           />
         </BrowserRouter>
       </UIContext.Provider>
