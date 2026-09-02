@@ -114,7 +114,7 @@ function getStoredTeacherWallets(): Record<string, TeacherWallet> {
         tutorName: 'Cô Sương Mai',
         type: 'tuition_income',
         amount: 1120000,
-        title: 'Cộng 70% học phí khóa 8 buổi (Học sinh Hoàng Nam)',
+        title: 'Cộng học phí khóa 8 buổi (Học sinh Hoàng Nam)',
         date: '02/09/2026',
         status: 'completed'
       },
@@ -124,7 +124,7 @@ function getStoredTeacherWallets(): Record<string, TeacherWallet> {
         tutorName: 'Cô Sương Mai',
         type: 'tuition_income',
         amount: 560000,
-        title: 'Cộng 70% học phí khóa 4 buổi (Học sinh Bảo Anh)',
+        title: 'Cộng học phí khóa 4 buổi (Học sinh Bảo Anh)',
         date: '01/09/2026',
         status: 'completed'
       }
@@ -1104,7 +1104,7 @@ function TeacherWalletModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-200">
       <div className="bg-white rounded-[2rem] max-w-lg w-full shadow-2xl relative border border-slate-100 animate-in zoom-in-95 duration-200 overflow-hidden flex flex-col max-h-[92vh]">
-        {/* Header High-End Visual Design - No icon */}
+        {/* Header High-End Visual Design */}
         <div className="p-6 pb-4 border-b border-slate-100 flex items-center justify-between bg-white">
           <div>
             <div className="flex items-center gap-2">
@@ -1156,25 +1156,27 @@ function TeacherWalletModal({
             </div>
           </div>
 
-          {/* Tab Navigation: Rút tiền vs Lịch sử - No icons */}
+          {/* Tab Navigation: Rút tiền vs Lịch sử */}
           <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100/90 rounded-2xl">
             <button
               type="button"
               onClick={() => setActiveTab('withdraw')}
-              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer text-center ${activeTab === 'withdraw'
+              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer text-center ${
+                activeTab === 'withdraw'
                   ? 'bg-white text-blue-600 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
-                }`}
+              }`}
             >
               Rút tiền về Ngân hàng
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('history')}
-              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer text-center ${activeTab === 'history'
+              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer text-center ${
+                activeTab === 'history'
                   ? 'bg-white text-blue-600 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
-                }`}
+              }`}
             >
               Lịch sử biến động ({wallet.transactions.length})
             </button>
@@ -1183,7 +1185,7 @@ function TeacherWalletModal({
           {/* TAB 1: RÚT TIỀN */}
           {activeTab === 'withdraw' ? (
             <form onSubmit={handleWithdraw} className="space-y-4 text-left">
-              {/* Thẻ Ngân hàng Đã liên kết - No icons */}
+              {/* Thẻ Ngân hàng Đã liên kết */}
               <div className="p-3.5 bg-blue-50/50 border border-blue-100 rounded-2xl flex items-center justify-between gap-3">
                 <div className="space-y-0.5">
                   <div className="text-xs font-bold text-slate-900 flex items-center gap-2">
@@ -1440,30 +1442,33 @@ function TeacherProfileModal({
             <button
               type="button"
               onClick={() => setActiveTab('info')}
-              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer text-center ${activeTab === 'info'
+              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer text-center ${
+                activeTab === 'info'
                   ? 'bg-white text-blue-600 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
-                }`}
+              }`}
             >
               Thông tin cá nhân
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('pricing')}
-              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer text-center ${activeTab === 'pricing'
+              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer text-center ${
+                activeTab === 'pricing'
                   ? 'bg-white text-blue-600 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
-                }`}
+              }`}
             >
               Môn dạy & Học phí
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('bank')}
-              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer text-center ${activeTab === 'bank'
+              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer text-center ${
+                activeTab === 'bank'
                   ? 'bg-white text-blue-600 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
-                }`}
+              }`}
             >
               Ngân hàng rút tiền
             </button>
@@ -1674,9 +1679,9 @@ function TeacherProfileModal({
             <button
               type="submit"
               disabled={saving}
-              className="px-5 py-2.5 bg-[#111111] hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all shadow-xs shadow-blue-200 cursor-pointer disabled:opacity-50 flex items-center gap-1.5 active:scale-98"
             >
-              {saving ? 'Đang lưu...' : '💾 Lưu & Cập nhật Hồ sơ'}
+              {saving ? 'Đang lưu...' : 'Lưu & Cập nhật Hồ sơ'}
             </button>
           </div>
         </form>
