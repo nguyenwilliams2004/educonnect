@@ -2,7 +2,6 @@ import {
   AlertCircle,
   ArrowRight,
   Award,
-  Bell,
   BookOpen,
   Briefcase,
   Calendar,
@@ -11,42 +10,29 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  Clock,
-  Copy,
   CreditCard,
   DollarSign,
   Edit3,
   ExternalLink,
   Eye,
-  Filter,
   Globe,
   GraduationCap,
   Heart,
   History,
-  Info,
   Laptop,
-  Lock,
   MapPin,
-  Maximize2,
   Menu,
   MessageCircle,
-  Phone,
   Play,
   Search,
   Share2,
   ShieldCheck,
-  Smile,
-  Sparkles,
   Star,
   Target,
   ThumbsUp,
-  TrendingUp,
   UploadCloud,
   User,
-  UserCheck,
   Users,
-  UserX,
-  Wallet,
   X,
   Zap,
   ZoomIn,
@@ -60,7 +46,6 @@ import {
   IDORGuard,
   RATE_LIMIT_RULES,
   RateLimiter,
-  RateLimitResult,
   RowLevelSecurity,
   SecurityAuditEvent,
   SecurityAuditLogger,
@@ -1002,7 +987,7 @@ function CheckoutModal({
               type="button"
               onClick={handleConfirmPaid}
               disabled={loading}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl text-sm transition-all shadow-md shadow-emerald-200 cursor-pointer disabled:opacity-50"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl text-sm transition-all shadow-md shadow-blue-200 cursor-pointer disabled:opacity-50"
             >
               {loading ? 'Đang xác thực thanh toán...' : 'Tôi đã chuyển khoản thành công'}
             </button>
@@ -1031,7 +1016,7 @@ function CheckoutModal({
 }
 
 // ==========================================
-// 3.2. TEACHER WALLET MODAL (Ví Giảng Dạy - Tự Rút Tiền Shopee-Style Fintech)
+// 3.2. TEACHER WALLET MODAL (Ví Thu Nhập Giáo Viên - Minimalist Blue & White)
 // ==========================================
 function TeacherWalletModal({
   isOpen,
@@ -1050,7 +1035,7 @@ function TeacherWalletModal({
   const [loading, setLoading] = useState(false);
 
   const activeTutor = (tutors && tutors.length > 0 ? tutors : mockTutors).find((t: any) => String(t.id) === String(tutorId) || String(t.id) === '1' || String(t.id) === 't1') || mockTutors[0];
-  
+
   const bankAccount = activeTutor?.bankName && activeTutor?.bankAccountNumber
     ? `${activeTutor.bankName} - ${activeTutor.bankAccountNumber} - ${activeTutor.bankAccountName || activeTutor.name}`
     : 'MB Bank - 0987654321 - NGUYEN SUONG MAI';
@@ -1066,7 +1051,7 @@ function TeacherWalletModal({
         tutorName: activeTutor?.name || 'Cô Sương Mai',
         type: 'tuition_income',
         amount: 1120000,
-        title: 'Cộng 70% học phí khóa 8 buổi (Học sinh Hoàng Nam)',
+        title: 'Cộng học phí khóa 8 buổi (Học sinh Hoàng Nam)',
         date: '02/09/2026',
         status: 'completed'
       },
@@ -1076,7 +1061,7 @@ function TeacherWalletModal({
         tutorName: activeTutor?.name || 'Cô Sương Mai',
         type: 'tuition_income',
         amount: 560000,
-        title: 'Cộng 70% học phí khóa 4 buổi (Học sinh Bảo Anh)',
+        title: 'Cộng học phí khóa 4 buổi (Học sinh Bảo Anh)',
         date: '01/09/2026',
         status: 'completed'
       }
@@ -1120,19 +1105,19 @@ function TeacherWalletModal({
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl max-w-lg w-full shadow-2xl relative border border-slate-200/90 animate-in zoom-in-95 duration-200 overflow-hidden flex flex-col max-h-[92vh]">
-        {/* Header */}
-        <div className="p-6 pb-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="bg-white rounded-3xl max-w-lg w-full shadow-2xl relative border border-slate-100 animate-in zoom-in-95 duration-200 overflow-hidden flex flex-col max-h-[92vh]">
+        {/* Header Minimalist Blue & White */}
+        <div className="p-6 pb-4 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-blue-50/50 via-white to-slate-50/50">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-100/80 border border-emerald-200 text-emerald-800 flex items-center justify-center font-bold">
+            <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-bold shadow-xs">
               <DollarSign className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-lg font-extrabold text-slate-900 leading-tight">Ví Thu Nhập Giáo Viên</h3>
-                <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">
-                  Shopee-Style
+                <span className="text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full">
+                  Napas 24/7
                 </span>
               </div>
               <p className="text-xs text-slate-500 mt-0.5">
@@ -1149,55 +1134,53 @@ function TeacherWalletModal({
         </div>
 
         <div className="p-6 overflow-y-auto space-y-5">
-          {/* Card Số dư Phong cách Fintech Dark Card */}
-          <div className="bg-gradient-to-br from-[#0B0F17] via-[#111827] to-[#042f2e] text-white p-5 sm:p-6 rounded-3xl shadow-[0_12px_36px_rgba(0,0,0,0.25)] border border-emerald-500/20 relative overflow-hidden">
-            <div className="absolute right-0 top-0 w-48 h-48 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
+          {/* Card Số dư Phong cách Minimalist Blue & White */}
+          <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white p-6 rounded-3xl shadow-[0_12px_36px_rgba(37,99,235,0.22)] relative overflow-hidden">
+            <div className="absolute right-0 top-0 w-48 h-48 bg-white/10 rounded-full blur-2xl pointer-events-none" />
 
             <div className="flex justify-between items-start mb-2 relative z-10">
-              <span className="text-xs text-slate-300 font-medium flex items-center gap-1.5">
+              <span className="text-xs text-blue-100 font-medium flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                Số dư ví khả dụng (70% Học phí)
+                Số dư khả dụng
               </span>
-              <span className="text-[10px] font-extrabold bg-emerald-500/20 text-emerald-300 px-2.5 py-0.5 rounded-full border border-emerald-400/30">
-                Napas 24/7 Miễn phí
+              <span className="text-[10px] font-extrabold bg-white/15 text-white px-2.5 py-0.5 rounded-full border border-white/20">
+                Tự rút 24/7
               </span>
             </div>
 
-            <div className="text-3xl sm:text-4xl font-black text-emerald-400 tracking-tight tabular-nums my-1 relative z-10 font-mono">
-              {wallet.balance.toLocaleString()} <span className="text-base font-bold text-slate-200">VNĐ</span>
+            <div className="text-3xl sm:text-4xl font-black text-white tracking-tight tabular-nums my-1.5 relative z-10 font-mono">
+              {wallet.balance.toLocaleString()} <span className="text-base font-bold text-blue-200">VNĐ</span>
             </div>
 
-            <div className="mt-4 pt-3.5 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-300 relative z-10">
+            <div className="mt-4 pt-3.5 border-t border-white/15 flex items-center justify-between text-xs text-blue-100 relative z-10">
               <div>
                 Đã rút thành công: <strong className="text-white font-bold">{wallet.totalWithdrawn.toLocaleString()}đ</strong>
               </div>
-              <div className="text-slate-400 text-[11px]">
+              <div className="text-blue-200 text-[11px]">
                 {wallet.transactions.length} biến động
               </div>
             </div>
           </div>
 
           {/* Tab Navigation: Rút tiền vs Lịch sử */}
-          <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-2xl">
+          <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100/90 rounded-2xl">
             <button
               type="button"
               onClick={() => setActiveTab('withdraw')}
-              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                activeTab === 'withdraw'
-                  ? 'bg-white text-slate-900 shadow-xs'
+              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${activeTab === 'withdraw'
+                  ? 'bg-white text-blue-600 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
-              }`}
+                }`}
             >
               <CreditCard className="w-4 h-4" /> Rút tiền về Ngân hàng
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('history')}
-              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                activeTab === 'history'
-                  ? 'bg-white text-slate-900 shadow-xs'
+              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${activeTab === 'history'
+                  ? 'bg-white text-blue-600 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
-              }`}
+                }`}
             >
               <History className="w-4 h-4" /> Lịch sử biến động ({wallet.transactions.length})
             </button>
@@ -1207,7 +1190,7 @@ function TeacherWalletModal({
           {activeTab === 'withdraw' ? (
             <form onSubmit={handleWithdraw} className="space-y-4 text-left">
               {/* Thẻ Ngân hàng Đã liên kết */}
-              <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between gap-3">
+              <div className="p-3.5 bg-blue-50/40 border border-blue-100 rounded-2xl flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-blue-600 text-white font-black text-xs flex items-center justify-center shadow-xs">
                     {activeTutor?.bankName?.substring(0, 2) || 'MB'}
@@ -1215,7 +1198,7 @@ function TeacherWalletModal({
                   <div>
                     <div className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
                       <span>{bankAccount}</span>
-                      <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
+                      <CheckCircle className="w-3.5 h-3.5 text-blue-600" />
                     </div>
                     <span className="text-[10px] text-slate-500">Tài khoản chính nhận chuyển khoản 24/7</span>
                   </div>
@@ -1238,7 +1221,7 @@ function TeacherWalletModal({
                   <button
                     type="button"
                     onClick={() => setWithdrawAmount(wallet.balance.toString())}
-                    className="text-xs text-emerald-600 font-bold hover:underline cursor-pointer"
+                    className="text-xs text-blue-600 font-bold hover:underline cursor-pointer"
                   >
                     ⚡ Rút tất cả số dư
                   </button>
@@ -1249,7 +1232,7 @@ function TeacherWalletModal({
                     value={withdrawAmount}
                     onChange={e => setWithdrawAmount(e.target.value)}
                     placeholder="VD: 500000"
-                    className="w-full px-4 py-3 rounded-2xl border border-slate-200 text-base font-bold text-slate-900 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 font-mono"
+                    className="w-full px-4 py-3 rounded-2xl border border-slate-200 text-base font-bold text-slate-900 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 font-mono"
                     max={wallet.balance}
                     min={50000}
                     required
@@ -1265,7 +1248,7 @@ function TeacherWalletModal({
                       type="button"
                       onClick={() => setWithdrawAmount(amt.toString())}
                       disabled={amt <= 0 || amt > wallet.balance}
-                      className="py-1.5 px-2 bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 text-slate-700 hover:text-emerald-800 text-[11px] font-bold rounded-xl transition-all disabled:opacity-30 disabled:pointer-events-none cursor-pointer text-center"
+                      className="py-1.5 px-2 bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-300 text-slate-700 hover:text-blue-700 text-[11px] font-bold rounded-xl transition-all disabled:opacity-30 disabled:pointer-events-none cursor-pointer text-center"
                     >
                       {idx === 3 ? 'Toàn bộ' : `${(amt / 1000).toLocaleString()}k`}
                     </button>
@@ -1274,10 +1257,10 @@ function TeacherWalletModal({
               </div>
 
               {/* Thông tin phí và thời gian */}
-              <div className="p-3.5 bg-emerald-50/60 rounded-2xl border border-emerald-200/80 text-[11px] text-emerald-950 space-y-1">
+              <div className="p-3.5 bg-blue-50/50 rounded-2xl border border-blue-100 text-[11px] text-slate-700 space-y-1">
                 <div className="flex justify-between items-center">
                   <span>Phí giao dịch rút tiền:</span>
-                  <span className="font-extrabold text-emerald-700">0đ (Miễn phí 100%)</span>
+                  <span className="font-extrabold text-blue-700">0đ (Miễn phí 100%)</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span>Thời gian chuyển khoản:</span>
@@ -1288,7 +1271,7 @@ function TeacherWalletModal({
               <button
                 type="submit"
                 disabled={loading || wallet.balance <= 0}
-                className="w-full bg-[#111111] hover:bg-slate-800 disabled:opacity-50 text-white font-bold py-3.5 rounded-2xl text-sm transition-all shadow-md cursor-pointer flex items-center justify-center gap-2"
+                className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-3.5 rounded-2xl text-sm transition-all shadow-md shadow-blue-200 cursor-pointer flex items-center justify-center gap-2 active:scale-98"
               >
                 {loading ? 'Đang tạo lệnh chuyển tiền Napas...' : `Xác nhận rút ${withdrawAmount ? parseInt(withdrawAmount).toLocaleString() + 'đ' : ''} về Ngân hàng`}
               </button>
@@ -1300,21 +1283,21 @@ function TeacherWalletModal({
                 <button
                   type="button"
                   onClick={() => setHistoryFilter('all')}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${historyFilter === 'all' ? 'bg-[#111111] text-white' : 'bg-slate-100 text-slate-600'}`}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${historyFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
                 >
                   Tất cả
                 </button>
                 <button
                   type="button"
                   onClick={() => setHistoryFilter('income')}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${historyFilter === 'income' ? 'bg-emerald-700 text-white' : 'bg-slate-100 text-slate-600'}`}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${historyFilter === 'income' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
                 >
-                  Học phí (+70%)
+                  Học phí nhận (+)
                 </button>
                 <button
                   type="button"
                   onClick={() => setHistoryFilter('withdrawal')}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${historyFilter === 'withdrawal' ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600'}`}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${historyFilter === 'withdrawal' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
                 >
                   Rút tiền (-)
                 </button>
@@ -1325,16 +1308,16 @@ function TeacherWalletModal({
                   <div className="py-10 text-center text-xs text-slate-400">Không có giao dịch nào phù hợp.</div>
                 ) : (
                   filteredTransactions.map((tx: WalletTransaction) => (
-                    <div key={tx.id} className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/90 flex items-center justify-between text-xs hover:border-slate-300 transition-colors">
+                    <div key={tx.id} className="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/90 flex items-center justify-between text-xs hover:border-blue-200 hover:bg-blue-50/20 transition-all">
                       <div className="space-y-1 max-w-[65%]">
                         <div className="font-bold text-slate-900 leading-snug">{tx.title}</div>
                         <div className="text-[10px] text-slate-500">{tx.date} • {tx.bankInfo || 'Tự động'}</div>
                       </div>
                       <div className="text-right">
-                        <div className={`font-black text-sm tabular-nums font-mono ${tx.type === 'tuition_income' ? 'text-emerald-600' : 'text-slate-900'}`}>
+                        <div className={`font-black text-sm tabular-nums font-mono ${tx.type === 'tuition_income' ? 'text-blue-600' : 'text-slate-900'}`}>
                           {tx.type === 'tuition_income' ? '+' : '-'}{tx.amount.toLocaleString()}đ
                         </div>
-                        <span className={`inline-block text-[9px] font-bold px-2 py-0.5 rounded-full mt-1 ${tx.status === 'completed' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+                        <span className={`inline-block text-[9px] font-bold px-2 py-0.5 rounded-full mt-1 ${tx.status === 'completed' ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-amber-50 text-amber-800 border border-amber-200'}`}>
                           {tx.status === 'completed' ? 'Thành công' : 'Chờ xử lý'}
                         </span>
                       </div>
@@ -1351,7 +1334,7 @@ function TeacherWalletModal({
 }
 
 // ==========================================
-// 3.3. TEACHER PROFILE MODAL (Chỉnh Sửa Thông Tin Giáo Viên)
+// 3.3. TEACHER PROFILE MODAL (Chỉnh Sửa Thông Tin Giáo Viên - Blue & White Minimalist)
 // ==========================================
 function TeacherProfileModal({
   isOpen,
@@ -1367,24 +1350,21 @@ function TeacherProfileModal({
 
   const [activeTab, setActiveTab] = useState<'info' | 'pricing' | 'bank'>('info');
 
-  // Form State initialized from activeTutor
   const [name, setName] = useState(activeTutor?.name || 'Cô Sương Mai');
   const [headline, setHeadline] = useState(activeTutor?.headline || 'Cử nhân Sư phạm Toán ĐH Sư Phạm Hà Nội, 5 năm kinh nghiệm');
   const [bio, setBio] = useState(activeTutor?.bio || 'Tận tâm, phương pháp giảng dạy dễ hiểu, giúp học sinh nắm vững kiến thức từ cơ bản đến nâng cao.');
   const [phone, setPhone] = useState(activeTutor?.phone || '0912345678');
   const [zalo, setZalo] = useState(activeTutor?.zalo || '0912345678');
   const [avatar, setAvatar] = useState(activeTutor?.avatar || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=400');
-  
-  // Pricing state
+
   const [primaryPrice, setPrimaryPrice] = useState(activeTutor?.levelPrices?.primary || 150000);
   const [secondaryPrice, setSecondaryPrice] = useState(activeTutor?.levelPrices?.secondary || 200000);
   const [highSchoolPrice, setHighSchoolPrice] = useState(activeTutor?.levelPrices?.high || 250000);
   const [examPrepPrice, setExamPrepPrice] = useState(activeTutor?.levelPrices?.exam || 300000);
 
-  // Bank state
-  const [bankName, setBankName] = useState('MB Bank');
-  const [bankAccountNumber, setBankAccountNumber] = useState('0987654321');
-  const [bankAccountName, setBankAccountName] = useState('NGUYEN SUONG MAI');
+  const [bankName, setBankName] = useState(activeTutor?.bankName || 'MB Bank');
+  const [bankAccountNumber, setBankAccountNumber] = useState(activeTutor?.bankAccountNumber || '0987654321');
+  const [bankAccountName, setBankAccountName] = useState(activeTutor?.bankAccountName || 'NGUYEN SUONG MAI');
 
   const [saving, setSaving] = useState(false);
 
@@ -1402,6 +1382,9 @@ function TeacherProfileModal({
         setHighSchoolPrice(activeTutor.levelPrices.high || 250000);
         setExamPrepPrice(activeTutor.levelPrices.exam || 300000);
       }
+      if (activeTutor.bankName) setBankName(activeTutor.bankName);
+      if (activeTutor.bankAccountNumber) setBankAccountNumber(activeTutor.bankAccountNumber);
+      if (activeTutor.bankAccountName) setBankAccountName(activeTutor.bankAccountName);
     }
   }, [activeTutor, isOpen]);
 
@@ -1420,6 +1403,9 @@ function TeacherProfileModal({
         zalo,
         avatar,
         pricePerSession: secondaryPrice || 200000,
+        bankName,
+        bankAccountNumber,
+        bankAccountName,
         levelPrices: {
           primary: Number(primaryPrice),
           secondary: Number(secondaryPrice),
@@ -1441,12 +1427,12 @@ function TeacherProfileModal({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl max-w-2xl w-full shadow-2xl relative border border-slate-200 animate-in zoom-in-95 duration-200 overflow-hidden flex flex-col max-h-[92vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="bg-white rounded-3xl max-w-2xl w-full shadow-2xl relative border border-slate-100 animate-in zoom-in-95 duration-200 overflow-hidden flex flex-col max-h-[92vh]">
         {/* Header */}
-        <div className="p-6 pb-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
+        <div className="p-6 pb-4 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-blue-50/50 via-white to-slate-50/50">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-blue-100/80 border border-blue-200 text-blue-800 flex items-center justify-center font-bold">
+            <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-bold shadow-xs">
               <User className="w-5 h-5" />
             </div>
             <div>
@@ -1470,35 +1456,32 @@ function TeacherProfileModal({
             <button
               type="button"
               onClick={() => setActiveTab('info')}
-              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                activeTab === 'info'
-                  ? 'bg-white text-slate-900 shadow-xs'
+              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${activeTab === 'info'
+                  ? 'bg-white text-blue-600 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
-              }`}
+                }`}
             >
-              👤 Thông tin cá nhân
+              <User className="w-3.5 h-3.5" /> Thông tin cá nhân
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('pricing')}
-              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                activeTab === 'pricing'
-                  ? 'bg-white text-slate-900 shadow-xs'
+              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${activeTab === 'pricing'
+                  ? 'bg-white text-blue-600 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
-              }`}
+                }`}
             >
-              📚 Môn dạy & Học phí
+              <BookOpen className="w-3.5 h-3.5" /> Môn dạy & Học phí
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('bank')}
-              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                activeTab === 'bank'
-                  ? 'bg-white text-slate-900 shadow-xs'
+              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${activeTab === 'bank'
+                  ? 'bg-white text-blue-600 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
-              }`}
+                }`}
             >
-              🏦 Ngân hàng rút tiền
+              <CreditCard className="w-3.5 h-3.5" /> Ngân hàng rút tiền
             </button>
           </div>
         </div>
@@ -1582,7 +1565,7 @@ function TeacherProfileModal({
           {activeTab === 'pricing' && (
             <div className="space-y-4">
               <div className="p-3 bg-blue-50/70 rounded-2xl border border-blue-200 text-xs text-blue-900 leading-relaxed">
-                💡 <strong>Lưu ý:</strong> Học phí dưới đây là mức học sinh nhìn thấy khi đăng ký khóa học. Giáo viên sẽ nhận <strong>70%</strong> học phí tích lũy vào Ví Giảng Dạy ngay khi học sinh hoàn tất thanh toán.
+                💡 <strong>Lưu ý:</strong> Học phí dưới đây là mức học phí hiển thị công khai khi học sinh đăng ký khóa học và được tích lũy vào Ví Giảng Dạy ngay khi học sinh thanh toán.
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
@@ -1689,8 +1672,8 @@ function TeacherProfileModal({
                 />
               </div>
 
-              <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-[11px] text-slate-500 flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+              <div className="p-3 bg-blue-50/50 rounded-2xl border border-blue-100 text-[11px] text-slate-600 flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
                 <span>Thông tin tài khoản được mã hóa và bảo mật chuẩn RLS. Dùng để tự động xử lý các lệnh rút tiền 24/7.</span>
               </div>
             </div>
@@ -1813,8 +1796,8 @@ function ReviewTutorModal({
                 >
                   <Star
                     className={`w-7 h-7 transition-colors ${(hoverRating || rating) >= star
-                        ? 'fill-amber-400 text-amber-400'
-                        : 'fill-slate-200 text-slate-200'
+                      ? 'fill-amber-400 text-amber-400'
+                      : 'fill-slate-200 text-slate-200'
                       }`}
                   />
                 </button>
@@ -1833,8 +1816,8 @@ function ReviewTutorModal({
                 type="button"
                 onClick={() => setStage('trial')}
                 className={`p-3 rounded-2xl border text-left font-bold transition-all cursor-pointer ${stage === 'trial'
-                    ? 'border-blue-600 bg-blue-50/70 text-blue-700 ring-2 ring-blue-100'
-                    : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300'
+                  ? 'border-blue-600 bg-blue-50/70 text-blue-700 ring-2 ring-blue-100'
+                  : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300'
                   }`}
               >
                 <div className="text-xs">🎯 Sau buổi học thử 1-1</div>
@@ -1845,8 +1828,8 @@ function ReviewTutorModal({
                 type="button"
                 onClick={() => setStage('official')}
                 className={`p-3 rounded-2xl border text-left font-bold transition-all cursor-pointer ${stage === 'official'
-                    ? 'border-blue-600 bg-blue-50/70 text-blue-700 ring-2 ring-blue-100'
-                    : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300'
+                  ? 'border-blue-600 bg-blue-50/70 text-blue-700 ring-2 ring-blue-100'
+                  : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300'
                   }`}
               >
                 <div className="text-xs">🎓 Đang học chính thức</div>
@@ -2236,11 +2219,10 @@ function Navbar() {
                 </>
               )}
 
-              <span className={`hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border ${
-                currentSession.role === 'admin' ? 'bg-red-50 text-red-700 border-red-200' :
-                currentSession.role === 'teacher' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                'bg-blue-50 text-blue-700 border-blue-200'
-              }`}>
+              <span className={`hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border ${currentSession.role === 'admin' ? 'bg-red-50 text-red-700 border-red-200' :
+                  currentSession.role === 'teacher' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                    'bg-blue-50 text-blue-700 border-blue-200'
+                }`}>
                 {currentSession.role === 'admin' ? <ShieldCheck className="w-3.5 h-3.5" /> : <User className="w-3.5 h-3.5" />}
                 {currentSession.role === 'admin' ? 'Quản trị viên' : currentSession.role === 'teacher' ? 'Giáo viên' : 'Học sinh'}
               </span>
@@ -2532,11 +2514,10 @@ function TutorCard({ tutor }: { tutor: any }) {
 
           {/* Floating Top Pills (Minimalist style) */}
           <div className="absolute top-2 left-2 right-2 flex items-center justify-between pointer-events-none">
-            <span className={`px-2.5 py-1 rounded-md font-bold text-[10px] tracking-wide uppercase backdrop-blur-md flex items-center gap-1.5 ${
-              isTeacher
+            <span className={`px-2.5 py-1 rounded-md font-bold text-[10px] tracking-wide uppercase backdrop-blur-md flex items-center gap-1.5 ${isTeacher
                 ? 'bg-[#111111]/90 text-white'
                 : 'bg-slate-800/90 text-white'
-            }`}>
+              }`}>
               {isTeacher ? <Briefcase className="w-3 h-3" /> : <GraduationCap className="w-3 h-3" />}
               {isTeacher ? 'Giáo viên' : 'Gia sư'}
             </span>
@@ -2689,7 +2670,7 @@ function HomePage() {
 
       {/* Section 1: Giáo viên & Gia sư Tiêu biểu (Minimalist UI Architecture) */}
       <section className="py-16 md:py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 md:mb-10 gap-4">
           <div className="space-y-2.5">
@@ -2705,8 +2686,8 @@ function HomePage() {
             </p>
           </div>
 
-          <Link 
-            to="/tim-gia-su" 
+          <Link
+            to="/tim-gia-su"
             className="group inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-400 text-slate-900 font-bold text-xs sm:text-sm transition-all whitespace-nowrap shadow-2xs"
           >
             <span>Khám phá tất cả {tutors.length}+ hồ sơ</span>
@@ -2723,17 +2704,15 @@ function HomePage() {
                 key={tab.id}
                 type="button"
                 onClick={() => setSelectedTab(tab.id as any)}
-                className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
-                  isActive
+                className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${isActive
                     ? 'bg-[#111111] text-white shadow-2xs'
                     : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200/90'
-                }`}
+                  }`}
               >
                 <span>{tab.label}</span>
                 {tab.count !== undefined && (
-                  <span className={`text-[10px] px-2 py-0.5 rounded-md font-bold tabular-nums ${
-                    isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
-                  }`}>
+                  <span className={`text-[10px] px-2 py-0.5 rounded-md font-bold tabular-nums ${isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                    }`}>
                     {tab.count}
                   </span>
                 )}
@@ -3068,7 +3047,7 @@ function FindTutorsPage() {
   return (
     <div className="bg-[#f8fafc] min-h-screen py-8 md:py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-        
+
         {/* Editorial Minimalist Header */}
         <div className="space-y-2">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[#EDF3EC] text-[#346538] text-xs font-bold border border-[#d6e5d5] uppercase tracking-wider">
@@ -3085,7 +3064,7 @@ function FindTutorsPage() {
 
         {/* TOP FILTER BAR: MODERN BENTO ARCHITECTURE */}
         <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.04)] space-y-4">
-          
+
           {/* Top Search Input & Action Row */}
           <div className="flex flex-col md:flex-row items-center gap-2.5">
             <form onSubmit={handleSearchSubmit} className="relative flex-1 w-full">
@@ -3131,16 +3110,15 @@ function FindTutorsPage() {
 
           {/* Interactive Dropdown Row */}
           <div className="flex flex-wrap items-center gap-2 pt-2.5 border-t border-slate-100">
-            
+
             {/* Dropdown 1: Môn học */}
             <div className="relative group">
               <button
                 type="button"
-                className={`px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1.5 cursor-pointer select-none ${
-                  selectedSubjects.length > 0
+                className={`px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1.5 cursor-pointer select-none ${selectedSubjects.length > 0
                     ? 'border-blue-300 bg-blue-50/80 text-blue-900 shadow-2xs font-bold'
                     : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'
-                }`}
+                  }`}
               >
                 <BookOpen className="w-3.5 h-3.5" />
                 <span>Môn học {selectedSubjects.length > 0 && `(${selectedSubjects.length})`}</span>
@@ -3166,9 +3144,8 @@ function FindTutorsPage() {
                             type="button"
                             key={sub}
                             onClick={() => toggleSubject(sub)}
-                            className={`px-2.5 py-1.5 rounded-lg text-left text-xs font-medium transition-colors flex items-center justify-between cursor-pointer ${
-                              isSelected ? 'bg-[#111111] text-white shadow-2xs' : 'bg-slate-50 hover:bg-slate-100 text-slate-700'
-                            }`}
+                            className={`px-2.5 py-1.5 rounded-lg text-left text-xs font-medium transition-colors flex items-center justify-between cursor-pointer ${isSelected ? 'bg-[#111111] text-white shadow-2xs' : 'bg-slate-50 hover:bg-slate-100 text-slate-700'
+                              }`}
                           >
                             <span className="truncate">{sub}</span>
                             {isSelected && <Check className="w-3 h-3 shrink-0 ml-1" />}
@@ -3185,11 +3162,10 @@ function FindTutorsPage() {
             <div className="relative group">
               <button
                 type="button"
-                className={`px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1.5 cursor-pointer select-none ${
-                  selectedLevels.length > 0
+                className={`px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1.5 cursor-pointer select-none ${selectedLevels.length > 0
                     ? 'border-indigo-300 bg-indigo-50/80 text-indigo-900 shadow-2xs font-bold'
                     : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'
-                }`}
+                  }`}
               >
                 <GraduationCap className="w-3.5 h-3.5" />
                 <span>Cấp học {selectedLevels.length > 0 && `(${selectedLevels.length})`}</span>
@@ -3211,9 +3187,8 @@ function FindTutorsPage() {
                         type="button"
                         key={lvl}
                         onClick={() => toggleLevel(lvl)}
-                        className={`w-full px-3 py-2 rounded-lg text-left text-xs font-medium transition-colors flex items-center justify-between cursor-pointer ${
-                          isSelected ? 'bg-[#111111] text-white shadow-2xs' : 'bg-slate-50 hover:bg-slate-100 text-slate-700'
-                        }`}
+                        className={`w-full px-3 py-2 rounded-lg text-left text-xs font-medium transition-colors flex items-center justify-between cursor-pointer ${isSelected ? 'bg-[#111111] text-white shadow-2xs' : 'bg-slate-50 hover:bg-slate-100 text-slate-700'
+                          }`}
                       >
                         <span>{lvl}</span>
                         {isSelected && <Check className="w-3.5 h-3.5 shrink-0" />}
@@ -3228,11 +3203,10 @@ function FindTutorsPage() {
             <div className="relative group">
               <button
                 type="button"
-                className={`px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1.5 cursor-pointer select-none ${
-                  selectedDistricts.length > 0
+                className={`px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1.5 cursor-pointer select-none ${selectedDistricts.length > 0
                     ? 'border-emerald-300 bg-[#EDF3EC] text-[#2e5d32] shadow-2xs font-bold'
                     : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'
-                }`}
+                  }`}
               >
                 <MapPin className="w-3.5 h-3.5" />
                 <span>Khu vực {selectedDistricts.length > 0 && `(${selectedDistricts.length})`}</span>
@@ -3254,9 +3228,8 @@ function FindTutorsPage() {
                         type="button"
                         key={dist}
                         onClick={() => toggleDistrict(dist)}
-                        className={`px-2.5 py-1.5 rounded-lg text-left text-xs font-medium transition-colors flex items-center justify-between cursor-pointer ${
-                          isSelected ? 'bg-[#111111] text-white shadow-2xs' : 'bg-slate-50 hover:bg-slate-100 text-slate-700'
-                        }`}
+                        className={`px-2.5 py-1.5 rounded-lg text-left text-xs font-medium transition-colors flex items-center justify-between cursor-pointer ${isSelected ? 'bg-[#111111] text-white shadow-2xs' : 'bg-slate-50 hover:bg-slate-100 text-slate-700'
+                          }`}
                       >
                         <span className="truncate">{dist}</span>
                         {isSelected && <Check className="w-3 h-3 shrink-0 ml-1" />}
@@ -3271,11 +3244,10 @@ function FindTutorsPage() {
             <div className="relative group">
               <button
                 type="button"
-                className={`px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1.5 cursor-pointer select-none ${
-                  selectedTypes.length > 0
+                className={`px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1.5 cursor-pointer select-none ${selectedTypes.length > 0
                     ? 'border-purple-300 bg-purple-50/80 text-purple-900 shadow-2xs font-bold'
                     : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'
-                }`}
+                  }`}
               >
                 <Briefcase className="w-3.5 h-3.5" />
                 <span>Loại hình {selectedTypes.length > 0 && `(${selectedTypes.length})`}</span>
@@ -3292,9 +3264,8 @@ function FindTutorsPage() {
                         type="button"
                         key={t.value}
                         onClick={() => toggleType(t.value)}
-                        className={`w-full px-3 py-2.5 rounded-lg text-left text-xs font-bold transition-all flex items-center justify-between cursor-pointer ${
-                          isSelected ? 'bg-[#111111] text-white shadow-2xs' : 'bg-slate-50 hover:bg-slate-100 text-slate-700'
-                        }`}
+                        className={`w-full px-3 py-2.5 rounded-lg text-left text-xs font-bold transition-all flex items-center justify-between cursor-pointer ${isSelected ? 'bg-[#111111] text-white shadow-2xs' : 'bg-slate-50 hover:bg-slate-100 text-slate-700'
+                          }`}
                       >
                         <div>
                           <div>{t.label}</div>
@@ -3314,11 +3285,10 @@ function FindTutorsPage() {
             <div className="relative group">
               <button
                 type="button"
-                className={`px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1.5 cursor-pointer select-none ${
-                  selectedFormats.length > 0
+                className={`px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1.5 cursor-pointer select-none ${selectedFormats.length > 0
                     ? 'border-amber-300 bg-amber-50/80 text-amber-900 shadow-2xs font-bold'
                     : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'
-                }`}
+                  }`}
               >
                 <Globe className="w-3.5 h-3.5" />
                 <span>Hình thức {selectedFormats.length > 0 && `(${selectedFormats.length})`}</span>
@@ -3334,9 +3304,8 @@ function FindTutorsPage() {
                       type="button"
                       key={fmt.value}
                       onClick={() => toggleFormat(fmt.value)}
-                      className={`w-full px-3 py-2 rounded-lg text-left text-xs font-medium transition-colors flex items-center justify-between cursor-pointer ${
-                        isSelected ? 'bg-[#111111] text-white shadow-2xs' : 'bg-slate-50 hover:bg-slate-100 text-slate-700'
-                      }`}
+                      className={`w-full px-3 py-2 rounded-lg text-left text-xs font-medium transition-colors flex items-center justify-between cursor-pointer ${isSelected ? 'bg-[#111111] text-white shadow-2xs' : 'bg-slate-50 hover:bg-slate-100 text-slate-700'
+                        }`}
                     >
                       <span>{fmt.label}</span>
                       {isSelected && <Check className="w-3.5 h-3.5 shrink-0" />}
@@ -3883,33 +3852,30 @@ function TeacherDetailPage() {
                 <button
                   type="button"
                   onClick={() => setReviewFilter('all')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                    reviewFilter === 'all'
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${reviewFilter === 'all'
                       ? 'bg-[#111111] text-white shadow-2xs'
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
+                    }`}
                 >
                   Tất cả ({displayedReviewsRaw.length})
                 </button>
                 <button
                   type="button"
                   onClick={() => setReviewFilter('trial')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                    reviewFilter === 'trial'
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${reviewFilter === 'trial'
                       ? 'bg-[#111111] text-white shadow-2xs'
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
+                    }`}
                 >
                   Sau học thử 1-1 ({displayedReviewsRaw.filter(r => r.stage === 'trial').length})
                 </button>
                 <button
                   type="button"
                   onClick={() => setReviewFilter('official')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                    reviewFilter === 'official'
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${reviewFilter === 'official'
                       ? 'bg-[#111111] text-white shadow-2xs'
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
+                    }`}
                 >
                   Đang học chính thức ({displayedReviewsRaw.filter(r => r.stage !== 'trial').length})
                 </button>
@@ -4174,7 +4140,7 @@ function TeacherDetailPage() {
 
             {/* Left Column: Image with Zoom Controls */}
             <div className="md:w-5/12 bg-[#111111] flex flex-col items-center justify-between p-6 relative overflow-hidden select-none">
-              
+
               {/* Zoom Controls */}
               <div className="w-full flex items-center justify-between text-white/80 z-10">
                 <span className="text-[11px] font-semibold bg-white/10 px-2.5 py-1 rounded-md">
@@ -4221,7 +4187,7 @@ function TeacherDetailPage() {
             {/* Right Column: Dossier Details */}
             <div className="md:w-7/12 p-6 sm:p-7 overflow-y-auto space-y-4 flex flex-col justify-between">
               <div className="space-y-3.5">
-                
+
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide bg-[#111111] text-white">
                     {isTeacher ? 'Giáo viên Chuyên môn' : 'Gia sư Sinh viên Giỏi'}
@@ -4961,11 +4927,10 @@ function AdminDashboardPage() {
                             {new Date(log.timestamp).toLocaleTimeString('vi-VN')}
                           </td>
                           <td className="py-3">
-                            <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
-                              log.severity === 'CRITICAL' ? 'bg-red-100 text-red-800 border border-red-200' :
-                              log.severity === 'HIGH' ? 'bg-amber-100 text-amber-800' :
-                              'bg-blue-100 text-blue-800'
-                            }`}>
+                            <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${log.severity === 'CRITICAL' ? 'bg-red-100 text-red-800 border border-red-200' :
+                                log.severity === 'HIGH' ? 'bg-amber-100 text-amber-800' :
+                                  'bg-blue-100 text-blue-800'
+                              }`}>
                               {log.severity}
                             </span>
                           </td>
@@ -5044,27 +5009,24 @@ function AdminDashboardPage() {
                     <button
                       type="button"
                       onClick={() => setSandboxRole('anonymous')}
-                      className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                        sandboxRole === 'anonymous' ? 'bg-[#111111] text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                      }`}
+                      className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${sandboxRole === 'anonymous' ? 'bg-[#111111] text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        }`}
                     >
                       Khách vãng lai
                     </button>
                     <button
                       type="button"
                       onClick={() => setSandboxRole('teacher')}
-                      className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                        sandboxRole === 'teacher' ? 'bg-[#111111] text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                      }`}
+                      className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${sandboxRole === 'teacher' ? 'bg-[#111111] text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        }`}
                     >
                       Chính Giáo viên
                     </button>
                     <button
                       type="button"
                       onClick={() => setSandboxRole('admin')}
-                      className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                        sandboxRole === 'admin' ? 'bg-[#111111] text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                      }`}
+                      className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${sandboxRole === 'admin' ? 'bg-[#111111] text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        }`}
                     >
                       Quản trị viên
                     </button>
@@ -5550,8 +5512,8 @@ function TutorRegistrationPage() {
             <div
               onClick={() => setRoleType('teacher')}
               className={`p-4 rounded-2xl border-2 transition-all cursor-pointer select-none ${roleType === 'teacher'
-                  ? 'border-blue-600 bg-blue-50/60 shadow-md ring-2 ring-blue-100'
-                  : 'border-slate-200 bg-slate-50/70 hover:bg-slate-100/80 text-slate-700'
+                ? 'border-blue-600 bg-blue-50/60 shadow-md ring-2 ring-blue-100'
+                : 'border-slate-200 bg-slate-50/70 hover:bg-slate-100/80 text-slate-700'
                 }`}
             >
               <div className="flex items-center justify-between mb-2">
@@ -5569,8 +5531,8 @@ function TutorRegistrationPage() {
             <div
               onClick={() => setRoleType('tutor')}
               className={`p-4 rounded-2xl border-2 transition-all cursor-pointer select-none ${roleType === 'tutor'
-                  ? 'border-purple-600 bg-purple-50/60 shadow-md ring-2 ring-purple-100'
-                  : 'border-slate-200 bg-slate-50/70 hover:bg-slate-100/80 text-slate-700'
+                ? 'border-purple-600 bg-purple-50/60 shadow-md ring-2 ring-purple-100'
+                : 'border-slate-200 bg-slate-50/70 hover:bg-slate-100/80 text-slate-700'
                 }`}
             >
               <div className="flex items-center justify-between mb-2">
@@ -6473,8 +6435,8 @@ export default function App() {
   };
 
   const recordOfficialEnrollment = (tutorId: any, totalTuition = 1600000) => {
-    // 1. Tự động cộng 70% học phí vào Ví Giảng Dạy của giáo viên (Shopee-Style)
-    const tutorEarnings = Math.round(totalTuition * 0.7);
+    // 1. Tự động cộng học phí vào Ví Giảng Dạy của giáo viên
+    const tutorEarnings = totalTuition;
     const idKey = String(tutorId);
     const current = getTeacherWallet(idKey);
     const incomeTx: WalletTransaction = {
@@ -6482,7 +6444,7 @@ export default function App() {
       tutorId,
       type: 'tuition_income',
       amount: tutorEarnings,
-      title: `Cộng 70% học phí khóa học (#ENR_${Date.now().toString().slice(-6)})`,
+      title: `Cộng học phí khóa học (#ENR_${Date.now().toString().slice(-6)})`,
       date: new Date().toLocaleDateString('vi-VN'),
       status: 'completed'
     };
@@ -6534,7 +6496,7 @@ export default function App() {
           student: 'Học sinh chính thức',
           type: 'official_enrolled',
           time: 'Vừa xong',
-          status: 'Đã thanh toán (70% vào Ví Giáo viên)'
+          status: 'Đã thanh toán (Đã cộng vào Ví Giáo viên)'
         },
         ...prev.recentActivities
       ]
@@ -6547,7 +6509,7 @@ export default function App() {
       saveStoredTrials(updated);
       return updated;
     });
-    alert("Đã xóa khỏi danh sách học thử. Bạn đã chọn không tiếp tục đăng ký học, tỷ lệ nhận lớp của giáo viên đã được hệ thống cập nhật giảm khách quan!");
+    alert("Đã xóa khỏi danh sách học thử. Bạn đã chọn không tiếp tục đăng ký học.");
   };
 
   const approveTutorKyc = (tutorId: any) => {
