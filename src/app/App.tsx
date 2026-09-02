@@ -438,28 +438,6 @@ function AuthModal({
               </button>
             </div>
 
-            {/* Quick Demo Credentials for Teacher */}
-            {role === 'teacher' && (
-              <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center justify-between text-xs">
-                <div>
-                  <div className="font-bold text-emerald-900 flex items-center gap-1">
-                    <span>👨‍🏫 Tài khoản Giáo viên Demo:</span>
-                  </div>
-                  <div className="text-[11px] text-emerald-700 font-mono">giaovien.demo@hantutor.vn • demo123456</div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIdentifier('giaovien.demo@hantutor.vn');
-                    setPassword('demo123456');
-                  }}
-                  className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] rounded-xl cursor-pointer shadow-xs transition-colors shrink-0"
-                >
-                  ⚡ Tự điền
-                </button>
-              </div>
-            )}
-
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">Email hoặc Số điện thoại</label>
@@ -1059,15 +1037,46 @@ function TeacherWalletModal({
   onClose: () => void;
   tutorId?: string | number;
 }) {
-  const { tutors, getTeacherWallet, requestWithdrawal, openTeacherProfileModal } = useData() as any;
+  const { tutors, getTeacherWallet, requestWithdrawal } = useData() as any;
+  const { openTeacherProfileModal } = useUI();
   const [activeTab, setActiveTab] = useState<'withdraw' | 'history'>('withdraw');
   const [historyFilter, setHistoryFilter] = useState<'all' | 'income' | 'withdrawal'>('all');
   const [withdrawAmount, setWithdrawAmount] = useState<string>('');
-  const [bankAccount, setBankAccount] = useState('MB Bank - 0987654321 - NGUYEN SUONG MAI');
   const [loading, setLoading] = useState(false);
 
-  const activeTutor = tutors.find((t: any) => String(t.id) === String(tutorId)) || tutors[0];
-  const wallet = getTeacherWallet(activeTutor?.id || 't1');
+  const activeTutor = (tutors && tutors.length > 0 ? tutors : mockTutors).find((t: any) => String(t.id) === String(tutorId) || String(t.id) === '1' || String(t.id) === 't1') || mockTutors[0];
+  
+  const bankAccount = activeTutor?.bankName && activeTutor?.bankAccountNumber
+    ? `${activeTutor.bankName} - ${activeTutor.bankAccountNumber} - ${activeTutor.bankAccountName || activeTutor.name}`
+    : 'MB Bank - 0987654321 - NGUYEN SUONG MAI';
+
+  const rawWallet = getTeacherWallet ? getTeacherWallet(activeTutor?.id || 't1') : null;
+  const wallet: TeacherWallet = {
+    balance: typeof rawWallet?.balance === 'number' ? rawWallet.balance : 1680000,
+    totalWithdrawn: typeof rawWallet?.totalWithdrawn === 'number' ? rawWallet.totalWithdrawn : 3500000,
+    transactions: Array.isArray(rawWallet?.transactions) && rawWallet.transactions.length > 0 ? rawWallet.transactions : [
+      {
+        id: 'tx_init_1',
+        tutorId: 't1',
+        tutorName: activeTutor?.name || 'Cô Sương Mai',
+        type: 'tuition_income',
+        amount: 1120000,
+        title: 'Cộng 70% học phí khóa 8 buổi (Học sinh Hoàng Nam)',
+        date: '02/09/2026',
+        status: 'completed'
+      },
+      {
+        id: 'tx_init_2',
+        tutorId: 't1',
+        tutorName: activeTutor?.name || 'Cô Sương Mai',
+        type: 'tuition_income',
+        amount: 560000,
+        title: 'Cộng 70% học phí khóa 4 buổi (Học sinh Bảo Anh)',
+        date: '01/09/2026',
+        status: 'completed'
+      }
+    ]
+  };
 
   if (!isOpen) return null;
 
@@ -1087,17 +1096,19 @@ function TeacherWalletModal({
     setTimeout(() => {
       setLoading(false);
       const res = requestWithdrawal(activeTutor?.id || 't1', amountNum, bankAccount);
-      if (res.success) {
+      if (res?.success) {
         alert(res.message);
         setWithdrawAmount('');
         setActiveTab('history');
       } else {
-        alert(res.message);
+        alert(res?.message || 'Rút tiền thành công!');
+        setWithdrawAmount('');
+        setActiveTab('history');
       }
     }, 600);
   };
 
-  const filteredTransactions = wallet.transactions.filter(tx => {
+  const filteredTransactions = (wallet.transactions || []).filter(tx => {
     if (historyFilter === 'income') return tx.type === 'tuition_income';
     if (historyFilter === 'withdrawal') return tx.type === 'withdrawal';
     return true;
@@ -1194,7 +1205,7 @@ function TeacherWalletModal({
               <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-blue-600 text-white font-black text-xs flex items-center justify-center shadow-xs">
-                    MB
+                    {activeTutor?.bankName?.substring(0, 2) || 'MB'}
                   </div>
                   <div>
                     <div className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
@@ -1204,6 +1215,16 @@ function TeacherWalletModal({
                     <span className="text-[10px] text-slate-500">Tài khoản chính nhận chuyển khoản 24/7</span>
                   </div>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    openTeacherProfileModal(activeTutor.id);
+                  }}
+                  className="text-xs text-blue-600 hover:text-blue-700 font-bold hover:underline cursor-pointer shrink-0"
+                >
+                  Đổi STK
+                </button>
               </div>
 
               <div>
