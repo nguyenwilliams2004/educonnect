@@ -1,25 +1,30 @@
--- Bảng Users: Chứa thông tin đăng nhập và phân quyền cơ bản (liên kết với Auth của Supabase)
-CREATE TABLE users (
+﻿-- =============================================================================
+-- HANTUTOR POSTGRESQL SCHEMA & ROW LEVEL SECURITY (RLS) POLICIES
+-- Chạy toàn bộ file này trực tiếp trên SQL Editor của Supabase Dashboard.
+-- =============================================================================
+
+-- 1. BẢNG USERS: Liên kết với Supabase Auth
+CREATE TABLE IF NOT EXISTS users (
   id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
   email TEXT UNIQUE NOT NULL,
   full_name TEXT NOT NULL,
-  role TEXT NOT NULL CHECK (role IN ('student', 'instructor', 'center')),
+  role TEXT NOT NULL CHECK (role IN ('student', 'instructor', 'center', 'admin')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Bảng Profiles: Chứa hồ sơ chi tiết của giáo viên/trung tâm để hiển thị lên app
-CREATE TABLE profiles (
+-- 2. BẢNG PROFILES: Hồ sơ chi tiết của giáo viên / trung tâm
+CREATE TABLE IF NOT EXISTS profiles (
   id UUID REFERENCES users(id) ON DELETE CASCADE PRIMARY KEY,
   avatar_url TEXT,
   subjects TEXT[] DEFAULT '{}',
   skills TEXT[] DEFAULT '{}',
   category_type TEXT,
-  provider_type TEXT, -- '1-1' | 'class' (v2)
-  target_tags TEXT[] DEFAULT '{}', -- Thẻ mục tiêu (v2)
-  success_story TEXT, -- Câu chuyện thành công (v2)
+  provider_type TEXT DEFAULT '1-1', -- '1-1' | 'class'
+  target_tags TEXT[] DEFAULT '{}',
+  success_story TEXT,
   levels TEXT[] DEFAULT '{}',
   price INTEGER DEFAULT 0,
-  price_unit TEXT DEFAULT 'giờ', -- 'giờ' | 'tháng'
+  price_unit TEXT DEFAULT 'giờ',
   location TEXT,
   district TEXT,
   ward TEXT,
@@ -34,15 +39,14 @@ CREATE TABLE profiles (
   schedule TEXT[] DEFAULT '{}',
   certificates TEXT[] DEFAULT '{}',
   verified BOOLEAN DEFAULT false,
-  -- Thông tin ngân hàng để nhận 70% học phí
-  bank_name TEXT,                -- Tên ngân hàng (VD: Vietcombank, MB Bank...)
-  bank_account_number TEXT,      -- Số tài khoản
-  bank_account_name TEXT,        -- Tên chủ tài khoản (in hoa, không dấu)
+  bank_name TEXT,
+  bank_account_number TEXT,
+  bank_account_name TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Bảng Achievements: Chứa thành tích bảng vàng của các giáo viên/trung tâm
-CREATE TABLE achievements (
+-- 3. BẢNG ACHIEVEMENTS: Bảng vàng thành tích học sinh của gia sư
+CREATE TABLE IF NOT EXISTS achievements (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   instructor_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
   title TEXT NOT NULL,
@@ -53,92 +57,43 @@ CREATE TABLE achievements (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Bảng Enrollments: Lưu thông tin đặt lịch học thử và nhập học (Booking qua nền tảng)
-CREATE TABLE enrollments (
+-- 4. BẢNG ENROLLMENTS: Đặt lịch học thử & đăng ký nhập học chính thức
+CREATE TABLE IF NOT EXISTS enrollments (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   instructor_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
-  student_id UUID REFERENCES users(id) ON DELETE SET NULL, -- Phụ huynh/học viên đăng nhập
-  class_title TEXT, -- Tên lớp hoặc tên môn muốn học
+  student_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  class_title TEXT,
   student_name TEXT NOT NULL,
   student_age TEXT,
   parent_name TEXT,
   parent_phone TEXT,
   note TEXT,
-  status TEXT DEFAULT 'trial_booked', -- trial_booked | trial_completed | enrolled | not_enrolled | changed_tutor
-  trial_date TEXT, -- Lịch học thử mong muốn
-  source_type TEXT DEFAULT 'platform', -- Ghi công nguồn: platform | organic
+  status TEXT DEFAULT 'trial_booked' CHECK (status IN ('trial_booked', 'trial_completed', 'enrolled', 'not_enrolled', 'changed_tutor')),
+  trial_date TEXT,
+  source_type TEXT DEFAULT 'platform',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Bảng Payments: Lưu lịch sử giao dịch (Thanh toán học phí tháng đầu)
-CREATE TABLE payments (
+-- 5. BẢNG PAYMENTS: Giao dịch thanh toán học phí (Phân chia 30/70)
+CREATE TABLE IF NOT EXISTS payments (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  enrollment_id UUID REFERENCES enrollments(id) ON DELETE CASCADE,
+  enrollment_id UUID REFERENCES enrollments(id) ON DELETE CASCADE NOT NULL,
   amount INTEGER NOT NULL,
   payment_method TEXT DEFAULT 'vietqr',
-  status TEXT DEFAULT 'pending', -- pending | success | failed
-  transaction_code TEXT, -- Mã giao dịch ngân hàng trả về (nếu có)
-  -- Phân chia học phí 30/70
-  center_amount INTEGER DEFAULT 0,        -- 30% thuộc về trung tâm EduConnect
-  tutor_amount INTEGER DEFAULT 0,         -- 70% thù lao giảng viên
-  tutor_transfer_status TEXT DEFAULT 'pending', -- pending | transferred | failed
-  tutor_bank_name TEXT,                   -- Ngân hàng của giảng viên
-  tutor_bank_account TEXT,                -- STK giảng viên
-  tutor_bank_name_holder TEXT,            -- Tên chủ TK giảng viên
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'success', 'failed')),
+  transaction_code TEXT,
+  center_amount INTEGER DEFAULT 0,        -- 30% thuộc về nền tảng HanTutor
+  tutor_amount INTEGER DEFAULT 0,         -- 70% thù lao giáo viên
+  tutor_transfer_status TEXT DEFAULT 'pending' CHECK (tutor_transfer_status IN ('pending', 'transferred', 'failed')),
+  tutor_bank_name TEXT,
+  tutor_bank_account TEXT,
+  tutor_bank_name_holder TEXT,
   transferred_at TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Bảng Class Requests: Lưu yêu cầu tìm gia sư chung (Phụ huynh đăng lên bảng chung)
-CREATE TABLE class_requests (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  parent_id UUID REFERENCES users(id) ON DELETE SET NULL, -- Học viên đăng yêu cầu (nếu có đăng nhập)
-  title TEXT NOT NULL,
-  parent_name TEXT,
-  subjects TEXT[] DEFAULT '{}',
-  format TEXT, -- Offline, Online
-  location TEXT,
-  sessions_per_week TEXT,
-  budget TEXT,
-  target_goal TEXT, -- Mục tiêu học tập (v2)
-  current_target_score TEXT, -- Mức điểm hiện tại -> Mong muốn (v2)
-  special_requirements TEXT,
-  status TEXT DEFAULT 'open',
-  applicants_count INTEGER DEFAULT 0,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
--- Bật Row Level Security (RLS) để bảo mật dữ liệu
-ALTER TABLE users ENABLE ROW LEVEL SECURITY;
-ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE achievements ENABLE ROW LEVEL SECURITY;
-ALTER TABLE enrollments ENABLE ROW LEVEL SECURITY;
-ALTER TABLE class_requests ENABLE ROW LEVEL SECURITY;
-ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
-
--- Cấu hình chính sách đọc dữ liệu công khai (Ai cũng xem được hồ sơ và thành tích)
-CREATE POLICY "Public users are viewable by everyone." ON users FOR SELECT USING (true);
-CREATE POLICY "Public profiles are viewable by everyone." ON profiles FOR SELECT USING (true);
-CREATE POLICY "Public achievements are viewable by everyone." ON achievements FOR SELECT USING (true);
-CREATE POLICY "Public class requests are viewable by everyone." ON class_requests FOR SELECT USING (true);
-
--- Cho phép mọi người Insert vào enrollments và payments (Demo/Tạm thời)
-CREATE POLICY "Anyone can insert enrollments." ON enrollments FOR INSERT WITH CHECK (true);
-CREATE POLICY "Anyone can update enrollments." ON enrollments FOR UPDATE USING (true);
-CREATE POLICY "Anyone can insert payments." ON payments FOR INSERT WITH CHECK (true);
-
--- Cấu hình chính sách Users: Người dùng chỉ được sửa thông tin của chính mình
-CREATE POLICY "Users can insert their own profile." ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
-CREATE POLICY "Users can update own profile." ON profiles FOR UPDATE USING (auth.uid() = id);
-
--- Các chính sách khác sẽ được bổ sung sau...
-
--- ==============================================================
--- Bảng Reviews: Đánh giá giảng viên từ học sinh đã đăng ký học
--- Chỉ học sinh có enrollment status = 'enrolled' mới được đánh giá
--- Mỗi enrollment chỉ được đánh giá đúng 1 lần (UNIQUE constraint)
--- ==============================================================
-CREATE TABLE reviews (
+-- 6. BẢNG REVIEWS: Đánh giá gia sư từ học sinh
+CREATE TABLE IF NOT EXISTS reviews (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   instructor_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
   student_id UUID REFERENCES users(id) ON DELETE SET NULL,
@@ -147,15 +102,116 @@ CREATE TABLE reviews (
   comment TEXT,
   student_name TEXT DEFAULT 'Học sinh',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-  UNIQUE(enrollment_id) -- Mỗi enrollment chỉ được đánh giá 1 lần
+  UNIQUE(enrollment_id)
 );
 
-ALTER TABLE reviews ENABLE ROW LEVEL SECURITY;
+-- 7. BẢNG CLASS_REQUESTS: Yêu cầu tìm gia sư chung của phụ huynh
+CREATE TABLE IF NOT EXISTS class_requests (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  parent_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  title TEXT NOT NULL,
+  parent_name TEXT,
+  subjects TEXT[] DEFAULT '{}',
+  format TEXT,
+  location TEXT,
+  sessions_per_week TEXT,
+  budget TEXT,
+  target_goal TEXT,
+  current_target_score TEXT,
+  special_requirements TEXT,
+  status TEXT DEFAULT 'open',
+  applicants_count INTEGER DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
 
--- Ai cũng xem được đánh giá (công khai)
+-- =============================================================================
+-- KÍCH HOẠT ROW LEVEL SECURITY (RLS) TRÊN TẤT CẢ CÁC BẢNG
+-- =============================================================================
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE achievements ENABLE ROW LEVEL SECURITY;
+ALTER TABLE enrollments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE reviews ENABLE ROW LEVEL SECURITY;
+ALTER TABLE class_requests ENABLE ROW LEVEL SECURITY;
+
+-- =============================================================================
+-- CÁC CHÍNH SÁCH BẢO MẬT (POLICIES)
+-- =============================================================================
+
+-- --- 1. CHÍNH SÁCH ĐỌC CÔNG KHAI (Public Read) ---
+DROP POLICY IF EXISTS "Public users are viewable by everyone." ON users;
+CREATE POLICY "Public users are viewable by everyone." ON users FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public profiles are viewable by everyone." ON profiles;
+CREATE POLICY "Public profiles are viewable by everyone." ON profiles FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public achievements are viewable by everyone." ON achievements;
+CREATE POLICY "Public achievements are viewable by everyone." ON achievements FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public reviews are viewable by everyone." ON reviews;
 CREATE POLICY "Public reviews are viewable by everyone." ON reviews FOR SELECT USING (true);
 
--- Chỉ học sinh đã đăng nhập và có enrollment 'enrolled' mới được insert
+DROP POLICY IF EXISTS "Public class requests are viewable by everyone." ON class_requests;
+CREATE POLICY "Public class requests are viewable by everyone." ON class_requests FOR SELECT USING (true);
+
+-- --- 2. CHÍNH SÁCH TỰ SỞ HỮU DỮ LIỆU (Self-Write / Profiles) ---
+DROP POLICY IF EXISTS "Users can insert their own profile." ON profiles;
+CREATE POLICY "Users can insert their own profile." ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
+
+DROP POLICY IF EXISTS "Users can update own profile." ON profiles;
+CREATE POLICY "Users can update own profile." ON profiles FOR UPDATE USING (auth.uid() = id);
+
+DROP POLICY IF EXISTS "Instructors can manage own achievements." ON achievements;
+CREATE POLICY "Instructors can manage own achievements." ON achievements FOR ALL USING (auth.uid() = instructor_id);
+
+-- --- 3. CHÍNH SÁCH QUẢN LÝ LỊCH HỌC THỬ (Enrollments) ---
+-- Học sinh xem lịch của mình, Gia sư xem các học sinh đăng ký với mình
+DROP POLICY IF EXISTS "Users can view relevant enrollments." ON enrollments;
+CREATE POLICY "Users can view relevant enrollments." ON enrollments FOR SELECT USING (
+  auth.uid() = student_id OR auth.uid() = instructor_id OR auth.uid() IS NULL
+);
+
+-- Bất kỳ ai (kể cả khách vãng lai) cũng có thể gửi đơn đăng ký học thử
+DROP POLICY IF EXISTS "Anyone can create trial enrollment." ON enrollments;
+CREATE POLICY "Anyone can create trial enrollment." ON enrollments FOR INSERT WITH CHECK (
+  auth.uid() IS NULL OR auth.uid() = student_id
+);
+
+-- Chỉ học sinh hoặc gia sư phụ trách mới được cập nhật trạng thái đơn
+DROP POLICY IF EXISTS "Participants can update enrollments." ON enrollments;
+CREATE POLICY "Participants can update enrollments." ON enrollments FOR UPDATE USING (
+  auth.uid() = student_id OR auth.uid() = instructor_id
+);
+
+-- --- 4. CHÍNH SÁCH BẢO VỆ DÒNG TIỀN (Payments Protection) ---
+-- Chỉ học sinh thanh toán hoặc gia sư thụ hưởng mới được xem hóa đơn
+DROP POLICY IF EXISTS "Participants can view payments." ON payments;
+CREATE POLICY "Participants can view payments." ON payments FOR SELECT USING (
+  EXISTS (
+    SELECT 1 FROM enrollments
+    WHERE enrollments.id = payments.enrollment_id
+      AND (enrollments.student_id = auth.uid() OR enrollments.instructor_id = auth.uid())
+  )
+);
+
+-- Cho phép tạo bản ghi thanh toán khi học sinh nhập học chính thức
+DROP POLICY IF EXISTS "Students can insert payment for own enrollment." ON payments;
+CREATE POLICY "Students can insert payment for own enrollment." ON payments FOR INSERT WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM enrollments
+    WHERE enrollments.id = enrollment_id
+      AND (enrollments.student_id = auth.uid() OR auth.uid() IS NULL)
+  )
+);
+
+-- CẤM UPDATE PAYMENTS: Trạng thái và số dư thanh toán không được phép tự sửa từ Client
+DROP POLICY IF EXISTS "Clients cannot mutate payments." ON payments;
+-- Không tạo policy FOR UPDATE để chặn mọi sửa đổi trái phép từ client
+
+-- --- 5. CHÍNH SÁCH ĐÁNH GIÁ (Reviews) ---
+-- Chỉ học sinh đã đăng ký và có đơn enrolled mới được đánh giá
+DROP POLICY IF EXISTS "Enrolled students can insert reviews." ON reviews;
 CREATE POLICY "Enrolled students can insert reviews." ON reviews FOR INSERT WITH CHECK (
   auth.uid() IS NOT NULL AND
   auth.uid() = student_id AND
@@ -166,20 +222,3 @@ CREATE POLICY "Enrolled students can insert reviews." ON reviews FOR INSERT WITH
       AND enrollments.status = 'enrolled'
   )
 );
-
--- ==============================================================
--- MIGRATION: Thêm cột ngân hàng vào profiles (chạy nếu DB đã tồn tại)
--- Chạy các lệnh này trong Supabase SQL Editor
--- ==============================================================
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS bank_name TEXT;
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS bank_account_number TEXT;
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS bank_account_name TEXT;
-
--- MIGRATION: Thêm cột phân chia học phí vào payments
-ALTER TABLE payments ADD COLUMN IF NOT EXISTS center_amount INTEGER DEFAULT 0;
-ALTER TABLE payments ADD COLUMN IF NOT EXISTS tutor_amount INTEGER DEFAULT 0;
-ALTER TABLE payments ADD COLUMN IF NOT EXISTS tutor_transfer_status TEXT DEFAULT 'pending';
-ALTER TABLE payments ADD COLUMN IF NOT EXISTS tutor_bank_name TEXT;
-ALTER TABLE payments ADD COLUMN IF NOT EXISTS tutor_bank_account TEXT;
-ALTER TABLE payments ADD COLUMN IF NOT EXISTS tutor_bank_name_holder TEXT;
-ALTER TABLE payments ADD COLUMN IF NOT EXISTS transferred_at TIMESTAMP WITH TIME ZONE;

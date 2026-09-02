@@ -1,6 +1,6 @@
 import { Send, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { useData } from '../App';
+import { useData } from '../../context/DataContext';
 
 export interface ChatMessage {
   id: string;
