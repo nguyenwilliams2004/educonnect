@@ -51,6 +51,17 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { BrowserRouter, Link, Route, Routes, useLocation, useNavigate, useParams } from 'react-router';
 import FloatingContactDock from './components/FloatingContactDock';
 import { defaultTutorReviews, mockAdminStats, mockPendingTutors, mockTutors, TutorReviewItem, TutorType } from './data';
+import {
+  IDORGuard,
+  RATE_LIMIT_RULES,
+  RateLimiter,
+  RateLimitResult,
+  RowLevelSecurity,
+  SecurityAuditEvent,
+  SecurityAuditLogger,
+  UserRole,
+  UserSessionContext
+} from './security';
 
 export interface StudentTrialItem {
   tutorId: string | number;
@@ -65,6 +76,8 @@ export interface StudentTrialItem {
   hourlyRate?: string;
   date: string;
   status: 'trial_in_progress' | 'enrolled' | 'cancelled';
+  studentId?: string | number;
+  studentPhone?: string;
 }
 
 // --- LOCALSTORAGE HELPERS (Quản lý trạng thái học thử và học chính thức) ---
@@ -136,6 +149,8 @@ interface DataContextType {
   adminStats: typeof mockAdminStats;
   myTrials: StudentTrialItem[];
   reviews: TutorReviewItem[];
+  currentSession: UserSessionContext;
+  setCurrentSession: React.Dispatch<React.SetStateAction<UserSessionContext>>;
   recordTrialContact: (tutor: any, studentInfo?: { name?: string, phone?: string }) => void;
   recordOfficialEnrollment: (tutorId: any) => void;
   cancelTrialEnrollment: (tutorId: any) => void;
@@ -143,6 +158,9 @@ interface DataContextType {
   rejectTutorKyc: (tutorId: any) => void;
   addMockTutor: (newTutor: any) => void;
   addTutorReview: (review: Omit<TutorReviewItem, 'id' | 'date'>) => void;
+  getMaskedTutor: (tutor: any) => any;
+  securityLogs: SecurityAuditEvent[];
+  refreshSecurityLogs: () => void;
 }
 
 export const DataContext = createContext<DataContextType | null>(null);
@@ -177,6 +195,7 @@ function AuthModal({
   const [countdown, setCountdown] = useState(60);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { setCurrentSession } = useData();
 
   useEffect(() => {
     setView(initialView);
@@ -199,9 +218,26 @@ function AuthModal({
       alert("Vui lòng nhập đầy đủ Email/Số điện thoại và Mật khẩu");
       return;
     }
+
+    // Rate Limit Check (Sliding window)
+    const rateCheck = RateLimiter.check('AUTH_LOGIN', identifier);
+    if (!rateCheck.allowed) {
+      alert(rateCheck.errorMessage || 'Thao tác quá nhanh. Vui lòng thử lại sau.');
+      return;
+    }
+
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
+      RateLimiter.reset('AUTH_LOGIN', identifier);
+      const isPhone = !identifier.includes('@');
+      setCurrentSession({
+        userId: IDORGuard.toSecureId('usr', identifier),
+        role: role === 'student' ? 'student' : 'teacher',
+        phone: isPhone ? identifier : undefined,
+        email: isPhone ? undefined : identifier,
+        sessionToken: 'tok_' + Math.random().toString(36).substring(2)
+      });
       alert(`Đăng nhập thành công với vai trò: ${role === 'student' ? 'Học sinh / Phụ huynh' : 'Giáo viên'}!`);
       onClose();
     }, 600);
@@ -209,6 +245,12 @@ function AuthModal({
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
+    const regRate = RateLimiter.check('AUTH_REGISTER', identifier || 'anon_reg');
+    if (!regRate.allowed) {
+      alert(regRate.errorMessage);
+      return;
+    }
+
     if (role === 'teacher') {
       onClose();
       navigate(`/dang-ky-gia-su?email=${encodeURIComponent(identifier)}`);
@@ -220,6 +262,14 @@ function AuthModal({
       setLoading(true);
       setTimeout(() => {
         setLoading(false);
+        const isPhone = !identifier.includes('@');
+        setCurrentSession({
+          userId: IDORGuard.toSecureId('usr', identifier),
+          role: 'student',
+          phone: isPhone ? identifier : undefined,
+          email: isPhone ? undefined : identifier,
+          sessionToken: 'tok_' + Math.random().toString(36).substring(2)
+        });
         alert("Đăng ký tài khoản học sinh thành công! Bạn có thể bắt đầu tìm kiếm giáo viên và liên hệ học thử miễn phí.");
         onClose();
       }, 600);
@@ -232,6 +282,13 @@ function AuthModal({
       alert("Vui lòng nhập Email hoặc Số điện thoại đã đăng ký");
       return;
     }
+
+    const otpRate = RateLimiter.check('AUTH_OTP', identifier);
+    if (!otpRate.allowed) {
+      alert(otpRate.errorMessage);
+      return;
+    }
+
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
@@ -1278,7 +1335,7 @@ function HeroRightIllustration() {
 
 function Navbar() {
   const { openAuthModal, openMyTrialsModal } = useUI();
-  const { myTrials } = useData();
+  const { myTrials, currentSession, setCurrentSession } = useData();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -1340,21 +1397,46 @@ function Navbar() {
             <Search className="w-4 h-4 sm:w-5 sm:h-5" />
           </Link>
 
-          <button
-            type="button"
-            onClick={() => openAuthModal('login')}
-            className="text-slate-700 hover:text-blue-600 font-bold text-xs sm:text-sm px-2 py-1.5 sm:px-2.5 sm:py-2 cursor-pointer transition-colors whitespace-nowrap"
-          >
-            Đăng nhập
-          </button>
+          {currentSession.role !== 'anonymous' ? (
+            <div className="flex items-center gap-2">
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border ${
+                currentSession.role === 'admin' ? 'bg-red-50 text-red-700 border-red-200' :
+                currentSession.role === 'teacher' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                'bg-blue-50 text-blue-700 border-blue-200'
+              }`}>
+                {currentSession.role === 'admin' ? <ShieldCheck className="w-3.5 h-3.5" /> : <User className="w-3.5 h-3.5" />}
+                {currentSession.role === 'admin' ? 'Quản trị viên' : currentSession.role === 'teacher' ? 'Giáo viên' : 'Học sinh'}
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setCurrentSession({ role: 'anonymous' });
+                  alert("Đã đăng xuất tài khoản thành công!");
+                }}
+                className="text-xs text-slate-500 hover:text-red-600 font-semibold px-2 py-1 cursor-pointer transition-colors"
+              >
+                Đăng xuất
+              </button>
+            </div>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => openAuthModal('login')}
+                className="text-slate-700 hover:text-blue-600 font-bold text-xs sm:text-sm px-2 py-1.5 sm:px-2.5 sm:py-2 cursor-pointer transition-colors whitespace-nowrap"
+              >
+                Đăng nhập
+              </button>
 
-          <button
-            type="button"
-            onClick={() => openAuthModal('register', 'student')}
-            className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 sm:px-5 sm:py-2.5 rounded-full transition-all text-xs sm:text-sm shadow-xs shadow-blue-200 whitespace-nowrap shrink-0"
-          >
-            Đăng ký
-          </button>
+              <button
+                type="button"
+                onClick={() => openAuthModal('register', 'student')}
+                className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 sm:px-5 sm:py-2.5 rounded-full transition-all text-xs sm:text-sm shadow-xs shadow-blue-200 whitespace-nowrap shrink-0"
+              >
+                Đăng ký
+              </button>
+            </>
+          )}
 
           {/* Nút Hamburger menu trên điện thoại */}
           <button
@@ -2530,7 +2612,7 @@ function FindTutorsPage() {
 // TeacherDetailPage - Giao diện chi tiết giáo viên chuẩn Minimalist & Editorial UI
 function TeacherDetailPage() {
   const { id } = useParams();
-  const { tutors, myTrials, cancelTrialEnrollment, reviews } = useData();
+  const { tutors, myTrials, cancelTrialEnrollment, reviews, getMaskedTutor } = useData();
   const { openContactZaloModal, openEnrollmentModal, openReviewModal, openAuthModal } = useUI();
   const [activeProofModal, setActiveProofModal] = useState<string | null>(null);
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
@@ -2556,10 +2638,16 @@ function TeacherDetailPage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const tutor = tutors.find(t => String(t.id) === String(id) || String(t.slug) === String(id))
-    || mockTutors.find(t => String(t.id) === String(id) || String(t.slug) === String(id))
+  // IDOR Guard: Support both raw IDs, slug names, and opaque crypto tokens
+  const resolvedId = IDORGuard.fromSecureId(id || '') || id;
+
+  const rawTutor = tutors.find(t => String(t.id) === String(resolvedId) || String(t.slug) === String(resolvedId) || String(t.id) === String(id) || String(t.slug) === String(id))
+    || mockTutors.find(t => String(t.id) === String(resolvedId) || String(t.slug) === String(resolvedId) || String(t.id) === String(id) || String(t.slug) === String(id))
     || tutors[0]
     || mockTutors[0];
+
+  // Apply Row Level Security (Data Masking for unprivileged viewers)
+  const tutor = getMaskedTutor(rawTutor);
 
   if (!tutor) {
     return <div className="p-16 text-center text-slate-500 font-medium">Không tìm thấy thông tin giáo viên</div>;
@@ -3394,31 +3482,99 @@ function TeacherDetailPage() {
 
 // AdminDashboardPage
 function AdminDashboardPage() {
-  const { tutors, pendingTutors, adminStats, approveTutorKyc, rejectTutorKyc } = useData();
+  const { tutors, pendingTutors, adminStats, approveTutorKyc, rejectTutorKyc, securityLogs, refreshSecurityLogs, setCurrentSession } = useData();
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return sessionStorage.getItem('hantutor_admin_auth') === 'true';
   });
   const [adminPassword, setAdminPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
-  const [currentTab, setCurrentTab] = useState<'kyc' | 'requests' | 'tutors' | 'analytics'>('kyc');
+  const [currentTab, setCurrentTab] = useState<'kyc' | 'requests' | 'tutors' | 'analytics' | 'security'>('kyc');
   const [kycFilter, setKycFilter] = useState<'all' | 'pending' | 'approved'>('pending');
   const [selectedDocPreview, setSelectedDocPreview] = useState<{ isOpen: boolean; title: string; imageUrl: string; tutorName: string } | null>(null);
 
+  // Security Sandbox State
+  const [sandboxRole, setSandboxRole] = useState<UserRole>('anonymous');
+  const [testInternalId, setTestInternalId] = useState('t1');
+  const [generatedSecureToken, setGeneratedSecureToken] = useState(() => IDORGuard.toSecureId('tutor', 't1'));
+
   const handleAdminLogin = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Enforce Rate Limit for Admin Login
+    const rateCheck = RateLimiter.check('ADMIN_ACTION', 'admin_portal_login');
+    if (!rateCheck.allowed) {
+      setErrorMsg(rateCheck.errorMessage || 'Quá nhiều lần đăng nhập quản trị thất bại.');
+      SecurityAuditLogger.log({
+        type: 'ADMIN_AUTH_FAILED',
+        severity: 'HIGH',
+        action: 'ADMIN_LOGIN_LOCKOUT',
+        target: 'admin_portal',
+        details: 'Cảnh báo: Cố gắng brute-force mật khẩu quản trị viên vượt quá giới hạn.'
+      });
+      refreshSecurityLogs();
+      return;
+    }
+
     if (adminPassword === 'admin123' || adminPassword === 'hantutor@2026') {
       sessionStorage.setItem('hantutor_admin_auth', 'true');
       setIsAuthenticated(true);
       setErrorMsg('');
+      RateLimiter.reset('ADMIN_ACTION', 'admin_portal_login');
+      setCurrentSession({
+        userId: 'admin_root',
+        role: 'admin',
+        sessionToken: 'adm_' + Date.now()
+      });
     } else {
       setErrorMsg('Mật khẩu quản trị viên không chính xác. Vui lòng thử lại!');
+      SecurityAuditLogger.log({
+        type: 'ADMIN_AUTH_FAILED',
+        severity: 'MEDIUM',
+        action: 'ADMIN_LOGIN_FAILED',
+        target: 'admin_portal',
+        details: 'Sai mật khẩu truy cập Admin Portal.'
+      });
+      refreshSecurityLogs();
     }
   };
 
   const handleAdminLogout = () => {
     sessionStorage.removeItem('hantutor_admin_auth');
     setIsAuthenticated(false);
+    setCurrentSession({ role: 'anonymous' });
+  };
+
+  const triggerSecuritySimulation = () => {
+    // 1. Simulate IDOR Probe Attack
+    SecurityAuditLogger.log({
+      type: 'IDOR_PROBE_DETECTED',
+      severity: 'CRITICAL',
+      action: 'ACCESS_TRIAL_PRIVATE',
+      target: 'trial_obj_891',
+      details: 'Mô phỏng IDOR: Người dùng student_402 cố tình đổi URL truy cập đơn học thử riêng tư #891 của học sinh khác.'
+    });
+
+    // 2. Simulate Rate Limit Trigger
+    SecurityAuditLogger.log({
+      type: 'RATE_LIMIT_EXCEEDED',
+      severity: 'HIGH',
+      action: 'AUTH_LOGIN',
+      target: '0987654321',
+      details: 'Mô phỏng Rate Limit: IP 118.69.182.10 gửi 6 yêu cầu đăng nhập liên tiếp trong 1 phút. Đã kích hoạt khóa tự động 5 phút.'
+    });
+
+    // 3. Simulate Unauthorized Row Mutation
+    SecurityAuditLogger.log({
+      type: 'UNAUTHORIZED_ACCESS_ATTEMPT',
+      severity: 'HIGH',
+      action: 'MODIFY_TUTOR',
+      target: 't1',
+      details: 'Mô phỏng RLS: Người dùng chưa cấp quyền cố gắng sửa học phí của giáo viên t1.'
+    });
+
+    refreshSecurityLogs();
+    alert("Đã tạo 3 sự kiện an ninh mô phỏng (IDOR Probe, Rate Limit Block, RLS Violation) vào Nhật ký An ninh!");
   };
 
   if (!isAuthenticated) {
@@ -3472,6 +3628,27 @@ function AdminDashboardPage() {
   const pendingList = pendingTutors.filter(t => t.kycStatus === 'pending');
   const approvedList = tutors.filter(t => t.kycStatus === 'approved');
   const displayedKycList = kycFilter === 'pending' ? pendingList : kycFilter === 'approved' ? approvedList : [...pendingList, ...approvedList];
+
+  // Sample tutor for RLS Sandbox
+  const sampleTutor = tutors[0] || {
+    id: 't1',
+    name: 'ThS. Nguyễn Văn An',
+    phone: '0912345678',
+    zalo: '0912345678',
+    email: 'nguyenvanan.sp@gmail.com',
+    kycData: {
+      status: 'verified',
+      idNumber: '001095012345',
+      frontDoc: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=800',
+      degreeDoc: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=800'
+    }
+  };
+
+  const maskedSample = RowLevelSecurity.applyTutorRLS(sampleTutor, {
+    role: sandboxRole,
+    userId: sandboxRole === 'teacher' ? sampleTutor.id : 'guest_1',
+    phone: sandboxRole === 'teacher' ? sampleTutor.phone : undefined
+  });
 
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col font-sans">
@@ -3541,6 +3718,21 @@ function AdminDashboardPage() {
             className={`pb-3 px-4 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${currentTab === 'analytics' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
           >
             Phân bổ Doanh thu (30%/70%)
+          </button>
+          <button
+            onClick={() => {
+              setCurrentTab('security');
+              refreshSecurityLogs();
+            }}
+            className={`pb-3 px-4 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${currentTab === 'security' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+          >
+            <ShieldCheck className="w-4 h-4 text-indigo-600" />
+            Giám sát An ninh (RLS, IDOR, Rate Limit)
+            {securityLogs.length > 0 && (
+              <span className="bg-indigo-100 text-indigo-800 text-[10px] font-extrabold px-1.5 py-0.2 rounded-full">
+                {securityLogs.length}
+              </span>
+            )}
           </button>
         </div>
 
@@ -3737,6 +3929,268 @@ function AdminDashboardPage() {
               <p className="text-xs text-slate-500 leading-relaxed">
                 Tất cả các giao dịch thanh toán VietQR đều được chia tách tự động theo tỷ lệ quy định 30% / 70% và cập nhật trực tiếp vào cơ sở dữ liệu.
               </p>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 4: SECURITY AUDIT & RLS / IDOR / RATE LIMIT MONITOR */}
+        {currentTab === 'security' && (
+          <div className="space-y-8 animate-in fade-in duration-200">
+            {/* Top Security Overview Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-slate-900 text-white p-5 rounded-2xl border border-slate-800 shadow-sm space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-400 font-bold uppercase">Sự kiện An ninh</span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                </div>
+                <div className="text-2xl font-black text-white">{securityLogs.length}</div>
+                <div className="text-[11px] text-slate-400">Ghi nhận vi phạm & Probe logs</div>
+              </div>
+
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-500 font-bold uppercase">Rate Limiting</span>
+                  <Zap className="w-4 h-4 text-amber-500" />
+                </div>
+                <div className="text-2xl font-black text-slate-900">{Object.keys(RATE_LIMIT_RULES).length} Quy tắc</div>
+                <div className="text-[11px] text-emerald-600 font-bold">Sliding Window & Lockout Active</div>
+              </div>
+
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-500 font-bold uppercase">Row Level Security (RLS)</span>
+                  <ShieldCheck className="w-4 h-4 text-blue-600" />
+                </div>
+                <div className="text-2xl font-black text-blue-600">Đang bật</div>
+                <div className="text-[11px] text-slate-500">Data Masking CCCD/SĐT/Bank</div>
+              </div>
+
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-500 font-bold uppercase">IDOR Guard</span>
+                  <Target className="w-4 h-4 text-indigo-600" />
+                </div>
+                <div className="text-2xl font-black text-indigo-600">Opaque Crypto</div>
+                <div className="text-[11px] text-slate-500">Chống quét ID số tuần tự</div>
+              </div>
+            </div>
+
+            {/* LIVE SECURITY AUDIT LOGS */}
+            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                <div>
+                  <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
+                    <ShieldCheck className="w-5 h-5 text-indigo-600" />
+                    Nhật ký Sự kiện An ninh Thời gian thực (Live Security Audit Log)
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Ghi nhận tự động các hành vi vượt ngưỡng Rate Limit, tấn công IDOR hoặc cố gắng can thiệp dữ liệu trái phép.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={triggerSecuritySimulation}
+                    className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs rounded-xl transition-colors cursor-pointer"
+                  >
+                    ⚡ Mô phỏng Vi phạm An ninh
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      SecurityAuditLogger.clearLogs();
+                      refreshSecurityLogs();
+                    }}
+                    className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-colors cursor-pointer"
+                  >
+                    Xóa nhật ký
+                  </button>
+                </div>
+              </div>
+
+              {securityLogs.length === 0 ? (
+                <div className="py-10 text-center text-slate-400 text-xs">
+                  <ShieldCheck className="w-8 h-8 mx-auto mb-2 text-emerald-500 opacity-60" />
+                  Hệ thống an toàn. Chưa phát hiện vi phạm bảo mật nào.
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-slate-200 text-slate-400 uppercase text-[10px]">
+                        <th className="pb-3">Thời gian</th>
+                        <th className="pb-3">Mức độ</th>
+                        <th className="pb-3">Loại sự kiện</th>
+                        <th className="pb-3">Đối tượng mục tiêu</th>
+                        <th className="pb-3">Chi tiết vi phạm</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-slate-700">
+                      {securityLogs.map(log => (
+                        <tr key={log.id} className="hover:bg-slate-50">
+                          <td className="py-3 text-slate-400 whitespace-nowrap text-[11px] font-mono">
+                            {new Date(log.timestamp).toLocaleTimeString('vi-VN')}
+                          </td>
+                          <td className="py-3">
+                            <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
+                              log.severity === 'CRITICAL' ? 'bg-red-100 text-red-800 border border-red-200' :
+                              log.severity === 'HIGH' ? 'bg-amber-100 text-amber-800' :
+                              'bg-blue-100 text-blue-800'
+                            }`}>
+                              {log.severity}
+                            </span>
+                          </td>
+                          <td className="py-3 font-bold text-slate-900 font-mono text-[11px]">{log.type}</td>
+                          <td className="py-3 font-semibold text-indigo-600 font-mono text-[11px]">{log.target}</td>
+                          <td className="py-3 text-slate-600 text-xs leading-relaxed max-w-md">{log.details}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* TWO COLUMN GRID: RATE LIMIT RULES & RLS / IDOR SANDBOX */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* RATE LIMIT RULES TABLE */}
+              <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-4">
+                <div className="border-b border-slate-100 pb-3">
+                  <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
+                    <Zap className="w-4 h-4 text-amber-500" />
+                    Cấu hình Giới hạn Tần suất (Rate Limiting Buckets)
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">Thuật toán Sliding Window với thời gian khóa tạm thời</p>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-slate-200 text-slate-400 uppercase text-[10px]">
+                        <th className="pb-2">Hành vi (Action)</th>
+                        <th className="pb-2">Hạn mức</th>
+                        <th className="pb-2">Cửa sổ (Window)</th>
+                        <th className="pb-2">Hình thức xử lý</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-slate-700">
+                      {Object.entries(RATE_LIMIT_RULES).map(([key, config]) => (
+                        <tr key={key} className="hover:bg-slate-50">
+                          <td className="py-2.5">
+                            <div className="font-bold text-slate-800">{config.description}</div>
+                            <div className="text-[10px] text-slate-400 font-mono">{key}</div>
+                          </td>
+                          <td className="py-2.5 font-bold text-indigo-600">{config.maxRequests} reqs</td>
+                          <td className="py-2.5 text-slate-600">{config.windowMs / 1000 >= 60 ? `${config.windowMs / 60000} phút` : `${config.windowMs / 1000}s`}</td>
+                          <td className="py-2.5">
+                            {config.lockoutMs ? (
+                              <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md">
+                                Khóa {config.lockoutMs / 60000} phút
+                              </span>
+                            ) : (
+                              <span className="text-[10px] font-semibold text-slate-500">Chờ hết cửa sổ</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* RLS & IDOR INTERACTIVE INSPECTOR */}
+              <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-4">
+                <div className="border-b border-slate-100 pb-3">
+                  <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-blue-600" />
+                    Thử nghiệm Row Level Security (RLS) & IDOR Protection
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">Kiểm tra kết quả Data Masking theo từng vai trò người dùng</p>
+                </div>
+
+                {/* Role Switcher */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-2">Xem dữ liệu dưới góc nhìn (Role View):</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setSandboxRole('anonymous')}
+                      className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        sandboxRole === 'anonymous' ? 'bg-[#111111] text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      }`}
+                    >
+                      Khách vãng lai
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSandboxRole('teacher')}
+                      className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        sandboxRole === 'teacher' ? 'bg-[#111111] text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      }`}
+                    >
+                      Chính Giáo viên
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSandboxRole('admin')}
+                      className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        sandboxRole === 'admin' ? 'bg-[#111111] text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      }`}
+                    >
+                      Quản trị viên
+                    </button>
+                  </div>
+                </div>
+
+                {/* Masked Output Preview */}
+                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 font-medium">Họ tên:</span>
+                    <strong className="text-slate-900">{maskedSample.name}</strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 font-medium">Số điện thoại:</span>
+                    <strong className={`font-mono ${sandboxRole === 'anonymous' ? 'text-amber-700 bg-amber-50 px-1.5 py-0.2 rounded' : 'text-emerald-700'}`}>
+                      {maskedSample.phone}
+                    </strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 font-medium">Số CCCD (KYC):</span>
+                    <strong className={`font-mono ${sandboxRole === 'anonymous' ? 'text-amber-700 bg-amber-50 px-1.5 py-0.2 rounded' : 'text-emerald-700'}`}>
+                      {maskedSample.kycData?.idNumber || '001**********'}
+                    </strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 font-medium">Link Scan CCCD & Bằng ĐH:</span>
+                    <strong className="text-slate-700">
+                      {maskedSample.kycData?.frontDoc ? '✓ Được cấp quyền xem ảnh gốc' : '🚫 Bị ẩn (RLS Encrypted)'}
+                    </strong>
+                  </div>
+                </div>
+
+                {/* IDOR Opaque Token Demo */}
+                <div className="pt-3 border-t border-slate-100 space-y-2">
+                  <label className="block text-xs font-bold text-slate-700">Chuyển đổi ID nội bộ sang Crypto Token (IDOR Defense):</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={testInternalId}
+                      onChange={e => {
+                        setTestInternalId(e.target.value);
+                        setGeneratedSecureToken(IDORGuard.toSecureId('tutor', e.target.value));
+                      }}
+                      className="w-24 px-3 py-2 border border-slate-200 rounded-xl text-xs font-mono"
+                      placeholder="ID gốc (1)"
+                    />
+                    <div className="flex-1 px-3 py-2 bg-indigo-50 border border-indigo-100 text-indigo-900 font-mono text-xs rounded-xl truncate flex items-center">
+                      {generatedSecureToken}
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-slate-400">
+                    URL công khai dùng token ngẫu nhiên không tuần tự, ngăn chặn hacker thay đổi số ID để đánh cắp hồ sơ.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -4815,7 +5269,39 @@ export default function App() {
     defaultStage: 'trial'
   });
 
+  const [currentSession, setCurrentSession] = useState<UserSessionContext>(() => {
+    try {
+      const saved = localStorage.getItem('hantutor_user_session');
+      if (saved) return JSON.parse(saved);
+    } catch (e) { }
+    return { role: 'anonymous' };
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('hantutor_user_session', JSON.stringify(currentSession));
+    } catch (e) { }
+  }, [currentSession]);
+
+  const [securityLogs, setSecurityLogs] = useState<SecurityAuditEvent[]>(() => SecurityAuditLogger.getLogs());
+
+  const refreshSecurityLogs = () => {
+    setSecurityLogs(SecurityAuditLogger.getLogs());
+  };
+
+  const getMaskedTutor = (tutor: any) => {
+    return RowLevelSecurity.applyTutorRLS(tutor, currentSession);
+  };
+
   const addTutorReview = (newReviewData: Omit<TutorReviewItem, 'id' | 'date'>) => {
+    // Rate limit check
+    const rate = RateLimiter.check('REVIEW_SUBMIT', String(newReviewData.tutorId));
+    if (!rate.allowed) {
+      alert(rate.errorMessage || 'Thao tác đánh giá quá nhanh. Vui lòng chờ ít phút.');
+      refreshSecurityLogs();
+      return;
+    }
+
     const newReview: TutorReviewItem = {
       ...newReviewData,
       id: `rev_${Date.now()}`,
@@ -4844,6 +5330,14 @@ export default function App() {
   };
 
   const addMockTutor = (newTutor: any) => {
+    // Rate limit check for KYC submit
+    const rate = RateLimiter.check('KYC_SUBMIT', newTutor.phone || 'tutor_reg');
+    if (!rate.allowed) {
+      alert(rate.errorMessage || 'Tải lên hồ sơ quá thường xuyên. Vui lòng thử lại sau.');
+      refreshSecurityLogs();
+      return;
+    }
+
     setPendingTutors(prev => {
       const updated = [newTutor, ...prev];
       try {
@@ -4869,6 +5363,14 @@ export default function App() {
   };
 
   const recordTrialContact = (tutor: any, studentInfo?: { name?: string, phone?: string }) => {
+    // Rate limit check for trial booking
+    const rate = RateLimiter.check('TRIAL_BOOKING', studentInfo?.phone || String(currentSession.userId || 'client_student'));
+    if (!rate.allowed) {
+      alert(rate.errorMessage || 'Bạn đã đăng ký học thử quá nhiều lần trong thời gian ngắn.');
+      refreshSecurityLogs();
+      return;
+    }
+
     // 1. Tăng lượt học thử cho giáo viên
     setTutors(prev => prev.map(t => {
       if (String(t.id) === String(tutor.id)) {
@@ -4903,7 +5405,9 @@ export default function App() {
           zalo: tutor.zalo,
           hourlyRate: tutor.hourlyRate,
           date: new Date().toLocaleDateString('vi-VN'),
-          status: 'trial_in_progress'
+          status: 'trial_in_progress',
+          studentId: currentSession.userId || 'anon_stud',
+          studentPhone: studentInfo?.phone || currentSession.phone
         };
         updated = [newItem, ...prev];
       }
@@ -5057,13 +5561,18 @@ export default function App() {
     adminStats,
     myTrials,
     reviews,
+    currentSession,
+    setCurrentSession,
     recordTrialContact,
     recordOfficialEnrollment,
     cancelTrialEnrollment,
     approveTutorKyc,
     rejectTutorKyc,
     addMockTutor,
-    addTutorReview
+    addTutorReview,
+    getMaskedTutor,
+    securityLogs,
+    refreshSecurityLogs
   };
 
   return (
