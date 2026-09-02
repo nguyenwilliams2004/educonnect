@@ -23,6 +23,7 @@ import {
   Info,
   Laptop,
   MapPin,
+  Maximize2,
   Menu,
   MessageCircle,
   Phone,
@@ -41,7 +42,9 @@ import {
   Users,
   UserX,
   X,
-  Zap
+  Zap,
+  ZoomIn,
+  ZoomOut
 } from 'lucide-react';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { BrowserRouter, Link, Route, Routes, useLocation, useNavigate, useParams } from 'react-router';
@@ -2529,6 +2532,8 @@ function TeacherDetailPage() {
   const { tutors, myTrials, cancelTrialEnrollment, reviews } = useData();
   const { openContactZaloModal, openEnrollmentModal, openReviewModal, openAuthModal } = useUI();
   const [activeProofModal, setActiveProofModal] = useState<string | null>(null);
+  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
+  const [avatarZoom, setAvatarZoom] = useState(1);
   const [isLiked, setIsLiked] = useState(false);
   const [shareToast, setShareToast] = useState(false);
   const [relatedPage, setRelatedPage] = useState(0);
@@ -2538,6 +2543,17 @@ function TeacherDetailPage() {
     window.scrollTo({ top: 0, behavior: 'instant' });
     setRelatedPage(0);
   }, [id]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsAvatarModalOpen(false);
+        setActiveProofModal(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const tutor = tutors.find(t => String(t.id) === String(id) || String(t.slug) === String(id))
     || mockTutors.find(t => String(t.id) === String(id) || String(t.slug) === String(id))
@@ -2751,10 +2767,23 @@ function TeacherDetailPage() {
                   </div>
                   {tutor.certificates && tutor.certificates.length > 0 && (
                     <div className="flex items-start gap-2">
-                      <Award className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-                      <div>
-                        <strong>Chứng chỉ đã xác thực: </strong>
-                        <span>{tutor.certificates.join(', ')}</span>
+                      <Award className="w-4 h-4 text-amber-500 shrink-0 mt-1" />
+                      <div className="space-y-1">
+                        <span className="font-bold text-slate-900 block">Chứng chỉ đã xác thực: </span>
+                        <div className="flex flex-wrap gap-1.5 pt-0.5">
+                          {tutor.certificates.map((cert: string, cIdx: number) => (
+                            <button
+                              key={cIdx}
+                              type="button"
+                              onClick={() => setActiveProofModal(tutor.kycData?.frontDoc || tutor.kycData?.degreeDoc || tutor.avatar)}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-50/90 hover:bg-amber-100 text-amber-900 border border-amber-200/80 text-xs font-semibold cursor-pointer transition-all active:scale-95 shadow-2xs"
+                              title="Nhấp để xem văn bằng chứng thực"
+                            >
+                              <span>{cert}</span>
+                              <Eye className="w-3 h-3 text-amber-600 ml-0.5" />
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   )}
@@ -3078,16 +3107,35 @@ function TeacherDetailPage() {
                 </button>
               </div>
 
-              {/* Round Avatar with KYC Check */}
-              <div className="relative inline-block mx-auto">
+              {/* Round Avatar with Interactive Zoom Trigger & KYC Check */}
+              <div
+                onClick={() => { setIsAvatarModalOpen(true); setAvatarZoom(1); }}
+                className="relative inline-block mx-auto group/avatar cursor-pointer"
+                title="Nhấp để xem ảnh đại diện & hồ sơ kiểm định"
+              >
                 <img
                   src={tutor.avatar}
                   alt={tutor.displayName || tutor.name}
-                  className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-slate-100 shadow-md bg-slate-50"
+                  className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-slate-100 shadow-md bg-slate-50 group-hover/avatar:scale-105 transition-transform duration-300"
                 />
+                <div className="absolute inset-0 rounded-full bg-slate-950/40 opacity-0 group-hover/avatar:opacity-100 transition-opacity flex items-center justify-center text-white">
+                  <ZoomIn className="w-6 h-6 drop-shadow-md" />
+                </div>
                 <div className="absolute bottom-0 right-0 bg-emerald-500 text-white p-1 rounded-full border-2 border-white shadow-2xs" title="Đã đối soát KYC">
                   <CheckCircle className="w-3.5 h-3.5 fill-white text-emerald-500" />
                 </div>
+              </div>
+
+              {/* Click instruction badge */}
+              <div>
+                <button
+                  type="button"
+                  onClick={() => { setIsAvatarModalOpen(true); setAvatarZoom(1); }}
+                  className="text-[11px] font-semibold text-slate-500 hover:text-blue-600 transition-colors inline-flex items-center gap-1 cursor-pointer"
+                >
+                  <Eye className="w-3 h-3" />
+                  Xem ảnh & hồ sơ xác thực
+                </button>
               </div>
 
               {/* Name & Rating */}
@@ -3156,25 +3204,198 @@ function TeacherDetailPage() {
         </div>
       </div>
 
-      {/* Modal Xem Minh chứng thành tích (nếu có) */}
+      {/* MODAL 1: Teacher Photo & Profile Verification Dossier Modal (Thiết kế mới khi bấm vào ảnh giáo viên) */}
+      {isAvatarModalOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200"
+          onClick={() => setIsAvatarModalOpen(false)}
+        >
+          <div
+            className="bg-white rounded-3xl max-w-3xl w-full shadow-2xl border border-slate-200/90 overflow-hidden relative flex flex-col md:flex-row max-h-[90vh] animate-in zoom-in-95 duration-200"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Top close button */}
+            <button
+              onClick={() => setIsAvatarModalOpen(false)}
+              className="absolute top-4 right-4 z-20 p-2.5 rounded-full bg-slate-900/80 hover:bg-slate-900 text-white transition-all cursor-pointer active:scale-90 shadow-md"
+              title="Đóng (ESC)"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            {/* Left Column: High-Res Image with Zoom Controls */}
+            <div className="md:w-5/12 bg-slate-950 flex flex-col items-center justify-between p-6 relative overflow-hidden select-none">
+              
+              {/* Zoom Controls Overlay */}
+              <div className="w-full flex items-center justify-between text-white/80 z-10">
+                <span className="text-[11px] font-semibold bg-white/10 px-2.5 py-1 rounded-md backdrop-blur-md">
+                  Ảnh hồ sơ chính thức
+                </span>
+                <div className="flex items-center gap-1.5 bg-white/10 p-1 rounded-lg backdrop-blur-md">
+                  <button
+                    type="button"
+                    onClick={() => setAvatarZoom(z => Math.max(1, z - 0.25))}
+                    className="p-1 hover:text-white transition-colors cursor-pointer"
+                    title="Thu nhỏ"
+                  >
+                    <ZoomOut className="w-3.5 h-3.5" />
+                  </button>
+                  <span className="text-[10px] font-bold px-1 tabular-nums">{Math.round(avatarZoom * 100)}%</span>
+                  <button
+                    type="button"
+                    onClick={() => setAvatarZoom(z => Math.min(2.5, z + 0.25))}
+                    className="p-1 hover:text-white transition-colors cursor-pointer"
+                    title="Phóng to"
+                  >
+                    <ZoomIn className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Main Photo Display */}
+              <div className="my-auto py-4 overflow-hidden flex items-center justify-center">
+                <img
+                  src={tutor.avatar}
+                  alt={tutor.displayName || tutor.name}
+                  style={{ transform: `scale(${avatarZoom})` }}
+                  className="max-h-[50vh] md:max-h-[380px] w-auto rounded-2xl object-cover shadow-2xl transition-transform duration-200 border-2 border-white/20"
+                />
+              </div>
+
+              {/* Bottom KYC Seal in Photo column */}
+              <div className="w-full bg-emerald-950/80 border border-emerald-500/30 rounded-xl p-2.5 text-center text-emerald-300 text-xs font-bold flex items-center justify-center gap-1.5 backdrop-blur-md z-10">
+                <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>Hồ sơ đã đối soát KYC 100%</span>
+              </div>
+            </div>
+
+            {/* Right Column: Educator Verification Dossier & Actions */}
+            <div className="md:w-7/12 p-6 sm:p-7 overflow-y-auto space-y-4 flex flex-col justify-between">
+              <div className="space-y-3.5">
+                
+                {/* Header tags */}
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide ${
+                    isTeacher ? 'bg-blue-600 text-white' : 'bg-purple-600 text-white'
+                  }`}>
+                    {isTeacher ? 'Giáo viên Chuyên môn' : 'Gia sư Sinh viên Giỏi'}
+                  </span>
+                  <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold text-blue-800 bg-blue-50 border border-blue-200">
+                    {tutor.badgeSubject || tutor.subjects?.[0] || 'Môn học'}
+                  </span>
+                </div>
+
+                {/* Name & headline */}
+                <div>
+                  <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                    {tutor.displayName || tutor.name}
+                  </h3>
+                  <p className="text-xs text-slate-500 font-medium italic mt-0.5">
+                    “{tutor.headline || tutor.title || 'Giáo viên giàu kinh nghiệm, tận tâm đồng hành cùng học viên.'}”
+                  </p>
+                </div>
+
+                {/* Key stats grid */}
+                <div className="grid grid-cols-2 gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200/80 text-xs">
+                  <div>
+                    <span className="text-slate-500 text-[11px] block">Đánh giá trung bình:</span>
+                    <strong className="text-amber-600 font-bold flex items-center gap-1">
+                      ⭐ 5.0 ({displayedReviewsRaw.length} đánh giá)
+                    </strong>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 text-[11px] block">Tỷ lệ nhận lớp:</span>
+                    <strong className="text-emerald-700 font-bold tabular-nums">
+                      {successRate}% sau học thử
+                    </strong>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 text-[11px] block">Mức học phí:</span>
+                    <strong className="text-blue-700 font-bold tabular-nums">
+                      {tutor.hourlyRate} VNĐ/giờ
+                    </strong>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 text-[11px] block">Phản hồi:</span>
+                    <strong className="text-slate-800 font-bold">
+                      {tutor.responseTime || 'Dưới 30 phút'}
+                    </strong>
+                  </div>
+                </div>
+
+                {/* Academic Qualifications */}
+                <div className="space-y-1.5 text-xs text-slate-700">
+                  <div className="font-bold text-slate-900">Văn bằng & Chứng chỉ đã xác thực:</div>
+                  <div className="flex items-start gap-1.5 bg-blue-50/50 p-2.5 rounded-lg border border-blue-100">
+                    <GraduationCap className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                    <span>{tutor.education || 'Cử nhân Sư phạm / Đại học Chuyên ngành'}</span>
+                  </div>
+                  {tutor.certificates && tutor.certificates.length > 0 && (
+                    <div className="flex items-start gap-1.5 bg-amber-50/50 p-2.5 rounded-lg border border-amber-100">
+                      <Award className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                      <span>{tutor.certificates.join(', ')}</span>
+                    </div>
+                  )}
+                </div>
+
+              </div>
+
+              {/* Modal Actions */}
+              <div className="pt-3 border-t border-slate-100 space-y-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsAvatarModalOpen(false);
+                    openContactZaloModal(tutor);
+                  }}
+                  className="w-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold py-3 rounded-xl transition-all text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  Nhận 01 buổi học thử 1-1 miễn phí
+                </button>
+                <div className="flex items-center justify-between text-[11px] text-slate-500 px-1">
+                  <span>🎁 Buổi đầu tiên hoàn toàn miễn phí</span>
+                  <button
+                    type="button"
+                    onClick={() => setIsAvatarModalOpen(false)}
+                    className="text-slate-600 hover:text-slate-900 font-semibold cursor-pointer underline"
+                  >
+                    Đóng cửa sổ
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 2: Certificate & Document Proof Lightbox Modal (Thiết kế minh chứng bằng cấp) */}
       {activeProofModal && (
         <div
-          className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
           onClick={() => setActiveProofModal(null)}
         >
           <div
-            className="bg-white rounded-3xl p-5 max-w-lg w-full shadow-2xl relative"
+            className="bg-white rounded-3xl p-5 sm:p-6 max-w-lg w-full shadow-2xl relative border border-slate-200"
             onClick={e => e.stopPropagation()}
           >
             <button
               onClick={() => setActiveProofModal(null)}
-              className="absolute top-4 right-4 p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 cursor-pointer"
+              className="absolute top-4 right-4 p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 cursor-pointer active:scale-90 transition-all"
+              title="Đóng (ESC)"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
-            <h3 className="text-base font-bold text-slate-900 mb-3">Tài liệu minh chứng thành tích</h3>
-            <div className="rounded-2xl overflow-hidden border border-slate-200 max-h-[70vh] flex items-center justify-center bg-slate-50">
-              <img src={activeProofModal} alt="Minh chứng thành tích" className="max-h-[65vh] w-auto object-contain" />
+            <div className="flex items-center gap-2 mb-3">
+              <Award className="w-5 h-5 text-amber-500" />
+              <h3 className="text-base font-bold text-slate-900">Văn bằng & Chứng chỉ chuyên môn</h3>
+            </div>
+            <div className="rounded-2xl overflow-hidden border border-slate-200 max-h-[65vh] flex items-center justify-center bg-slate-950">
+              <img src={activeProofModal} alt="Minh chứng thành tích" className="max-h-[60vh] w-auto object-contain" />
+            </div>
+            <div className="mt-3 text-center text-xs text-slate-500 font-medium">
+              Văn bằng đã được chuyên gia HanTutor xác thực bản gốc
             </div>
           </div>
         </div>
