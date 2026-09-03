@@ -43,13 +43,13 @@ test('AI CHAT LLM - System Instruction chứa toàn bộ tri thức website và 
   assert.ok(content.includes('prompt injection'), 'Phải có cơ chế phòng chống prompt injection');
 });
 
-test('AI CHAT LLM - Chuẩn hóa model Gemini chính thức và triệt tiêu lỗi DEFAULT_GEMINI_API_KEY', () => {
+test('AI CHAT LLM - Tối ưu hóa tốc độ phản hồi bằng các model Flash thế hệ mới', () => {
   const servicePath = path.join(rootDir, 'src', 'lib', 'aiChatService.ts');
   const serviceContent = fs.readFileSync(servicePath, 'utf8');
 
-  // Kiểm tra model: Phải ưu tiên gemini-3.8-flash làm model chính
-  assert.ok(serviceContent.includes('gemini-3.8-flash'), 'Phải hỗ trợ gemini-3.8-flash làm model chính');
-  assert.ok(serviceContent.includes('gemini-2.0-flash'), 'Phải hỗ trợ gemini-2.0-flash');
+  // Kiểm tra model: Ưu tiên gemini-3.5-flash và gemini-3.6-flash cho tốc độ phản hồi sub-2s
+  assert.ok(serviceContent.includes('gemini-3.5-flash'), 'Phải hỗ trợ gemini-3.5-flash');
+  assert.ok(serviceContent.includes('gemini-3.6-flash'), 'Phải hỗ trợ gemini-3.6-flash');
 
   // Kiểm tra widget
   const widgetPath = path.join(rootDir, 'src', 'app', 'components', 'AiChatWidget.tsx');
@@ -58,11 +58,15 @@ test('AI CHAT LLM - Chuẩn hóa model Gemini chính thức và triệt tiêu l�
   assert.ok(widgetContent.includes('queryGeminiChatbot'), 'AiChatWidget phải gọi queryGeminiChatbot từ service');
 });
 
-test('AI CHAT LLM - AiChatWidget cung cấp giao diện hiển thị trạng thái và cấu hình API Key', () => {
+test('AI CHAT LLM - Thiết kế Hallmark Editorial: Triệt tiêu hoàn toàn UI chìa khóa và badge kỹ thuật', () => {
   const widgetPath = path.join(rootDir, 'src', 'app', 'components', 'AiChatWidget.tsx');
   const widgetContent = fs.readFileSync(widgetPath, 'utf8');
 
-  assert.ok(widgetContent.includes('hantutor_gemini_api_key'), 'Cho phép lưu API Key vào localStorage');
-  assert.ok(widgetContent.includes('Gemini 3.8 Flash'), 'Hiển thị badge khi Gemini 3.8 Flash hoạt động');
-  assert.ok(widgetContent.includes('showConfig'), 'Có panel cấu hình key khi cần');
+  // Đảm bảo không còn giao diện chìa khóa API key gây rối cho người dùng
+  assert.ok(!widgetContent.includes('showConfig'), 'Triệt tiêu hoàn toàn panel cấu hình key');
+  assert.ok(!widgetContent.includes('Gemini 3.8 Flash'), 'Triệt tiêu badge kỹ thuật Gemini 3.8 Flash');
+
+  // Đảm bảo thương hiệu chuyên nghiệp theo phong cách Hallmark Editorial
+  assert.ok(widgetContent.includes('Trợ lý HanTutor'), 'Hiển thị đúng thương hiệu Trợ lý HanTutor');
+  assert.ok(widgetContent.includes('Trực tuyến'), 'Có chỉ báo trạng thái Trực tuyến tinh tế');
 });
