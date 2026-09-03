@@ -44,9 +44,10 @@ export interface DataContextType {
   myTrials: StudentTrialItem[];
   setMyTrials: React.Dispatch<React.SetStateAction<StudentTrialItem[]>>;
   adminStats: typeof mockAdminStats;
-  recordTrialContact: (tutor: any, studentInfo?: { name?: string; phone?: string }) => Promise<void>;
+  recordTrialContact: (tutor: any, studentInfo?: { name?: string; phone?: string; slot?: any }) => Promise<void>;
   recordOfficialEnrollment: (tutorId: any, totalTuition?: number, slotId?: string | null) => Promise<void>;
   cancelTrialEnrollment: (tutorId: any) => Promise<void>;
+  updateTrialStatus: (targetId: any, status: 'trial_in_progress' | 'trial_completed' | 'enrolled' | 'cancelled') => Promise<void>;
 
   // From WalletContext
   teacherWallets: Record<string, TeacherWallet>;
@@ -104,6 +105,7 @@ export function useData(): DataContextType {
         wallet.recordIncome(tutorId, totalTuition);
       },
       cancelTrialEnrollment: booking.cancelTrialEnrollment,
+      updateTrialStatus: booking.updateTrialStatus,
 
       // WalletContext
       teacherWallets: wallet.teacherWallets,

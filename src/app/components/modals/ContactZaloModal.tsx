@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { X, ShieldCheck, ExternalLink, LogIn, UserCheck } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, ShieldCheck, ExternalLink, LogIn, UserCheck, CheckCircle2, BookOpen } from 'lucide-react';
 import { useData } from '../../../context/DataContext';
 import { useUI } from '../../../context/UIContext';
 
@@ -16,8 +16,8 @@ export function ContactZaloModal({
   onClose: propOnClose,
   onOfficialEnroll: propOnOfficialEnroll
 }: ContactZaloModalProps = {}) {
-  const { contactZaloModalTutor, closeContactZaloModal, setEnrollmentModalTutor, openAuthModal } = useUI();
-  const { recordTrialContact, currentSession } = useData();
+  const { contactZaloModalTutor, closeContactZaloModal, setEnrollmentModalTutor, openAuthModal, openMyTrialsModal } = useUI();
+  const { recordTrialContact, currentSession, myTrials } = useData();
 
   const tutor = propTutor !== undefined ? propTutor : contactZaloModalTutor;
   const isOpen = propIsOpen !== undefined ? propIsOpen : !!contactZaloModalTutor;
@@ -28,16 +28,33 @@ export function ContactZaloModal({
     setEnrollmentModalTutor(t);
   });
 
+  const [justSaved, setJustSaved] = useState(false);
   const isLoggedIn = currentSession && currentSession.role !== 'anonymous' && !!currentSession.userId;
 
-  // Chỉ tự động ghi nhận khi học sinh đã đăng nhập
-  useEffect(() => {
-    if (isOpen && tutor && isLoggedIn) {
-      recordTrialContact(tutor);
-    }
-  }, [isOpen, tutor, isLoggedIn, recordTrialContact]);
+  const existingTrial = tutor && myTrials.find(
+    (t) => String(t.tutorId) === String(tutor.id) && t.status !== 'cancelled'
+  );
+  const isRegistered = justSaved || !!existingTrial;
 
   if (!isOpen || !tutor) return null;
+
+  const handleConfirmTrial = async () => {
+    if (!isLoggedIn) {
+      onClose();
+      openAuthModal('login', 'student');
+      return;
+    }
+    await recordTrialContact(tutor);
+    setJustSaved(true);
+  };
+
+  const handleOpenZalo = async () => {
+    if (isLoggedIn && !isRegistered) {
+      await recordTrialContact(tutor);
+      setJustSaved(true);
+    }
+    window.open(zaloUrl, '_blank', 'noopener,noreferrer');
+  };
 
   // Lấy SĐT / Zalo của giáo viên đã đăng ký để tạo link & mã QR Zalo
   const rawPhone = tutor.zalo || tutor.phone || '0967891234';
@@ -152,16 +169,56 @@ export function ContactZaloModal({
               </div>
 
               {/* Nút hành động */}
-              <div className="space-y-2 pt-1">
-                <a
-                  href={zaloUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full py-3.5 bg-[#0068FF] hover:bg-[#0056d6] text-white font-extrabold text-sm rounded-2xl transition-all shadow-md shadow-blue-200 flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <span>Mở Zalo kết nối ngay</span>
-                  <ExternalLink className="w-4 h-4" />
-                </a>
+              <div className="space-y-2.5 pt-1">
+                {isRegistered ? (
+                  <>
+                    <div className="bg-emerald-50 border border-emerald-200/90 p-3.5 rounded-2xl text-xs text-emerald-800 flex items-center justify-between animate-in fade-in">
+                      <span className="flex items-center gap-1.5 font-bold">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                        Đã lưu vào "Lớp học thử của tôi"
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onClose();
+                          openMyTrialsModal();
+                        }}
+                        className="text-[11px] font-extrabold text-emerald-700 hover:text-emerald-900 underline cursor-pointer shrink-0"
+                      >
+                        Xem danh sách →
+                      </button>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleOpenZalo}
+                      className="w-full py-3.5 bg-[#0068FF] hover:bg-[#0056d6] text-white font-extrabold text-sm rounded-2xl transition-all shadow-md shadow-blue-200 flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+                    >
+                      <span>Mở Zalo nhắn tin trao đổi</span>
+                      <ExternalLink className="w-4 h-4" />
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={handleOpenZalo}
+                      className="w-full py-3.5 bg-[#0068FF] hover:bg-[#0056d6] text-white font-extrabold text-sm rounded-2xl transition-all shadow-md shadow-blue-200 flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+                    >
+                      <span>Mở Zalo & Đăng ký học thử 1-1</span>
+                      <ExternalLink className="w-4 h-4" />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleConfirmTrial}
+                      className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-2xl transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      <BookOpen className="w-3.5 h-3.5 text-slate-500" />
+                      <span>Lưu giáo viên vào "Lớp học thử của tôi"</span>
+                    </button>
+                  </>
+                )}
 
                 <button
                   type="button"
@@ -172,9 +229,9 @@ export function ContactZaloModal({
                 </button>
               </div>
 
-              {/* Ghi chú lưu tự động vào Lớp học thử của tôi */}
-              <div className="bg-slate-50 border border-slate-200/80 p-3 rounded-2xl text-[11px] text-slate-600 text-center leading-relaxed">
-                ✨ Lớp học thử 1-1 đã được tự động lưu vào mục <strong className="text-slate-900">"Lớp học thử của tôi"</strong>.
+              {/* Ghi chú hướng dẫn */}
+              <div className="bg-slate-50 border border-slate-200/80 p-3 rounded-2xl text-[11px] text-slate-500 text-center leading-relaxed">
+                💡 Sau khi kết nối Zalo, hai bên tự do trao đổi và xếp lịch học thử 1-1 miễn phí. Bạn có thể theo dõi tiến độ ở mục <strong className="text-slate-700">"Lớp học thử của tôi"</strong>.
               </div>
             </>
           )}

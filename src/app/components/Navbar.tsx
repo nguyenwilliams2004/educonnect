@@ -283,6 +283,30 @@ export function Navbar() {
                           </span>
                         </button>
 
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setUserDropdownOpen(false);
+                            openMyTrialsModal();
+                          }}
+                          className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors cursor-pointer text-left group"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <BookOpen className="w-4 h-4 text-slate-500 group-hover:text-slate-800 transition-colors shrink-0" />
+                            <div className="min-w-0">
+                              <p className="font-medium text-slate-800 group-hover:text-slate-900">Đơn học thử & Học viên</p>
+                              <p className="text-[11px] text-slate-400 font-normal truncate mt-0.5">
+                                Danh sách liên hệ & xếp lịch dạy
+                              </p>
+                            </div>
+                          </div>
+                          {myTrials.length > 0 && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 shrink-0 ml-2">
+                              {myTrials.length}
+                            </span>
+                          )}
+                        </button>
+
                         <Link
                           to={`/giao-vien/${currentSession.userId || 't1'}`}
                           onClick={() => setUserDropdownOpen(false)}

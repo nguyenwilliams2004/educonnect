@@ -588,10 +588,10 @@ export function StudentProfileModal() {
                             <div className="flex items-center gap-3 mt-1.5 text-[11px] text-slate-500">
                               <span className="flex items-center gap-1 font-semibold text-emerald-600">
                                 <CheckCircle2 className="w-3.5 h-3.5" />
-                                Đã xác nhận học thử 1-1
+                                {item.slotDay ? `Lịch học thử: ${item.slotDay}${item.slotTime ? ` • ${item.slotTime}` : ''}` : 'Đã đăng ký học thử 1-1'}
                               </span>
                               <span>•</span>
-                              <span>Ngày hẹn: {item.date || 'Hôm nay'}</span>
+                              <span>{item.date ? `Ngày đăng ký: ${item.date}` : 'Mới đăng ký'}</span>
                             </div>
                           </div>
                         </div>
