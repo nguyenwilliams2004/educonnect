@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router';
 import { ShieldCheck, AlertCircle, ExternalLink, Zap, Target, X } from 'lucide-react';
 import { Logo } from '../components/Logo';
@@ -375,9 +375,9 @@ export function AdminDashboardPage() {
                 <tbody className="divide-y divide-slate-100 text-slate-700">
                   {(adminStats.recentActivities || []).map((act: any) => (
                     <tr key={act.id} className="hover:bg-slate-50">
-                      <td className="py-3 font-semibold text-slate-900">{act.student || 'Há»c sinh'}</td>
+                      <td className="py-3 font-semibold text-slate-900">{act.student || 'Há» c sinh'}</td>
                       <td className="py-3 font-medium text-blue-600">{act.tutor}</td>
-                      <td className="py-3">{act.type === 'trial_contact' ? 'Há»c thá»­ 1-1 Zalo' : act.type === 'official_enrolled' ? 'Há»c chÃ­nh thá»©c' : 'XÃ©t duyá»‡t KYC'}</td>
+                      <td className="py-3">{act.type === 'trial_contact' ? 'Há» c thá»­ 1-1 Zalo' : act.type === 'official_enrolled' ? 'Há» c chÃ­nh thá»©c' : 'XÃ©t duyá»‡t KYC'}</td>
                       <td className="py-3 text-slate-400">{act.time}</td>
                       <td className="py-3 font-bold text-emerald-600">{act.status}</td>
                     </tr>
@@ -393,23 +393,23 @@ export function AdminDashboardPage() {
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-xs">
-                <span className="text-xs text-slate-400 font-bold uppercase block">Tá»•ng Quá»¹ VÃ­ GiÃ¡o ViÃªn</span>
+                <span className="text-xs text-slate-400 font-bold uppercase block">Tổng Quỹ Ví Giáo Viên</span>
                 <span className="text-2xl font-black text-emerald-600">
-                  {Object.values(teacherWallets).reduce((sum, w) => sum + (w.balance || 0), 0).toLocaleString()} VNÄ
+                  {Object.values(teacherWallets).reduce((sum, w) => sum + (w.balance || 0), 0).toLocaleString()} VNĐ
                 </span>
-                <p className="text-[11px] text-slate-400 mt-1">70% há»c phÃ­ tÃ­ch lÅ©y sáºµn sÃ ng rÃºt</p>
+                <p className="text-[11px] text-slate-400 mt-1">Thù lao tích lũy sẵn sàng rút</p>
               </div>
 
               <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-xs">
-                <span className="text-xs text-slate-400 font-bold uppercase block">Tá»•ng Tiá»n ÄÃ£ RÃºt</span>
+                <span className="text-xs text-slate-400 font-bold uppercase block">Tổng Tiền Đã Rút</span>
                 <span className="text-2xl font-black text-slate-900">
-                  {Object.values(teacherWallets).reduce((sum, w) => sum + (w.totalWithdrawn || 0), 0).toLocaleString()} VNÄ
+                  {Object.values(teacherWallets).reduce((sum, w) => sum + (w.totalWithdrawn || 0), 0).toLocaleString()} VNĐ
                 </span>
-                <p className="text-[11px] text-slate-400 mt-1">ÄÃ£ chuyá»ƒn khoáº£n qua Napas 24/7</p>
+                <p className="text-[11px] text-slate-400 mt-1">Đã chuyển khoản qua Napas 24/7</p>
               </div>
 
               <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-xs">
-                <span className="text-xs text-slate-400 font-bold uppercase block">Doanh Thu SÃ n Giá»¯ Láº¡i (30%)</span>
+                <span className="text-xs text-slate-400 font-bold uppercase block">Doanh Thu Phí Dịch Vụ Sàn</span>
                 <span className="text-2xl font-black text-blue-600">
                   {Math.round(Object.values(teacherWallets).reduce((sum, w) => sum + (w.balance + w.totalWithdrawn), 0) * (3 / 7)).toLocaleString()} VNÄ
                 </span>

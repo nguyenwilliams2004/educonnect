@@ -72,8 +72,8 @@ NHIỆM VỤ CHÍNH:
    - Hai bên thống nhất lịch học thử 1-1 miễn phí 01 buổi.
    - Sau học thử: học sinh xác nhận "Đăng ký học chính thức" nếu hài lòng, hoặc "Không tiếp tục" (hệ thống tự động giảm tỷ lệ nhận lớp của giáo viên để đảm bảo tính khách quan).
 2. Chính sách tài chính minh bạch:
-   - Thu 30% học phí tháng đầu cho trung tâm và 70% trả cho giáo viên sau khi hoàn thành giảng dạy.
-   - Cam kết hoàn tiền 100% nếu học sinh không hài lòng.
+   - Học phí được thanh toán an toàn, bảo vệ quyền lợi tối đa cho cả phụ huynh và giáo viên.
+   - Cam kết hoàn tiền 100% nếu học sinh không hài lòng về chất lượng giảng dạy.
 3. Kiểm duyệt KYC:
    - 100% giáo viên được đối soát CCCD 2 mặt và bằng cấp sư phạm / chứng chỉ chuyên môn.
 4. DANH SÁCH GIÁO VIÊN VÀ GIA SƯ HIỆN CÓ TRÊN HỆ THỐNG:
@@ -103,10 +103,10 @@ function generateHanTutorDomainResponse(query: string, tutors: any[]): { text: s
     };
   }
 
-  // 3. Chính sách 30%/70% và cam kết hoàn tiền
-  if (q.includes('30%') || q.includes('70%') || q.includes('chính sách') || q.includes('hoàn tiền') || q.includes('học phí')) {
+  // 3. Chính sách tài chính và cam kết hoàn tiền
+  if (q.includes('chính sách') || q.includes('hoàn tiền') || q.includes('học phí') || q.includes('tài chính')) {
     return {
-      text: `### Chính sách tài chính và cam kết bảo vệ học viên:\n\n- Cơ chế 30% / 70%: Học phí tháng đầu được chia theo tỷ lệ 30% cho nền tảng HanTutor để đảm bảo dịch vụ và 70% thanh toán cho giáo viên sau khi hoàn thành khóa học.\n- Cam kết hoàn tiền 100%: Nếu học sinh không hài lòng về chất lượng giảng dạy trong suốt quá trình theo học, HanTutor cam kết hoàn lại 100% học phí đã đóng.`
+      text: `### Chính sách tài chính và cam kết bảo vệ học viên:\n\n- Cơ chế thanh toán an toàn: Học phí được bảo hộ qua hệ thống HanTutor để đảm bảo dịch vụ thông suốt và thanh toán thù lao chuẩn xác cho giáo viên sau khi hoàn thành khóa học.\n- Cam kết hoàn tiền 100%: Nếu học sinh không hài lòng về chất lượng giảng dạy trong suốt quá trình theo học, HanTutor cam kết hoàn lại 100% học phí đã đóng.`
     };
   }
 
@@ -242,7 +242,7 @@ const QUICK_PROMPTS = [
   "Quy trình kết nối và học thử như thế nào?",
   "Tìm giáo viên Toán luyện thi tại Hà Nội",
   "Tỷ lệ nhận lớp thành công là gì?",
-  "Chính sách bảo vệ học viên 30%/70%"
+  "Chính sách bảo vệ học viên & hoàn tiền 100%"
 ];
 
 // Khóa kết nối Google Gemini API
@@ -264,7 +264,7 @@ export default function AiChatWidget({ isOpen, onClose }: { isOpen: boolean; onC
     {
       id: 'welcome',
       sender: 'ai',
-      text: `Xin chào! Tôi là Trợ lý AI HanTutor.\n\nTôi có thể hỗ trợ bạn:\n- Quy trình học thử 1-1 miễn phí và kết nối giáo viên\n- Tìm kiếm gia sư và giáo viên theo môn học tại Hà Nội\n- Chính sách bảo vệ học viên 30%/70% và kiểm duyệt KYC\n- Hướng dẫn đăng ký giảng dạy trên hệ thống\n\nBạn cần hỗ trợ thông tin gì hôm nay?`,
+      text: `Xin chào! Tôi là Trợ lý AI HanTutor.\n\nTôi có thể hỗ trợ bạn:\n- Quy trình học thử 1-1 miễn phí và kết nối giáo viên\n- Tìm kiếm gia sư và giáo viên theo môn học tại Hà Nội\n- Chính sách tài chính minh bạch và cam kết hoàn tiền 100%\n- Hướng dẫn đăng ký giảng dạy trên hệ thống\n\nBạn cần hỗ trợ thông tin gì hôm nay?`,
       timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
     }
   ]);

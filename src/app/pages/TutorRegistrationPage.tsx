@@ -317,87 +317,109 @@ export function TutorRegistrationPage() {
   if (success) {
     return (
       <div className="max-w-md mx-auto px-4 py-16 text-center animate-in fade-in zoom-in-95 duration-200">
-        <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
-          <CheckCircle className="w-10 h-10 text-emerald-600 animate-bounce" />
+        <div className="w-16 h-16 bg-emerald-50 border border-emerald-200 rounded-full flex items-center justify-center mx-auto mb-5 text-emerald-600">
+          <CheckCircle className="w-8 h-8" />
         </div>
-        <h1 className="text-3xl font-bold text-slate-900 mb-2">Gửi hồ sơ thành công!</h1>
-        <p className="text-slate-600 mb-8 text-sm leading-relaxed">
-          Hồ sơ của bạn đã được gửi đến ban kiểm duyệt HanTutor. Chúng tôi sẽ đối soát danh tính KYC tự động và kích hoạt hồ sơ trong thời gian sớm nhất.
+        <h1 className="text-2xl font-extrabold text-slate-900 mb-2">Gửi hồ sơ thành công!</h1>
+        <p className="text-slate-600 mb-8 text-xs sm:text-sm leading-relaxed">
+          Hồ sơ giảng dạy của bạn đã được chuyển đến ban kiểm duyệt chuyên môn HanTutor. Chúng tôi sẽ thẩm định thông tin và kích hoạt hồ sơ công khai trong thời gian sớm nhất.
         </p>
         <Link
           to="/tim-gia-su"
-          className="inline-block bg-blue-600 text-white font-bold px-8 py-3.5 rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200 text-sm"
+          className="inline-flex items-center justify-center bg-blue-600 text-white font-semibold px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors shadow-sm text-xs sm:text-sm"
         >
-          Xem danh sách giáo viên
+          Khám phá danh sách giáo viên
         </Link>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 animate-in fade-in slide-in-from-bottom-4 duration-300">
-      <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-xl border border-slate-200">
-        <div className="text-center mb-8 border-b border-slate-100 pb-6">
-          <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-2xs">
-            <GraduationCap className="w-8 h-8" />
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-14 animate-in fade-in duration-300">
+      <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-10 shadow-sm border border-slate-200/80">
+        
+        {/* HEADER */}
+        <div className="text-center mb-8 border-b border-slate-100 pb-8">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200/80 mb-3">
+            <GraduationCap className="w-3.5 h-3.5 text-blue-600" />
+            <span>Cổng Đăng Ký Đối Tác Giảng Dạy</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900">Đăng ký Hồ sơ Giảng dạy</h1>
-          <p className="text-slate-500 text-xs sm:text-sm mt-1.5 max-w-xl mx-auto">
-            Hệ thống kết nối Giáo viên Chuyên nghiệp & Gia sư Sinh viên Giỏi hàng đầu tại Hà Nội
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Đăng ký Hồ sơ Giảng dạy</h1>
+          <p className="text-slate-500 text-xs sm:text-sm mt-2 max-w-xl mx-auto leading-relaxed">
+            Gia nhập mạng lưới giáo viên chuyên nghiệp & gia sư tài năng hàng đầu tại Hà Nội. Tiếp cận học sinh chất lượng cao, linh hoạt thời gian và minh bạch thù lao.
           </p>
 
-          <div className="mt-6 mb-6 max-w-2xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-left">
+          {/* CHỌN VAI TRÒ: GIÁO VIÊN VS GIA SƯ */}
+          <div className="mt-7 mb-7 max-w-2xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-left">
             <div
               onClick={() => setRoleType('teacher')}
-              className={`p-4 rounded-2xl border-2 transition-all cursor-pointer select-none ${roleType === 'teacher'
-                ? 'border-blue-600 bg-blue-50/60 shadow-md ring-2 ring-blue-100'
-                : 'border-slate-200 bg-slate-50/70 hover:bg-slate-100/80 text-slate-700'
-                }`}
+              className={`p-4 sm:p-5 rounded-2xl border-2 transition-all cursor-pointer select-none ${
+                roleType === 'teacher'
+                  ? 'border-blue-600 bg-blue-50/40 ring-4 ring-blue-500/10 shadow-xs'
+                  : 'border-slate-200 bg-slate-50/50 hover:bg-white hover:border-slate-300 text-slate-700'
+              }`}
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="font-extrabold text-sm text-slate-900 flex items-center gap-1.5">
-                  <Briefcase className="w-4 h-4 text-blue-600" />
-                  Đăng ký Giáo viên
+                <span className="font-bold text-sm text-slate-900 flex items-center gap-2">
+                  <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${roleType === 'teacher' ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-600'}`}>
+                    <Briefcase className="w-3.5 h-3.5" />
+                  </div>
+                  Giáo viên Chuyên nghiệp
                 </span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 uppercase">Chuyên nghiệp</span>
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-100/70 text-blue-800">
+                  Chính quy
+                </span>
               </div>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Dành cho giáo viên các trường, giảng viên, thạc sĩ. <strong>Học sinh đóng tiền trực tiếp cho Giáo viên</strong> sau khi chốt lịch, giáo viên gửi 30% phí vận hành cho sàn.
+              <p className="text-xs text-slate-600 leading-relaxed mt-1">
+                Dành cho giáo viên trường công/tư, giảng viên, thạc sĩ. Chủ động lịch dạy, trực tiếp thống nhất học phí và kế hoạch học tập với phụ huynh học sinh.
               </p>
             </div>
 
             <div
               onClick={() => setRoleType('tutor')}
-              className={`p-4 rounded-2xl border-2 transition-all cursor-pointer select-none ${roleType === 'tutor'
-                ? 'border-purple-600 bg-purple-50/60 shadow-md ring-2 ring-purple-100'
-                : 'border-slate-200 bg-slate-50/70 hover:bg-slate-100/80 text-slate-700'
-                }`}
+              className={`p-4 sm:p-5 rounded-2xl border-2 transition-all cursor-pointer select-none ${
+                roleType === 'tutor'
+                  ? 'border-indigo-600 bg-indigo-50/40 ring-4 ring-indigo-500/10 shadow-xs'
+                  : 'border-slate-200 bg-slate-50/50 hover:bg-white hover:border-slate-300 text-slate-700'
+              }`}
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="font-extrabold text-sm text-slate-900 flex items-center gap-1.5">
-                  <GraduationCap className="w-4 h-4 text-purple-600" />
-                  Đăng ký Gia sư
+                <span className="font-bold text-sm text-slate-900 flex items-center gap-2">
+                  <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${roleType === 'tutor' ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-600'}`}>
+                    <GraduationCap className="w-3.5 h-3.5" />
+                  </div>
+                  Gia sư Xuất sắc
                 </span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 uppercase">Thanh toán Escrow</span>
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-indigo-100/70 text-indigo-800">
+                  Bảo trợ Escrow
+                </span>
               </div>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Dành cho sinh viên giỏi, thủ khoa, gia sư tự do. <strong>Phụ huynh thanh toán đảm bảo qua HanTutor Escrow</strong>, nhận 70% học phí an toàn sau khi hoàn thành buổi học.
+              <p className="text-xs text-slate-600 leading-relaxed mt-1">
+                Dành cho sinh viên giỏi, thủ khoa, gia sư kinh nghiệm. Phụ huynh thanh toán qua quỹ bảo trợ HanTutor Escrow, cam kết nhận đủ thù lao sau mỗi buổi dạy.
               </p>
             </div>
           </div>
 
+          {/* STEPPER NAVIGATION */}
           <div className="grid grid-cols-2 gap-3 max-w-xl mx-auto">
             <button
               type="button"
               onClick={() => setStep(1)}
-              className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${step === 1 ? 'border-blue-600 bg-blue-50/80 text-blue-900 shadow-xs' : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
-                }`}
+              className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer flex items-center gap-3 ${
+                step === 1
+                  ? 'border-blue-600 bg-blue-50/60 text-blue-950 shadow-xs ring-2 ring-blue-500/10'
+                  : 'border-slate-200 bg-slate-50/60 text-slate-600 hover:bg-slate-100/70'
+              }`}
             >
-              <div className="flex items-center gap-2">
-                <span className={`w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center ${step === 1 ? 'bg-blue-600 text-white' : 'bg-slate-300 text-slate-700'}`}>I</span>
-                <span className="text-xs font-bold uppercase tracking-wider">Phần I: Thẩm định KYC</span>
+              <span className={`w-7 h-7 rounded-lg text-xs font-bold flex items-center justify-center shrink-0 ${
+                step === 1 ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-600'
+              }`}>
+                1
+              </span>
+              <div className="min-w-0">
+                <p className="text-xs font-bold uppercase tracking-wider">Phần I: Thẩm định KYC</p>
+                <p className="text-[11px] text-slate-500 truncate mt-0.5">Bảo mật thông tin cá nhân</p>
               </div>
-              <span className="text-[10px] text-slate-500 block mt-1">Bảo mật, không hiển thị trên web</span>
             </button>
 
             <button
@@ -407,206 +429,339 @@ export function TutorRegistrationPage() {
                 if (err) { alert(err); return; }
                 setStep(2);
               }}
-              className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${step === 2 ? 'border-blue-600 bg-blue-50/80 text-blue-900 shadow-xs' : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
-                }`}
+              className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer flex items-center gap-3 ${
+                step === 2
+                  ? 'border-blue-600 bg-blue-50/60 text-blue-950 shadow-xs ring-2 ring-blue-500/10'
+                  : 'border-slate-200 bg-slate-50/60 text-slate-600 hover:bg-slate-100/70'
+              }`}
             >
-              <div className="flex items-center gap-2">
-                <span className={`w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center ${step === 2 ? 'bg-blue-600 text-white' : 'bg-slate-300 text-slate-700'}`}>II</span>
-                <span className="text-xs font-bold uppercase tracking-wider">Phần II: TT Giảng dạy</span>
+              <span className={`w-7 h-7 rounded-lg text-xs font-bold flex items-center justify-center shrink-0 ${
+                step === 2 ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-600'
+              }`}>
+                2
+              </span>
+              <div className="min-w-0">
+                <p className="text-xs font-bold uppercase tracking-wider">Phần II: Hồ sơ Giảng dạy</p>
+                <p className="text-[11px] text-slate-500 truncate mt-0.5">Hiển thị tới học sinh</p>
               </div>
-              <span className="text-[10px] text-slate-500 block mt-1">Hiển thị trên web cho học sinh</span>
             </button>
           </div>
         </div>
 
+        {/* ========================================================================= */}
+        {/* PHẦN 1: THẨM ĐỊNH KYC (BẢO MẬT) */}
+        {/* ========================================================================= */}
         {step === 1 && (
-          <div className="space-y-8 animate-in fade-in duration-200">
-            <div className="bg-amber-50/80 border border-amber-200 rounded-2xl p-4 flex items-start gap-3 text-xs text-amber-900 leading-relaxed">
-              <ShieldCheck className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+          <div className="space-y-6 animate-in fade-in duration-200">
+            {/* Alert bảo mật */}
+            <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex items-start gap-3.5 text-xs text-slate-700 leading-relaxed">
+              <ShieldCheck className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
               <div>
-                <strong className="font-bold">Quy định bảo mật hồ sơ:</strong> Thông tin CCCD và Tài khoản ngân hàng ở Phần I được bảo mật chuẩn KYC, dùng cho mục đích kiểm duyệt văn bằng và chuyển trả học phí, tuyệt đối KHÔNG hiển thị công khai.
+                <strong className="font-bold text-slate-900">Cam kết bảo mật danh tính (KYC):</strong> Toàn bộ thông tin CCCD/Hộ chiếu và số tài khoản ngân hàng ở Phần I được mã hóa và lưu trữ an toàn. Dữ liệu này chỉ phục vụ công tác xác minh tư cách người dạy và đối soát chi trả thù lao, tuyệt đối <strong>không hiển thị công khai</strong> trên hồ sơ web.
               </div>
             </div>
 
-            <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200/80 space-y-4">
-              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
-                <span className="w-7 h-7 rounded-xl bg-blue-600 text-white font-bold text-xs flex items-center justify-center">1</span>
-                <h3 className="text-base font-bold text-slate-900">Định danh cá nhân (KYC)</h3>
+            {/* Mục 1: Định danh cá nhân */}
+            <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-2xs space-y-4">
+              <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
+                <span className="w-6 h-6 rounded-md bg-blue-50 text-blue-700 font-bold text-xs flex items-center justify-center">1</span>
+                <h3 className="text-sm font-bold text-slate-900">Định danh cá nhân (KYC)</h3>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Họ và tên đầy đủ *</label>
-                  <input type="text" value={fullName} onChange={e => setFullName(e.target.value)} placeholder="VD: NGUYỄN VĂN AN" className="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 focus:ring-2 focus:ring-blue-100 outline-none text-sm font-semibold text-slate-800" />
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Họ và tên đầy đủ theo CCCD <span className="text-red-500">*</span></label>
+                  <input
+                    type="text"
+                    value={fullName}
+                    onChange={e => setFullName(e.target.value)}
+                    placeholder="VD: NGUYỄN VĂN AN"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 focus:border-blue-600 focus:ring-3 focus:ring-blue-500/10 outline-none text-xs sm:text-sm font-semibold text-slate-800 transition-all"
+                  />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Số CCCD / Hộ chiếu *</label>
-                  <input type="text" value={cccdNumber} onChange={e => setCccdNumber(e.target.value.replace(/\D/g, ''))} placeholder="VD: 001200012345" maxLength={12} className="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 focus:ring-2 focus:ring-blue-100 outline-none text-sm font-semibold text-slate-800" />
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Số CCCD / Hộ chiếu <span className="text-red-500">*</span></label>
+                  <input
+                    type="text"
+                    value={cccdNumber}
+                    onChange={e => setCccdNumber(e.target.value.replace(/\D/g, ''))}
+                    placeholder="VD: 001200012345"
+                    maxLength={12}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 focus:border-blue-600 focus:ring-3 focus:ring-blue-500/10 outline-none text-xs sm:text-sm font-mono text-slate-800 transition-all"
+                  />
                 </div>
 
                 <div className="sm:col-span-2 space-y-2 pt-2">
-                  <label className="block text-xs font-bold text-slate-700">Ảnh chụp 2 mặt CCCD / Hộ chiếu *</label>
+                  <label className="block text-xs font-semibold text-slate-700">Ảnh chụp 2 mặt CCCD / Hộ chiếu <span className="text-red-500">*</span></label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    
+                    {/* Mặt trước */}
                     <div className="space-y-1.5">
                       <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-semibold text-slate-600 block">Mặt trước CCCD *</span>
+                        <span className="text-[11px] font-medium text-slate-600 block">Mặt trước CCCD</span>
                         {imageValidations.cccdFront && (
-                          <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 flex items-center gap-1">
-                            <CheckCircle className="w-3 h-3 text-emerald-600" /> AI Đã duyệt ảnh chuẩn
+                          <span className="text-[10px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3 text-emerald-600" /> Đã duyệt ảnh chuẩn
                           </span>
                         )}
                       </div>
-                      <div className="relative border-2 border-dashed border-slate-200 rounded-2xl p-4 text-center hover:bg-white hover:border-blue-300 transition-all cursor-pointer min-h-[140px] flex flex-col justify-center items-center bg-white/70">
+                      <div className="relative border border-dashed border-slate-300 rounded-xl p-4 text-center hover:bg-blue-50/30 hover:border-blue-400 transition-all cursor-pointer min-h-[130px] flex flex-col justify-center items-center bg-slate-50/50">
                         <input type="file" accept="image/*" onChange={e => handleFileChange(e, 'cccdFront')} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-                        {cccdFrontPreview ? <img src={cccdFrontPreview} alt="CCCD Front" className="max-h-[120px] rounded-lg object-contain" /> : <><UploadCloud className="w-7 h-7 text-blue-500 mb-1" /><span className="font-bold text-slate-700 text-xs block">Tải ảnh mặt trước</span></>}
+                        {cccdFrontPreview ? (
+                          <img src={cccdFrontPreview} alt="CCCD Front" className="max-h-[110px] rounded-lg object-contain shadow-xs" />
+                        ) : (
+                          <>
+                            <UploadCloud className="w-6 h-6 text-slate-400 mb-1.5" />
+                            <span className="font-semibold text-slate-700 text-xs block">Tải ảnh mặt trước</span>
+                            <span className="text-[10px] text-slate-400 mt-0.5">JPG, PNG, WEBP tối đa 5MB</span>
+                          </>
+                        )}
                       </div>
                     </div>
+
+                    {/* Mặt sau */}
                     <div className="space-y-1.5">
                       <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-semibold text-slate-600 block">Mặt sau CCCD *</span>
+                        <span className="text-[11px] font-medium text-slate-600 block">Mặt sau CCCD</span>
                         {imageValidations.cccdBack && (
-                          <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 flex items-center gap-1">
-                            <CheckCircle className="w-3 h-3 text-emerald-600" /> AI Đã duyệt ảnh chuẩn
+                          <span className="text-[10px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3 text-emerald-600" /> Đã duyệt ảnh chuẩn
                           </span>
                         )}
                       </div>
-                      <div className="relative border-2 border-dashed border-slate-200 rounded-2xl p-4 text-center hover:bg-white hover:border-blue-300 transition-all cursor-pointer min-h-[140px] flex flex-col justify-center items-center bg-white/70">
+                      <div className="relative border border-dashed border-slate-300 rounded-xl p-4 text-center hover:bg-blue-50/30 hover:border-blue-400 transition-all cursor-pointer min-h-[130px] flex flex-col justify-center items-center bg-slate-50/50">
                         <input type="file" accept="image/*" onChange={e => handleFileChange(e, 'cccdBack')} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-                        {cccdBackPreview ? <img src={cccdBackPreview} alt="CCCD Back" className="max-h-[120px] rounded-lg object-contain" /> : <><UploadCloud className="w-7 h-7 text-blue-500 mb-1" /><span className="font-bold text-slate-700 text-xs block">Tải ảnh mặt sau</span></>}
+                        {cccdBackPreview ? (
+                          <img src={cccdBackPreview} alt="CCCD Back" className="max-h-[110px] rounded-lg object-contain shadow-xs" />
+                        ) : (
+                          <>
+                            <UploadCloud className="w-6 h-6 text-slate-400 mb-1.5" />
+                            <span className="font-semibold text-slate-700 text-xs block">Tải ảnh mặt sau</span>
+                            <span className="text-[10px] text-slate-400 mt-0.5">JPG, PNG, WEBP tối đa 5MB</span>
+                          </>
+                        )}
                       </div>
                     </div>
+
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200/80 space-y-4">
-              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
-                <span className="w-7 h-7 rounded-xl bg-blue-600 text-white font-bold text-xs flex items-center justify-center">2</span>
-                <h3 className="text-base font-bold text-slate-900">Thông tin liên hệ & Kênh thanh toán</h3>
+            {/* Mục 2: Liên hệ & Ngân hàng */}
+            <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-2xs space-y-4">
+              <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
+                <span className="w-6 h-6 rounded-md bg-blue-50 text-blue-700 font-bold text-xs flex items-center justify-center">2</span>
+                <h3 className="text-sm font-bold text-slate-900">Thông tin liên hệ & Kênh nhận thù lao</h3>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Số điện thoại dùng Zalo *</label>
-                  <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 outline-none text-sm font-semibold text-slate-800" />
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Số điện thoại Zalo nhận thông báo lớp <span className="text-red-500">*</span></label>
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={e => setPhone(e.target.value)}
+                    placeholder="0912345678"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 outline-none text-xs sm:text-sm font-semibold text-slate-800 focus:border-blue-600 focus:ring-3 focus:ring-blue-500/10 transition-all font-mono"
+                  />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Email cá nhân *</label>
-                  <input type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 outline-none text-sm font-semibold text-slate-800" />
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Email cá nhân <span className="text-red-500">*</span></label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    placeholder="tutor@gmail.com"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 outline-none text-xs sm:text-sm font-semibold text-slate-800 focus:border-blue-600 focus:ring-3 focus:ring-blue-500/10 transition-all"
+                  />
                 </div>
-                <div className="sm:col-span-2 pt-2 border-t border-slate-200">
+
+                {/* Phần Ngân hàng nhận thù lao */}
+                <div className="sm:col-span-2 pt-3 border-t border-slate-100">
                   <div className="mb-3">
-                    <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Tài khoản ngân hàng nhận học phí (70% đối với Gia sư) *</h4>
-                    <p className="text-[11px] text-slate-500 mt-0.5">Tên chủ tài khoản bắt buộc phải trùng khớp với Họ tên trên CCCD.</p>
+                    <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Tài khoản ngân hàng nhận thù lao giảng dạy <span className="text-red-500">*</span></h4>
+                    <p className="text-[11px] text-slate-500 mt-0.5">Tên chủ tài khoản ngân hàng cần trùng khớp với Họ tên trên CCCD để hệ thống tự động đối soát.</p>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-700 mb-1">Tên ngân hàng *</label>
-                      <select value={bankName} onChange={e => setBankName(e.target.value)} className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold outline-none">
+                      <label className="block text-[11px] font-semibold text-slate-700 mb-1">Tên ngân hàng <span className="text-red-500">*</span></label>
+                      <select
+                        value={bankName}
+                        onChange={e => setBankName(e.target.value)}
+                        className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs font-medium outline-none focus:border-blue-600 transition-colors"
+                      >
                         <option value="">-- Chọn ngân hàng --</option>
                         {banksList.map(b => <option key={b} value={b}>{b}</option>)}
                       </select>
+                      {bankName === 'Ngân hàng khác (Tự nhập)' && (
+                        <input
+                          type="text"
+                          placeholder="Nhập tên ngân hàng..."
+                          value={customBankName}
+                          onChange={e => setCustomBankName(e.target.value)}
+                          className="mt-2 w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs outline-none focus:border-blue-600"
+                        />
+                      )}
                     </div>
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-700 mb-1">Số tài khoản *</label>
-                      <input type="text" value={bankAccountNumber} onChange={e => setBankAccountNumber(e.target.value.replace(/\D/g, ''))} className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold outline-none" />
+                      <label className="block text-[11px] font-semibold text-slate-700 mb-1">Số tài khoản <span className="text-red-500">*</span></label>
+                      <input
+                        type="text"
+                        value={bankAccountNumber}
+                        onChange={e => setBankAccountNumber(e.target.value.replace(/\D/g, ''))}
+                        placeholder="VD: 1903..."
+                        className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs font-mono font-semibold outline-none focus:border-blue-600 transition-colors"
+                      />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-700 mb-1">Tên chủ tài khoản *</label>
-                      <input type="text" value={bankAccountHolder} onChange={e => setBankAccountHolder(e.target.value.toUpperCase())} className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold uppercase outline-none" />
+                      <label className="block text-[11px] font-semibold text-slate-700 mb-1">Tên chủ tài khoản <span className="text-red-500">*</span></label>
+                      <input
+                        type="text"
+                        value={bankAccountHolder}
+                        onChange={e => setBankAccountHolder(e.target.value.toUpperCase())}
+                        placeholder="NGUYEN VAN AN"
+                        className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs font-semibold uppercase outline-none focus:border-blue-600 transition-colors"
+                      />
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="pt-4 flex justify-end">
-              <button type="button" onClick={handleNextStep} className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3.5 rounded-2xl transition-all shadow-md shadow-blue-200 text-sm cursor-pointer">
+            {/* Next Button */}
+            <div className="pt-2 flex justify-end">
+              <button
+                type="button"
+                onClick={handleNextStep}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-7 py-3 rounded-xl transition-all shadow-sm text-xs sm:text-sm cursor-pointer inline-flex items-center gap-2"
+              >
                 Tiếp tục sang Phần II (Thông tin giảng dạy) →
               </button>
             </div>
           </div>
         )}
 
+        {/* ========================================================================= */}
+        {/* PHẦN 2: THÔNG TIN GIẢNG DẠY (HIỂN THỊ CÔNG KHAI) */}
+        {/* ========================================================================= */}
         {step === 2 && (
-          <div className="space-y-8 animate-in fade-in duration-200">
-            <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200/80 space-y-4">
-              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
-                <span className="w-7 h-7 rounded-xl bg-blue-600 text-white font-bold text-xs flex items-center justify-center">1-2</span>
-                <h3 className="text-base font-bold text-slate-900">Tên hiển thị & Giới thiệu ngắn</h3>
+          <div className="space-y-6 animate-in fade-in duration-200">
+            
+            {/* Mục 1-2: Tên & Giới thiệu */}
+            <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-2xs space-y-4">
+              <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
+                <span className="w-6 h-6 rounded-md bg-blue-50 text-blue-700 font-bold text-xs flex items-center justify-center">1-2</span>
+                <h3 className="text-sm font-bold text-slate-900">Tên hiển thị & Giới thiệu ngắn</h3>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">1. Tên hiển thị trên web *</label>
-                  <input type="text" value={displayName} onChange={e => setDisplayName(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 outline-none text-sm font-bold text-slate-800" />
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">1. Tên hiển thị trên website <span className="text-red-500">*</span></label>
+                  <input
+                    type="text"
+                    value={displayName}
+                    onChange={e => setDisplayName(e.target.value)}
+                    placeholder="VD: Thầy Hoàng Nam hoặc Cô Mai Anh"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 outline-none text-xs sm:text-sm font-bold text-slate-800 focus:border-blue-600 focus:ring-3 focus:ring-blue-500/10 transition-all"
+                  />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">2. Dòng giới thiệu ngắn (Slogan) *</label>
-                  <input type="text" value={headline} onChange={e => setHeadline(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 outline-none text-sm font-semibold text-blue-700" />
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">2. Dòng giới thiệu ngắn (Slogan / Chuyên môn) <span className="text-red-500">*</span></label>
+                  <input
+                    type="text"
+                    value={headline}
+                    onChange={e => setHeadline(e.target.value)}
+                    placeholder="VD: Luyện thi Toán 9 vào 10 & Chuyên sâu bản chất"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 outline-none text-xs sm:text-sm font-semibold text-blue-700 focus:border-blue-600 focus:ring-3 focus:ring-blue-500/10 transition-all"
+                  />
                 </div>
               </div>
             </div>
 
-            <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200/80 space-y-6">
-              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
-                <span className="w-7 h-7 rounded-xl bg-blue-600 text-white font-bold text-xs flex items-center justify-center">3-4</span>
-                <h3 className="text-base font-bold text-slate-900">Ảnh đại diện & Ảnh hoạt động giảng dạy</h3>
+            {/* Mục 3-4: Ảnh chân dung & Hoạt động */}
+            <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-2xs space-y-5">
+              <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
+                <span className="w-6 h-6 rounded-md bg-blue-50 text-blue-700 font-bold text-xs flex items-center justify-center">3-4</span>
+                <h3 className="text-sm font-bold text-slate-900">Ảnh đại diện & Hình ảnh giảng dạy</h3>
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="block text-xs font-bold text-slate-700">3. Ảnh đại diện (Avatar) * (Chân dung bản thân, trang phục lịch sự, phông sáng)</label>
+                  <label className="block text-xs font-semibold text-slate-700">3. Ảnh đại diện hồ sơ (Avatar) <span className="text-red-500">*</span></label>
                   {imageValidations.avatar && (
-                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 flex items-center gap-1">
-                      <CheckCircle className="w-3 h-3 text-emerald-600" /> AI Đã duyệt ảnh đạt chuẩn
+                    <span className="text-[10px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 flex items-center gap-1">
+                      <CheckCircle className="w-3 h-3 text-emerald-600" /> Ảnh đạt chuẩn
                     </span>
                   )}
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center bg-white p-4 rounded-2xl border border-slate-200">
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center bg-slate-50/50 p-4 rounded-xl border border-slate-200">
                   <div className="flex items-center gap-3.5">
-                    <div className="w-20 h-24 sm:w-24 sm:h-28 rounded-2xl bg-slate-100 border-2 border-slate-200 overflow-hidden shrink-0 flex items-center justify-center">
-                      {avatarPreview ? <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" /> : <Users className="w-8 h-8 text-slate-400" />}
+                    <div className="w-20 h-24 rounded-xl bg-white border border-slate-200 overflow-hidden shrink-0 flex items-center justify-center shadow-xs">
+                      {avatarPreview ? (
+                        <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
+                      ) : (
+                        <Users className="w-7 h-7 text-slate-400" />
+                      )}
                     </div>
                     <div>
-                      <label className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 shadow-xs">
-                        <UploadCloud className="w-4 h-4" /> <span>Tải ảnh đại diện</span>
+                      <label className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-2 rounded-xl text-xs font-semibold inline-flex items-center gap-1.5 shadow-xs transition-colors">
+                        <UploadCloud className="w-3.5 h-3.5" /> <span>Tải ảnh đại diện</span>
                         <input type="file" accept="image/*" onChange={e => handleFileChange(e, 'avatar')} className="hidden" />
                       </label>
-                      <p className="text-[10px] text-slate-500 mt-1">Ảnh nét, phông sáng, tối đa 5MB</p>
+                      <p className="text-[10px] text-slate-400 mt-1">Ảnh chân dung lịch sự, phông sáng, tối đa 5MB</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 bg-amber-50 p-3 rounded-xl border border-amber-200">
-                    <button type="button" onClick={() => setShowSampleModal(true)} className="w-14 h-18 sm:w-16 sm:h-20 rounded-lg overflow-hidden border border-amber-300 shrink-0 bg-white cursor-pointer hover:scale-105 transition-transform">
+
+                  <div className="flex items-center gap-3 bg-amber-50/70 p-3 rounded-xl border border-amber-200/80">
+                    <button
+                      type="button"
+                      onClick={() => setShowSampleModal(true)}
+                      className="w-12 h-16 rounded-lg overflow-hidden border border-amber-300 shrink-0 bg-white cursor-pointer hover:scale-105 transition-transform"
+                    >
                       <img src="/sample-avatar-4x6.png" alt="Ảnh mẫu" className="w-full h-full object-cover" />
                     </button>
                     <div>
-                      <span className="text-[10px] font-extrabold text-amber-900 bg-amber-200/80 px-1.5 py-0.5 rounded uppercase block w-fit mb-0.5">Ảnh mẫu chuẩn</span>
-                      <p className="text-[11px] text-slate-600">Chụp chính diện lịch sự, phông sáng.</p>
-                      <button type="button" onClick={() => setShowSampleModal(true)} className="text-[11px] text-amber-800 font-bold hover:underline mt-0.5 flex items-center gap-1">
-                        <Eye className="w-3.5 h-3.5" /> Xem mẫu
+                      <span className="text-[10px] font-bold text-amber-900 bg-amber-200/70 px-1.5 py-0.5 rounded uppercase block w-fit mb-0.5">Tiêu chuẩn ảnh mẫu</span>
+                      <p className="text-[11px] text-slate-600 leading-snug">Chụp chính diện, trang phục trang nhã.</p>
+                      <button
+                        type="button"
+                        onClick={() => setShowSampleModal(true)}
+                        className="text-[11px] text-amber-800 font-semibold hover:underline mt-0.5 flex items-center gap-1 cursor-pointer"
+                      >
+                        <Eye className="w-3.5 h-3.5" /> Xem ảnh mẫu 4x6
                       </button>
                     </div>
                   </div>
                 </div>
               </div>
 
+              {/* 4. Ảnh hoạt động */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-2">4. Ảnh hoạt động dạy học thực tế (Tối đa 2 ảnh - Tùy chọn)</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-2">4. Ảnh hoạt động giảng dạy thực tế (Tùy chọn - Giúp tăng tỷ lệ chọn)</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="border border-slate-200 rounded-2xl p-4 bg-white text-center">
-                    <span className="text-[10px] font-bold text-slate-700 block mb-1.5">Ảnh hoạt động 1 (Lớp học / Dạy kèm)</span>
-                    <div className="relative aspect-video rounded-xl bg-slate-100 overflow-hidden flex items-center justify-center border border-slate-200">
-                      {otherImages[0] ? <img src={otherImages[0]} alt="Activity 1" className="w-full h-full object-cover" /> : <span className="text-[10px] text-slate-400 font-medium">Chưa có ảnh</span>}
-                      <label className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 hover:opacity-100 cursor-pointer text-white font-bold text-xs">
+                  <div className="border border-slate-200 rounded-xl p-3.5 bg-slate-50/40 text-center">
+                    <span className="text-[11px] font-medium text-slate-700 block mb-1.5">Ảnh hoạt động 1 (Lớp học / Kèm 1-1)</span>
+                    <div className="relative aspect-video rounded-lg bg-white overflow-hidden flex items-center justify-center border border-slate-200">
+                      {otherImages[0] ? (
+                        <img src={otherImages[0]} alt="Activity 1" className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-[11px] text-slate-400">Chưa có ảnh</span>
+                      )}
+                      <label className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 hover:opacity-100 cursor-pointer text-white font-semibold text-xs transition-opacity">
                         Thay ảnh <input type="file" accept="image/*" onChange={e => handleFileChange(e, 'other')} className="hidden" />
                       </label>
                     </div>
                   </div>
-                  <div className="border border-slate-200 rounded-2xl p-4 bg-white text-center">
-                    <span className="text-[10px] font-bold text-slate-700 block mb-1.5">Ảnh hoạt động 2 (Học sinh tiến bộ)</span>
-                    <div className="relative aspect-video rounded-xl bg-slate-100 overflow-hidden flex items-center justify-center border border-slate-200">
-                      {otherImages[1] ? <img src={otherImages[1]} alt="Activity 2" className="w-full h-full object-cover" /> : <span className="text-[10px] text-slate-400 font-medium">Tùy chọn</span>}
-                      <label className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 hover:opacity-100 cursor-pointer text-white font-bold text-xs">
+
+                  <div className="border border-slate-200 rounded-xl p-3.5 bg-slate-50/40 text-center">
+                    <span className="text-[11px] font-medium text-slate-700 block mb-1.5">Ảnh hoạt động 2 (Tài liệu / Học sinh tiến bộ)</span>
+                    <div className="relative aspect-video rounded-lg bg-white overflow-hidden flex items-center justify-center border border-slate-200">
+                      {otherImages[1] ? (
+                        <img src={otherImages[1]} alt="Activity 2" className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-[11px] text-slate-400">Chưa có ảnh</span>
+                      )}
+                      <label className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 hover:opacity-100 cursor-pointer text-white font-semibold text-xs transition-opacity">
                         Thay ảnh <input type="file" accept="image/*" onChange={e => handleFileChange(e, 'other')} className="hidden" />
                       </label>
                     </div>
@@ -615,81 +770,150 @@ export function TutorRegistrationPage() {
               </div>
             </div>
 
-            <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200/80 space-y-6">
-              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
-                <span className="w-7 h-7 rounded-xl bg-blue-600 text-white font-bold text-xs flex items-center justify-center">5-6</span>
-                <h3 className="text-base font-bold text-slate-900">Trình độ học vấn & Môn học tiếp nhận</h3>
+            {/* Mục 5-6: Học vấn & Môn học */}
+            <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-2xs space-y-5">
+              <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
+                <span className="w-6 h-6 rounded-md bg-blue-50 text-blue-700 font-bold text-xs flex items-center justify-center">5-6</span>
+                <h3 className="text-sm font-bold text-slate-900">Trình độ học vấn & Môn học tiếp nhận</h3>
               </div>
+
               <div className="space-y-3">
-                <label className="block text-xs font-bold text-slate-700">5. Trình độ học vấn *</label>
+                <label className="block text-xs font-semibold text-slate-700">5. Học vị & Trường đào tạo <span className="text-red-500">*</span></label>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <select value={educationLevel} onChange={e => setEducationLevel(e.target.value)} className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-xs font-bold">
-                    <option value="Đại học">Đại học</option><option value="Cao đẳng">Cao đẳng</option><option value="Thạc sĩ">Thạc sĩ</option>
+                  <select
+                    value={educationLevel}
+                    onChange={e => setEducationLevel(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs font-semibold outline-none focus:border-blue-600 transition-colors"
+                  >
+                    <option value="Đại học">Đại học</option>
+                    <option value="Cao đẳng">Cao đẳng</option>
+                    <option value="Thạc sĩ">Thạc sĩ</option>
+                    <option value="Tiến sĩ">Tiến sĩ</option>
                   </select>
-                  <input type="text" value={major} onChange={e => setMajor(e.target.value)} placeholder="Chuyên ngành" className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold" />
-                  <input type="text" value={university} onChange={e => setUniversity(e.target.value)} placeholder="Trường ĐH" className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold" />
+                  <input
+                    type="text"
+                    value={major}
+                    onChange={e => setMajor(e.target.value)}
+                    placeholder="Chuyên ngành đào tạo"
+                    className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs font-medium outline-none focus:border-blue-600 transition-colors"
+                  />
+                  <input
+                    type="text"
+                    value={university}
+                    onChange={e => setUniversity(e.target.value)}
+                    placeholder="Tên trường Đại học"
+                    className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs font-medium outline-none focus:border-blue-600 transition-colors"
+                  />
                 </div>
+
                 <div className="pt-2">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-[11px] font-bold text-slate-700 block">Tải lên tệp kiểm duyệt văn bằng</span>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[11px] font-semibold text-slate-700 block">Tệp chứng thực văn bằng / Thẻ sinh viên</span>
                     {imageValidations.credential && (
-                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 flex items-center gap-1">
-                        <CheckCircle className="w-3 h-3 text-emerald-600" /> AI Đã kiểm duyệt văn bằng
+                      <span className="text-[10px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 flex items-center gap-1">
+                        <CheckCircle className="w-3 h-3 text-emerald-600" /> Đã nhận tệp văn bằng
                       </span>
                     )}
                   </div>
-                  <div className="relative border-2 border-dashed border-slate-200 rounded-2xl p-4 text-center min-h-[100px] flex flex-col justify-center items-center bg-white/70">
+                  <div className="relative border border-dashed border-slate-300 rounded-xl p-4 text-center min-h-[90px] flex flex-col justify-center items-center bg-slate-50/50 hover:bg-blue-50/30 hover:border-blue-400 transition-all cursor-pointer">
                     <input type="file" accept="image/*,application/pdf" onChange={e => handleFileChange(e, 'credential')} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-                    {credentialPreview ? <span className="text-xs font-bold text-emerald-700">✓ Đã tải văn bằng</span> : <><UploadCloud className="w-6 h-6 text-blue-500 mb-1" /><span className="text-[10px] text-slate-400">JPG, PNG, PDF (Tối đa 5MB)</span></>}
+                    {credentialPreview ? (
+                      <span className="text-xs font-bold text-emerald-700 flex items-center gap-1">✓ Đã tải tệp văn bằng lên hệ thống</span>
+                    ) : (
+                      <>
+                        <UploadCloud className="w-5 h-5 text-slate-400 mb-1" />
+                        <span className="text-xs font-semibold text-slate-700">Tải ảnh bằng tốt nghiệp hoặc thẻ SV</span>
+                        <span className="text-[10px] text-slate-400 mt-0.5">JPG, PNG, PDF (Tối đa 5MB)</span>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
-              <div className="pt-3 border-t border-slate-200">
-                <label className="block text-xs font-bold text-slate-700 mb-2">6. Môn học tiếp nhận *</label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-white p-4 rounded-2xl border border-slate-200">
-                  {popularSubjects.map(sub => (
-                    <label key={sub} className="flex items-center gap-2 p-2 rounded-xl text-xs font-semibold cursor-pointer">
-                      <input type="checkbox" checked={selectedSubjects.includes(sub)} onChange={() => toggleSubject(sub)} className="rounded text-blue-600" /> {sub}
-                    </label>
-                  ))}
+
+              {/* 6. Môn học */}
+              <div className="pt-3 border-t border-slate-100">
+                <label className="block text-xs font-semibold text-slate-700 mb-2">6. Môn học tiếp nhận giảng dạy <span className="text-red-500">*</span></label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-slate-50/40 p-3.5 rounded-xl border border-slate-200">
+                  {popularSubjects.map(sub => {
+                    const checked = selectedSubjects.includes(sub);
+                    return (
+                      <label
+                        key={sub}
+                        onClick={() => toggleSubject(sub)}
+                        className={`flex items-center gap-2 p-2 rounded-lg text-xs font-medium cursor-pointer transition-colors select-none ${
+                          checked
+                            ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                            : 'hover:bg-white text-slate-700'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => {}}
+                          className="rounded text-blue-600 focus:ring-blue-500"
+                        />
+                        <span>{sub}</span>
+                      </label>
+                    );
+                  })}
                 </div>
               </div>
             </div>
 
-            <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200/80 space-y-3">
-              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
-                <span className="w-7 h-7 rounded-xl bg-blue-600 text-white font-bold text-xs flex items-center justify-center">9</span>
-                <h3 className="text-base font-bold text-slate-900">Cấp học & Đối tượng nhận dạy</h3>
+            {/* Mục 9: Cấp học & Đối tượng nhận dạy */}
+            <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-2xs space-y-3">
+              <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
+                <span className="w-6 h-6 rounded-md bg-blue-50 text-blue-700 font-bold text-xs flex items-center justify-center">9</span>
+                <h3 className="text-sm font-bold text-slate-900">Cấp học & Đối tượng nhận dạy</h3>
               </div>
-              <textarea rows={3} value={targetAudience} onChange={e => setTargetAudience(e.target.value)} placeholder="Mô tả đối tượng học sinh..." className="w-full p-4 rounded-2xl bg-white border border-slate-200 text-xs font-medium outline-none" />
+              <textarea
+                rows={3}
+                value={targetAudience}
+                onChange={e => setTargetAudience(e.target.value)}
+                placeholder="Mô tả cụ thể đối tượng học sinh tiếp nhận (VD: Học sinh mất gốc môn Toán lớp 8-9, học sinh ôn thi chuyên Văn vào 10, luyện thi Đại học khối D...)"
+                className="w-full p-3.5 rounded-xl bg-white border border-slate-200 text-xs sm:text-sm font-medium outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-500/10 transition-all resize-none"
+              />
             </div>
 
-            <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200/80 space-y-6">
-              <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
-                <span className="w-7 h-7 rounded-xl bg-blue-600 text-white font-bold text-xs flex items-center justify-center">13</span>
-                <h3 className="text-base font-bold text-slate-900">Lịch học & Cam kết vận hành</h3>
+            {/* Mục 13: Lịch học rảnh trong tuần */}
+            <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-2xs space-y-5">
+              <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
+                <span className="w-6 h-6 rounded-md bg-blue-50 text-blue-700 font-bold text-xs flex items-center justify-center">13</span>
+                <h3 className="text-sm font-bold text-slate-900">Khung giờ có thể nhận lớp</h3>
               </div>
+
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-2">Khung giờ có thể nhận lớp *</label>
-                <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-2xs">
-                  <table className="w-full min-w-[540px] border-collapse text-xs text-center">
+                <label className="block text-xs font-semibold text-slate-700 mb-2">Chọn các ca học bạn sẵn sàng giảng dạy <span className="text-red-500">*</span></label>
+                <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-2xs">
+                  <table className="w-full min-w-[520px] border-collapse text-xs text-center">
                     <thead>
                       <tr className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
                         <th className="p-3 text-left pl-4 font-bold text-slate-800">Khung giờ</th>
-                        {days.map(d => <th key={d} className="p-3">{d}</th>)}
+                        {days.map(d => <th key={d} className="p-2.5 font-semibold text-slate-700">{d}</th>)}
                       </tr>
                     </thead>
                     <tbody>
                       {shifts.map(shiftObj => (
-                        <tr key={shiftObj.key} className="border-b border-slate-100">
-                          <td className="p-3 font-bold text-slate-700 text-left pl-4 bg-slate-50/70 whitespace-nowrap">{shiftObj.label}</td>
-                          {days.map(day => (
-                            <td key={day} className="p-1.5">
-                              <button type="button" onClick={() => toggleScheduleSlot(day, shiftObj.key)} className={`w-full py-1.5 rounded-lg text-[11px] font-semibold ${scheduleSlots.includes(`${day}_${shiftObj.key}`) ? 'bg-blue-600 text-white shadow-xs font-bold' : 'bg-slate-50 text-slate-400'}`}>
-                                {scheduleSlots.includes(`${day}_${shiftObj.key}`) ? '✓ Rảnh' : '+'}
-                              </button>
-                            </td>
-                          ))}
+                        <tr key={shiftObj.key} className="border-b border-slate-100 last:border-0">
+                          <td className="p-2.5 font-medium text-slate-700 text-left pl-4 bg-slate-50/50 whitespace-nowrap text-xs">{shiftObj.label}</td>
+                          {days.map(day => {
+                            const isSelected = scheduleSlots.includes(`${day}_${shiftObj.key}`);
+                            return (
+                              <td key={day} className="p-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => toggleScheduleSlot(day, shiftObj.key)}
+                                  className={`w-full py-1.5 rounded-lg text-[11px] font-medium transition-colors cursor-pointer ${
+                                    isSelected
+                                      ? 'bg-blue-600 text-white font-bold shadow-xs'
+                                      : 'bg-slate-100/70 text-slate-500 hover:bg-slate-200/80'
+                                  }`}
+                                >
+                                  {isSelected ? '✓ Rảnh' : '+'}
+                                </button>
+                              </td>
+                            );
+                          })}
                         </tr>
                       ))}
                     </tbody>
@@ -697,48 +921,49 @@ export function TutorRegistrationPage() {
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-slate-200 space-y-2.5">
-                <label className="flex items-start gap-2.5 cursor-pointer text-xs text-slate-700 p-2.5 bg-white rounded-xl border border-slate-200 hover:bg-blue-50/30">
+              {/* Cam kết trách nhiệm */}
+              <div className="pt-3 border-t border-slate-100 space-y-2.5">
+                <label className="flex items-start gap-2.5 cursor-pointer text-xs text-slate-700 p-2.5 bg-slate-50/50 rounded-xl border border-slate-200/80 hover:bg-blue-50/30 transition-colors">
                   <input
                     type="checkbox"
                     checked={commitAccurate}
                     onChange={e => setCommitAccurate(e.target.checked)}
                     className="mt-0.5 rounded text-blue-600 focus:ring-blue-500 shrink-0"
                   />
-                  <span>1. Cam kết thông tin bằng cấp, chứng chỉ đã tải lên là chính xác 100%.</span>
+                  <span>1. Cam kết toàn bộ thông tin bằng cấp, thẻ sinh viên và hồ sơ tải lên là hoàn toàn chính xác.</span>
                 </label>
 
-                <label className="flex items-start gap-2.5 cursor-pointer text-xs text-slate-700 p-2.5 bg-white rounded-xl border border-slate-200 hover:bg-blue-50/30">
+                <label className="flex items-start gap-2.5 cursor-pointer text-xs text-slate-700 p-2.5 bg-slate-50/50 rounded-xl border border-slate-200/80 hover:bg-blue-50/30 transition-colors">
                   <input
                     type="checkbox"
                     checked={commitConduct}
                     onChange={e => setCommitConduct(e.target.checked)}
                     className="mt-0.5 rounded text-blue-600 focus:ring-blue-500 shrink-0"
                   />
-                  <span>2. Cam kết tuân thủ quy tắc ứng xử sư phạm và thời gian nhận lớp sau khi kết nối.</span>
+                  <span>2. Cam kết giữ vững chuẩn mực sư phạm, đúng giờ và nhiệt tình đồng hành cùng học sinh.</span>
                 </label>
 
-                <label className="flex items-start gap-2.5 cursor-pointer text-xs text-slate-700 p-2.5 bg-white rounded-xl border border-slate-200 hover:bg-blue-50/30">
+                <label className="flex items-start gap-2.5 cursor-pointer text-xs text-slate-700 p-2.5 bg-slate-50/50 rounded-xl border border-slate-200/80 hover:bg-blue-50/30 transition-colors">
                   <input
                     type="checkbox"
                     checked={commitTerms}
                     onChange={e => setCommitTerms(e.target.checked)}
                     className="mt-0.5 rounded text-blue-600 focus:ring-blue-500 shrink-0"
                   />
-                  <span>3. Đã đọc và đồng ý với các điều khoản của hợp đồng hợp tác đào tạo.</span>
+                  <span>3. Đã đọc kỹ và đồng ý với điều khoản hợp tác đối tác giảng dạy của HanTutor.</span>
                 </label>
               </div>
             </div>
 
-            {/* Form Controls: Back & Submit */}
-            <div className="pt-4 flex items-center justify-between gap-4 border-t border-slate-100">
+            {/* Điều hướng Back & Submit */}
+            <div className="pt-2 flex items-center justify-between gap-4 border-t border-slate-100">
               <button
                 type="button"
                 onClick={() => {
                   setStep(1);
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className="px-6 py-3 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 cursor-pointer"
+                className="px-5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
               >
                 ← Quay lại Phần I
               </button>
@@ -747,7 +972,7 @@ export function TutorRegistrationPage() {
                 type="button"
                 onClick={handleSubmit}
                 disabled={loading}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3.5 rounded-2xl transition-all shadow-md shadow-blue-200 text-sm cursor-pointer disabled:opacity-50 flex items-center gap-2"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-7 py-3 rounded-xl transition-all shadow-sm text-xs sm:text-sm cursor-pointer disabled:opacity-50 flex items-center gap-2"
               >
                 {loading ? (
                   <>
@@ -767,26 +992,26 @@ export function TutorRegistrationPage() {
       {/* Modal Phóng to Xem Kĩ Ảnh Mẫu Chuẩn */}
       {showSampleModal && (
         <div
-          className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"
+          className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200"
           onClick={() => setShowSampleModal(false)}
         >
           <div
-            className="bg-white rounded-3xl p-5 sm:p-6 max-w-sm w-full shadow-2xl relative animate-in zoom-in-95 duration-200 flex flex-col items-center text-center"
+            className="bg-white rounded-2xl p-5 sm:p-6 max-w-sm w-full shadow-xl relative animate-in zoom-in-95 duration-200 flex flex-col items-center text-center border border-slate-100"
             onClick={e => e.stopPropagation()}
           >
             <button
               onClick={() => setShowSampleModal(false)}
-              className="absolute top-4 right-4 p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors cursor-pointer"
+              className="absolute top-4 right-4 p-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition-colors cursor-pointer"
               title="Đóng"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
 
-            <div className="inline-flex items-center gap-1.5 bg-amber-100 text-amber-900 text-xs font-extrabold px-3 py-1 rounded-full mb-3">
-              ★ Ảnh mẫu chân dung chuẩn
+            <div className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-900 text-xs font-semibold px-3 py-1 rounded-full mb-3 border border-amber-200/60">
+              ★ Ảnh mẫu chân dung chuẩn 4x6
             </div>
 
-            <div className="w-52 sm:w-60 h-72 sm:h-80 rounded-2xl overflow-hidden shadow-md border-4 border-slate-100 bg-white mb-3 flex items-center justify-center">
+            <div className="w-48 sm:w-56 h-64 sm:h-72 rounded-xl overflow-hidden shadow-xs border border-slate-200 bg-white mb-3 flex items-center justify-center">
               <img
                 src="/sample-avatar-4x6.png"
                 alt="Ảnh mẫu chân dung chuẩn"
@@ -794,14 +1019,14 @@ export function TutorRegistrationPage() {
               />
             </div>
 
-            <p className="text-xs text-slate-600 leading-relaxed font-medium">
-              Chụp thẳng mặt rõ nét, phông nền sáng như ảnh mẫu.
+            <p className="text-xs text-slate-600 leading-relaxed font-normal">
+              Chụp chính diện rõ nét khuôn mặt, trang phục lịch sự, phông nền sáng.
             </p>
 
             <button
               type="button"
               onClick={() => setShowSampleModal(false)}
-              className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-xs transition-colors cursor-pointer shadow-xs"
+              className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl text-xs transition-colors cursor-pointer shadow-xs"
             >
               Đã hiểu & Đóng
             </button>

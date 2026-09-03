@@ -142,8 +142,8 @@ export interface DbPayment {
   payment_method: string;
   status: 'pending' | 'success' | 'failed';
   transaction_code?: string | null;
-  center_amount: number; // 30% hoa hồng HanTutor
-  tutor_amount: number;  // 70% thù lao gia sư
+  center_amount: number; // Phí nền tảng HanTutor
+  tutor_amount: number;  // Thù lao gia sư
   tutor_transfer_status: 'pending' | 'transferred' | 'failed';
   transferred_at?: string | null;
   created_at: string;
