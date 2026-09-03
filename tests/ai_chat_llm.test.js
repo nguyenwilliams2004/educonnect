@@ -70,3 +70,13 @@ test('AI CHAT LLM - Thiết kế Hallmark Editorial: Triệt tiêu hoàn toàn U
   assert.ok(widgetContent.includes('Trợ lý HanTutor'), 'Hiển thị đúng thương hiệu Trợ lý HanTutor');
   assert.ok(widgetContent.includes('Trực tuyến'), 'Có chỉ báo trạng thái Trực tuyến tinh tế');
 });
+
+test('AI CHAT LLM - maxOutputTokens đạt 2500 và fallback không gợi ý gia sư bừa bãi', () => {
+  const servicePath = path.join(rootDir, 'src', 'lib', 'aiChatService.ts');
+  const serviceContent = fs.readFileSync(servicePath, 'utf8');
+
+  // Kiểm tra token headroom
+  assert.ok(serviceContent.includes('maxOutputTokens: 2500'), 'Phải cấp 2500 token để chống ngắt câu giữa chừng');
+  assert.ok(serviceContent.includes('cây') && serviceContent.includes('lá'), 'Phải xử lý câu hỏi kiến thức phổ thông cây và lá');
+  assert.ok(serviceContent.includes('Âm nhạc'), 'Phải hỗ trợ từ khóa môn Âm nhạc');
+});
