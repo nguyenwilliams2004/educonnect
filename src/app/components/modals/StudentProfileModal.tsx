@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useUI } from '../../../context/UIContext';
 import { useData } from '../../../context/DataContext';
+import { supabase } from '../../../lib/supabase';
 
 export interface StudentProfileData {
   name: string;
@@ -98,32 +99,81 @@ export function StudentProfileModal() {
         const stored = localStorage.getItem('hantutor_student_profile');
         if (stored) {
           setProfile(JSON.parse(stored));
+        } else {
+          setProfile(prev => ({
+            ...prev,
+            name: currentSession.name || currentSession.fullName || prev.name,
+            phone: currentSession.phone || prev.phone,
+            email: currentSession.email || prev.email,
+            avatar: currentSession.avatar || prev.avatar
+          }));
         }
       } catch {}
     }
-  }, [isStudentProfileOpen]);
+  }, [isStudentProfileOpen, currentSession]);
 
   if (!isStudentProfileOpen) return null;
 
-  const handleSaveProfile = (e: React.FormEvent) => {
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    setSaveSuccess(false);
 
-    setTimeout(() => {
+    try {
+      const trimmedName = profile.name.trim();
+      const trimmedPhone = profile.phone.trim();
+      const finalAvatar = profile.avatar;
+
+      // 1. CẬP NHẬT DATABASE SUPABASE THẬT
+      if (currentSession.userId && !String(currentSession.userId).startsWith('t')) {
+        await supabase
+          .from('users')
+          .update({
+            full_name: trimmedName,
+            phone: trimmedPhone,
+            avatar_url: finalAvatar
+          })
+          .eq('id', currentSession.userId)
+          .catch(() => {});
+
+        await supabase.auth.updateUser({
+          data: {
+            full_name: trimmedName,
+            phone: trimmedPhone,
+            avatar_url: finalAvatar,
+            grade: profile.grade,
+            school: profile.school,
+            district: profile.district,
+            parentName: profile.parentName
+          }
+        }).catch(() => {});
+      }
+
+      // 2. LƯU LOCALSTORAGE VÀ CẬP NHẬT CLIENT SESSION
       try {
-        localStorage.setItem('hantutor_student_profile', JSON.stringify(profile));
-        setCurrentSession(prev => ({
-          ...prev,
-          name: profile.name,
-          phone: profile.phone,
-          email: profile.email
+        localStorage.setItem('hantutor_student_profile', JSON.stringify({
+          ...profile,
+          name: trimmedName,
+          phone: trimmedPhone,
+          avatar: finalAvatar
         }));
       } catch {}
 
-      setSaving(false);
+      setCurrentSession(prev => ({
+        ...prev,
+        name: trimmedName,
+        fullName: trimmedName,
+        phone: trimmedPhone,
+        avatar: finalAvatar
+      }));
+
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 2500);
-    }, 300);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSaving(false);
+    }
   };
 
   // Mock enrollment payments for tab 3

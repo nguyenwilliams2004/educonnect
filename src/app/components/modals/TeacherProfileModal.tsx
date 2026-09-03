@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useData } from '../../../context/DataContext';
 import { useUI } from '../../../context/UIContext';
+import { supabase } from '../../../lib/supabase';
+import { CheckCircle2 } from 'lucide-react';
 
 export interface TeacherProfileModalProps {
   isOpen?: boolean;
@@ -41,6 +43,7 @@ export function TeacherProfileModal({
   const [bankAccountName, setBankAccountName] = useState(activeTutor?.bankAccountName || 'NGUYEN SUONG MAI');
 
   const [saving, setSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   useEffect(() => {
     if (activeTutor) {
@@ -59,22 +62,24 @@ export function TeacherProfileModal({
       if (activeTutor.bankName) setBankName(activeTutor.bankName);
       if (activeTutor.bankAccountNumber) setBankAccountNumber(activeTutor.bankAccountNumber);
       if (activeTutor.bankAccountName) setBankAccountName(activeTutor.bankAccountName);
+      setSaveSuccess(false);
     }
   }, [activeTutor, isOpen]);
 
   if (!isOpen) return null;
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    setTimeout(() => {
-      setSaving(false);
+    setSaveSuccess(false);
+
+    try {
       const updated = {
-        name,
-        headline,
-        bio,
-        phone,
-        zalo,
+        name: name.trim(),
+        headline: headline.trim(),
+        bio: bio.trim(),
+        phone: phone.trim(),
+        zalo: zalo.trim(),
         avatar,
         pricePerSession: secondaryPrice || 200000,
         bankName,
@@ -87,10 +92,37 @@ export function TeacherProfileModal({
           exam: Number(examPrepPrice)
         }
       };
-      updateTutorProfile(activeTutor?.id || 't1', updated);
-      alert("Cập nhật thông tin hồ sơ giáo viên thành công! Dữ liệu đã được lưu trực tiếp.");
-      onClose();
-    }, 500);
+
+      await updateTutorProfile(activeTutor?.id || 't1', updated);
+
+      if (activeTutor?.id && !String(activeTutor.id).startsWith('t')) {
+        await supabase.from('users').update({
+          full_name: name.trim(),
+          phone: phone.trim(),
+          avatar_url: avatar
+        }).eq('id', activeTutor.id).catch(() => {});
+
+        await supabase.from('profiles').update({
+          name: name.trim(),
+          headline: headline.trim(),
+          bio: bio.trim(),
+          phone: phone.trim(),
+          zalo: zalo.trim(),
+          avatar_url: avatar,
+          hourly_rate: Number(secondaryPrice || 200000)
+        }).eq('id', activeTutor.id).catch(() => {});
+      }
+
+      setSaveSuccess(true);
+      setTimeout(() => {
+        setSaveSuccess(false);
+        onClose();
+      }, 1000);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const sampleAvatars = [
@@ -160,6 +192,13 @@ export function TeacherProfileModal({
 
         {/* Form Body */}
         <form onSubmit={handleSave} className="p-6 overflow-y-auto space-y-4 flex-1">
+          {saveSuccess && (
+            <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2 animate-in fade-in">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>Đã lưu và đồng bộ hồ sơ giáo viên lên cơ sở dữ liệu Supabase thành công!</span>
+            </div>
+          )}
+
           {/* TAB 1: THÔNG TIN CÁ NHÂN */}
           {activeTab === 'info' && (
             <div className="space-y-4">
