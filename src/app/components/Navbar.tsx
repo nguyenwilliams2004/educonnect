@@ -187,27 +187,27 @@ export function Navbar() {
 
               {/* VERTICAL DROPDOWN MENU */}
               {userDropdownOpen && (
-                <div className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-white rounded-2xl shadow-xl border border-slate-100 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-150">
-                  {/* Header tóm tắt tài khoản */}
-                  <div className="px-4 py-3 bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50 border-b border-slate-100">
+                <div className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-slate-200/80 py-1 z-50 animate-in fade-in duration-150">
+                  {/* Header tóm tắt tài khoản: Tối giản, không gradient */}
+                  <div className="px-4 py-3 border-b border-slate-100">
                     <div className="flex items-center gap-3">
                       <img
                         src={userAvatar}
                         alt="Avatar"
-                        className="w-11 h-11 rounded-2xl object-cover border border-white shadow-xs shrink-0"
+                        className="w-10 h-10 rounded-full object-cover border border-slate-200 shrink-0"
                       />
                       <div className="min-w-0">
-                        <p className="text-sm font-bold text-slate-900 truncate">{displayName}</p>
-                        <p className="text-[11px] text-slate-500 truncate">
+                        <p className="text-xs font-semibold text-slate-900 truncate">{displayName}</p>
+                        <p className="text-[11px] text-slate-500 truncate mt-0.5">
                           {currentSession.email || currentSession.phone || 'Tài khoản tiêu chuẩn'}
                         </p>
                         <span
-                          className={`inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                          className={`inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium border ${
                             currentSession.role === 'admin'
-                              ? 'bg-red-50 text-red-700 border-red-200'
+                              ? 'bg-[#FDEBEC] text-[#9F2F2D] border-[#f7d6d7]'
                               : currentSession.role === 'teacher'
-                              ? 'bg-blue-50 text-blue-700 border-blue-200'
-                              : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                              ? 'bg-[#E1F3FE] text-[#1F6C9F] border-[#cbe6fa]'
+                              : 'bg-[#EDF3EC] text-[#346538] border-[#d5e4d3]'
                           }`}
                         >
                           <Sparkles className="w-2.5 h-2.5" />
@@ -221,21 +221,21 @@ export function Navbar() {
                     </div>
                   </div>
 
-                  {/* Vertical Options Menu */}
+                  {/* Vertical Options Menu: Flat, clean typographic hierarchy */}
                   <div className="p-1.5 space-y-0.5">
-                    {/* Option 1: Cài đặt hồ sơ tiêu chuẩn (Cập nhật DB) */}
+                    {/* Option 1: Cài đặt hồ sơ tiêu chuẩn */}
                     <button
                       type="button"
                       onClick={() => {
                         setUserDropdownOpen(false);
                         openUserProfileModal();
                       }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-blue-50/60 hover:text-blue-700 transition-colors cursor-pointer text-left"
+                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors cursor-pointer text-left group"
                     >
-                      <User className="w-4 h-4 text-blue-600 shrink-0" />
+                      <User className="w-4 h-4 text-slate-500 group-hover:text-slate-800 transition-colors shrink-0" />
                       <div className="flex-1 min-w-0">
-                        <p className="font-bold text-slate-800">Cài đặt & Hồ sơ của tôi</p>
-                        <p className="text-[10px] text-slate-400 font-normal truncate">
+                        <p className="font-medium text-slate-800 group-hover:text-slate-900">Cài đặt & Hồ sơ của tôi</p>
+                        <p className="text-[11px] text-slate-400 font-normal truncate mt-0.5">
                           Họ tên, số điện thoại, đổi ảnh đại diện
                         </p>
                       </div>
@@ -250,12 +250,12 @@ export function Navbar() {
                             setUserDropdownOpen(false);
                             openTeacherProfileModal(currentSession.userId || 't1');
                           }}
-                          className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-blue-600 transition-colors cursor-pointer text-left"
+                          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors cursor-pointer text-left group"
                         >
-                          <BookOpen className="w-4 h-4 text-indigo-600 shrink-0" />
+                          <BookOpen className="w-4 h-4 text-slate-500 group-hover:text-slate-800 transition-colors shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <p className="font-bold text-slate-800">Hồ sơ giảng dạy & Bảng giá</p>
-                            <p className="text-[10px] text-slate-400 font-normal truncate">
+                            <p className="font-medium text-slate-800 group-hover:text-slate-900">Hồ sơ giảng dạy & Bảng giá</p>
+                            <p className="text-[11px] text-slate-400 font-normal truncate mt-0.5">
                               Giới thiệu kinh nghiệm và môn học
                             </p>
                           </div>
@@ -267,18 +267,18 @@ export function Navbar() {
                             setUserDropdownOpen(false);
                             openTeacherWalletModal(currentSession.userId || 't1');
                           }}
-                          className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-blue-600 transition-colors cursor-pointer text-left"
+                          className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors cursor-pointer text-left group"
                         >
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <Wallet className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <div className="flex items-center gap-3 min-w-0">
+                            <Wallet className="w-4 h-4 text-slate-500 group-hover:text-slate-800 transition-colors shrink-0" />
                             <div className="min-w-0">
-                              <p className="font-bold text-slate-800">Ví thu nhập & Rút tiền</p>
-                              <p className="text-[10px] text-slate-400 font-normal truncate">
+                              <p className="font-medium text-slate-800 group-hover:text-slate-900">Ví thu nhập & Rút tiền</p>
+                              <p className="text-[11px] text-slate-400 font-normal truncate mt-0.5">
                                 Tài khoản ngân hàng, yêu cầu rút
                               </p>
                             </div>
                           </div>
-                          <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 shrink-0 ml-2">
+                          <span className="text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200/60 shrink-0 ml-2">
                             {getTeacherWallet(currentSession.userId || 't1').balance.toLocaleString()}đ
                           </span>
                         </button>
@@ -286,12 +286,12 @@ export function Navbar() {
                         <Link
                           to={`/giao-vien/${currentSession.userId || 't1'}`}
                           onClick={() => setUserDropdownOpen(false)}
-                          className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-blue-600 transition-colors cursor-pointer text-left"
+                          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors cursor-pointer text-left group"
                         >
-                          <ExternalLink className="w-4 h-4 text-purple-600 shrink-0" />
+                          <ExternalLink className="w-4 h-4 text-slate-500 group-hover:text-slate-800 transition-colors shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <p className="font-bold text-slate-800">Xem trang hồ sơ công khai</p>
-                            <p className="text-[10px] text-slate-400 font-normal truncate">
+                            <p className="font-medium text-slate-800 group-hover:text-slate-900">Xem trang hồ sơ công khai</p>
+                            <p className="text-[11px] text-slate-400 font-normal truncate mt-0.5">
                               Giao diện phụ huynh nhìn thấy
                             </p>
                           </div>
@@ -308,12 +308,12 @@ export function Navbar() {
                             setUserDropdownOpen(false);
                             openStudentProfileModal();
                           }}
-                          className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-blue-600 transition-colors cursor-pointer text-left"
+                          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors cursor-pointer text-left group"
                         >
-                          <GraduationCap className="w-4 h-4 text-blue-600 shrink-0" />
+                          <GraduationCap className="w-4 h-4 text-slate-500 group-hover:text-slate-800 transition-colors shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <p className="font-bold text-slate-800">Hồ sơ học tập chi tiết</p>
-                            <p className="text-[10px] text-slate-400 font-normal truncate">
+                            <p className="font-medium text-slate-800 group-hover:text-slate-900">Hồ sơ học tập chi tiết</p>
+                            <p className="text-[11px] text-slate-400 font-normal truncate mt-0.5">
                               Lớp học, trường học và địa chỉ
                             </p>
                           </div>
@@ -325,19 +325,19 @@ export function Navbar() {
                             setUserDropdownOpen(false);
                             openMyTrialsModal();
                           }}
-                          className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-blue-600 transition-colors cursor-pointer text-left"
+                          className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors cursor-pointer text-left group"
                         >
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <Calendar className="w-4 h-4 text-amber-500 shrink-0" />
+                          <div className="flex items-center gap-3 min-w-0">
+                            <Calendar className="w-4 h-4 text-slate-500 group-hover:text-slate-800 transition-colors shrink-0" />
                             <div className="min-w-0">
-                              <p className="font-bold text-slate-800">Lịch học thử đã đặt</p>
-                              <p className="text-[10px] text-slate-400 font-normal truncate">
+                              <p className="font-medium text-slate-800 group-hover:text-slate-900">Lịch học thử đã đặt</p>
+                              <p className="text-[11px] text-slate-400 font-normal truncate mt-0.5">
                                 Lịch hẹn và kết nối gia sư
                               </p>
                             </div>
                           </div>
                           {myTrials.length > 0 && (
-                            <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-500 text-white shrink-0 ml-2">
+                            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 shrink-0 ml-2">
                               {myTrials.length}
                             </span>
                           )}
@@ -350,12 +350,12 @@ export function Navbar() {
                       <Link
                         to="/admin"
                         onClick={() => setUserDropdownOpen(false)}
-                        className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-rose-600 transition-colors cursor-pointer text-left"
+                        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors cursor-pointer text-left group"
                       >
-                        <Shield className="w-4 h-4 text-rose-600 shrink-0" />
+                        <Shield className="w-4 h-4 text-slate-500 group-hover:text-slate-800 transition-colors shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <p className="font-bold text-slate-800">Bảng quản trị Admin</p>
-                          <p className="text-[10px] text-slate-400 font-normal truncate">
+                          <p className="font-medium text-slate-800 group-hover:text-slate-900">Bảng quản trị Admin</p>
+                          <p className="text-[11px] text-slate-400 font-normal truncate mt-0.5">
                             Duyệt KYC gia sư và đối soát
                           </p>
                         </div>
@@ -372,7 +372,7 @@ export function Navbar() {
                         setUserDropdownOpen(false);
                         await logout();
                       }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer text-left"
+                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium text-rose-600 hover:bg-rose-50/70 transition-colors cursor-pointer text-left group"
                     >
                       <LogOut className="w-4 h-4 text-rose-500 shrink-0" />
                       <span>Đăng xuất tài khoản</span>
