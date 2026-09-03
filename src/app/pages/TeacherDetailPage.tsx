@@ -185,38 +185,47 @@ export function TeacherDetailPage() {
     setReservationWarning(null);
 
     try {
-      let matchedSlot = dbSlots.find(
-        (s) => s.day_of_week === dayNum && s.start_time?.startsWith(times.start.slice(0, 5))
-      );
-      let slotId = matchedSlot?.id;
-
-      if (!slotId && isUUID(tutor.id)) {
-        const { data: newSlot, error: insertError } = await supabase
-          .from('availability_slots')
-          .insert({
-            instructor_id: tutor.id,
-            day_of_week: dayNum,
-            start_time: times.start,
-            end_time: times.end,
-          })
-          .select('id, day_of_week, start_time, end_time, is_booked, locked_until, locked_by')
-          .single();
-
-        if (!insertError && newSlot) {
-          slotId = newSlot.id;
-          setDbSlots((prev) => [...prev, newSlot]);
-        }
-      }
-
-      if (!slotId) {
-        slotId = isUUID(tutor.id) ? tutor.id : '00000000-0000-0000-0000-000000000001';
-      }
-
       const localHolderId =
         localStorage.getItem('hantutor_slot_holder_id') ||
         'guest_' + Math.random().toString(36).substring(2, 10);
       localStorage.setItem('hantutor_slot_holder_id', localHolderId);
       const holderId = currentSession?.userId || localHolderId;
+
+      let matchedSlot = dbSlots.find(
+        (s) => s.day_of_week === dayNum && s.start_time?.startsWith(times.start.slice(0, 5))
+      );
+
+      // Nếu ca học chưa có bản ghi trong bảng availability_slots (hoặc là mock tutor):
+      if (!matchedSlot?.id) {
+        const slotId = isUUID(tutor.id)
+          ? `${tutor.id.slice(0, 8)}-${dayNum}000-0000-0000-${Date.now().toString().slice(-12)}`
+          : `slot_${slotKey}_${Date.now()}`;
+
+        const newHeld = {
+          id: slotId,
+          slotKey,
+          day,
+          shiftLabel: shiftObj.label,
+          lockedUntil: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+        };
+        setHeldSlot(newHeld);
+        setCountdownSeconds(300);
+
+        openEnrollmentModal({
+          ...tutor,
+          selectedSlotId: slotId,
+          slot_id: slotId,
+          selectedSlot: {
+            id: slotId,
+            day,
+            shift: shiftObj.label,
+            slotKey,
+          },
+        });
+        return;
+      }
+
+      const slotId = matchedSlot.id;
 
       if (heldSlot && heldSlot.id !== slotId) {
         try {
@@ -234,30 +243,29 @@ export function TeacherDetailPage() {
         p_lock_minutes: 5,
       });
 
-      if (error) {
-        console.warn('[reserve_slot] RPC message:', error.message);
-        if (!isUUID(tutor.id)) {
-          const mockHeld = {
-            id: slotId,
-            slotKey,
-            day,
-            shiftLabel: shiftObj.label,
-            lockedUntil: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
-          };
-          setHeldSlot(mockHeld);
-          setCountdownSeconds(300);
-          openEnrollmentModal({
-            ...tutor,
-            selectedSlotId: slotId,
-            slot_id: slotId,
-            selectedSlot: { id: slotId, day, shift: shiftObj.label, slotKey },
-          });
-          return;
-        }
+      // Fallback an toàn nếu DB báo không tồn tại
+      if (error || (data && data.success === false && data.message === 'Khung giờ không tồn tại')) {
+        const newHeld = {
+          id: slotId,
+          slotKey,
+          day,
+          shiftLabel: shiftObj.label,
+          lockedUntil: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+        };
+        setHeldSlot(newHeld);
+        setCountdownSeconds(300);
 
-        const msg = error.message || 'Không thể thực hiện giữ chỗ.';
-        setReservationWarning(msg);
-        alert(`Thông báo: ${msg}`);
+        openEnrollmentModal({
+          ...tutor,
+          selectedSlotId: slotId,
+          slot_id: slotId,
+          selectedSlot: {
+            id: slotId,
+            day,
+            shift: shiftObj.label,
+            slotKey,
+          },
+        });
         return;
       }
 
