@@ -12,14 +12,18 @@ import {
 } from 'lucide-react';
 import { Tutor as TutorType } from '../data';
 import { useData } from '../../context/DataContext';
+import { useAuth } from '../../context/AuthContext';
+import { registerTutorProfile } from '../../lib/kycService';
 
 export function TutorRegistrationPage() {
   const { addMockTutor } = useData();
+  const { currentSession } = useAuth();
   const location = useLocation();
   const urlParams = new URLSearchParams(location.search);
 
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [statusMessage, setStatusMessage] = useState('');
   const [success, setSuccess] = useState(false);
 
   // Phân tách vai trò Đăng ký: Giáo viên vs Gia sư
@@ -32,9 +36,17 @@ export function TutorRegistrationPage() {
   const [cccdFrontPreview, setCccdFrontPreview] = useState<string>('');
   const [cccdBackPreview, setCccdBackPreview] = useState<string>('');
 
-  // 2. Thông tin liên hệ & Kênh thanh toán
+  // File Objects thật tải lên Supabase Storage
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [cccdFrontFile, setCccdFrontFile] = useState<File | null>(null);
+  const [cccdBackFile, setCccdBackFile] = useState<File | null>(null);
+  const [credentialFile, setCredentialFile] = useState<File | null>(null);
+  const [achievementFile, setAchievementFile] = useState<File | null>(null);
+
+  // 2. Thông tin liên hệ, Tài khoản & Kênh thanh toán
   const [phone, setPhone] = useState(urlParams.get('phone') || '');
   const [email, setEmail] = useState(urlParams.get('email') || '');
+  const [password, setPassword] = useState('');
   const [bankName, setBankName] = useState('');
   const [customBankName, setCustomBankName] = useState('');
   const [bankAccountNumber, setBankAccountNumber] = useState('');
@@ -151,22 +163,27 @@ export function TutorRegistrationPage() {
     reader.onload = (event) => {
       const dataUrl = event.target?.result as string;
       if (type === 'avatar') {
+        setAvatarFile(file);
         setAvatarPreview(dataUrl);
         setImageValidations(prev => ({ ...prev, avatar: true }));
       } else if (type === 'other') {
         setOtherImages(prev => prev.length < 2 ? [...prev, dataUrl] : [prev[0], dataUrl]);
       } else if (type === 'cccdFront') {
+        setCccdFrontFile(file);
         setCccdFrontPreview(dataUrl);
         setImageValidations(prev => ({ ...prev, cccdFront: true }));
       } else if (type === 'cccdBack') {
+        setCccdBackFile(file);
         setCccdBackPreview(dataUrl);
         setImageValidations(prev => ({ ...prev, cccdBack: true }));
       } else if (type === 'credential') {
+        setCredentialFile(file);
         setCredentialPreview(dataUrl);
         setImageValidations(prev => ({ ...prev, credential: true }));
       } else if (type === 'certProof') {
         setCertificateProofPreview(dataUrl);
       } else if (type === 'achievement') {
+        setAchievementFile(file);
         setAchievementPreview(dataUrl);
       }
     };
@@ -237,8 +254,16 @@ export function TutorRegistrationPage() {
       return;
     }
 
+    // Nếu chưa đăng nhập, bắt buộc phải có mật khẩu để tạo Auth User
+    if (!currentSession?.userId && (!password || password.trim().length < 6)) {
+      alert("Vui lòng nhập Mật khẩu (tối thiểu 6 ký tự) ở Phần I để khởi tạo tài khoản giáo viên.");
+      setStep(1);
+      return;
+    }
+
     setLoading(true);
-    const tutorId = `tutor-${Date.now()}`;
+    setStatusMessage("Đang mã hóa và tải tài liệu KYC lên kho lưu trữ bảo mật...");
+
     const allSubjects = [...selectedSubjects];
     if (customSubject.trim() && !allSubjects.includes(customSubject.trim())) {
       allSubjects.push(customSubject.trim());
@@ -252,6 +277,49 @@ export function TutorRegistrationPage() {
     if (pedagogicalCertificates.trim()) certList.push(pedagogicalCertificates.trim());
 
     const isTeacherRole = roleType === 'teacher';
+
+    // GỌI THỰC TẾ LÊN SUPABASE (AUTH -> STORAGE BUCKETS -> PROFILES & SLOTS)
+    const result = await registerTutorProfile({
+      userId: currentSession?.userId,
+      email: email.trim(),
+      password: password ? password.trim() : undefined,
+      fullName: fullName.trim(),
+      phone: phone.trim(),
+      roleType,
+      headline: headline.trim(),
+      educationLevel,
+      major: major.trim(),
+      university: finalUniversityName,
+      subjects: allSubjects,
+      hourlyRate,
+      priceUnit,
+      levelPrices,
+      teachingFormatsOffline,
+      isOnlineSupport,
+      teachingAchievement,
+      experience: experience || (isTeacherRole ? '5 năm' : '2 năm'),
+      personalityTraits,
+      scheduleSlots,
+      cccdNumber,
+      bankName: finalBankName,
+      bankAccountNumber,
+      bankAccountHolder: bankAccountHolder || fullName.toUpperCase(),
+      avatarFile,
+      cccdFrontFile,
+      cccdBackFile,
+      credentialFile,
+      achievementFile,
+    });
+
+    setLoading(false);
+    setStatusMessage("");
+
+    if (!result.success) {
+      alert(result.message || 'Không thể gửi hồ sơ lên máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại!');
+      return;
+    }
+
+    const tutorId = result.userId || `tutor-${Date.now()}`;
 
     const newTutorProfile: TutorType = {
       id: tutorId,
@@ -310,7 +378,6 @@ export function TutorRegistrationPage() {
     };
 
     addMockTutor(newTutorProfile);
-    setLoading(false);
     setSuccess(true);
   };
 
@@ -575,6 +642,24 @@ export function TutorRegistrationPage() {
                     className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 outline-none text-xs sm:text-sm font-semibold text-slate-800 focus:border-blue-600 focus:ring-3 focus:ring-blue-500/10 transition-all"
                   />
                 </div>
+
+                {!currentSession?.userId && (
+                  <div className="sm:col-span-2 pt-1">
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      Mật khẩu tài khoản Giáo viên <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
+                      placeholder="Nhập mật khẩu (tối thiểu 6 ký tự để đăng nhập sau này)..."
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 outline-none text-xs sm:text-sm font-semibold text-slate-800 focus:border-blue-600 focus:ring-3 focus:ring-blue-500/10 transition-all"
+                    />
+                    <p className="text-[11px] text-slate-400 mt-1">
+                      Dùng để đăng nhập vào HanTutor sau khi hồ sơ được ban quản trị xét duyệt.
+                    </p>
+                  </div>
+                )}
 
                 {/* Phần Ngân hàng nhận thù lao */}
                 <div className="sm:col-span-2 pt-3 border-t border-slate-100">
@@ -980,7 +1065,7 @@ export function TutorRegistrationPage() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Đang gửi hồ sơ...
+                    <span>{statusMessage || 'Đang gửi hồ sơ...'}</span>
                   </>
                 ) : 'Hoàn tất đăng ký & Gửi duyệt hồ sơ'}
               </button>

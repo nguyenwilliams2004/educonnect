@@ -1,4 +1,4 @@
-﻿import React, { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { AuthProvider, useAuth, UserSessionContext, UserRole } from './AuthContext';
 import { TutorProvider, useTutors } from './TutorContext';
 import { BookingProvider, useBooking, StudentTrialItem } from './BookingContext';
@@ -45,7 +45,7 @@ export interface DataContextType {
   setMyTrials: React.Dispatch<React.SetStateAction<StudentTrialItem[]>>;
   adminStats: typeof mockAdminStats;
   recordTrialContact: (tutor: any, studentInfo?: { name?: string; phone?: string }) => Promise<void>;
-  recordOfficialEnrollment: (tutorId: any, totalTuition?: number) => Promise<void>;
+  recordOfficialEnrollment: (tutorId: any, totalTuition?: number, slotId?: string | null) => Promise<void>;
   cancelTrialEnrollment: (tutorId: any) => Promise<void>;
 
   // From WalletContext
@@ -99,8 +99,8 @@ export function useData(): DataContextType {
       setMyTrials: booking.setMyTrials,
       adminStats: booking.adminStats,
       recordTrialContact: booking.recordTrialContact,
-      recordOfficialEnrollment: async (tutorId: any, totalTuition = 1_600_000) => {
-        await booking.recordOfficialEnrollment(tutorId, totalTuition);
+      recordOfficialEnrollment: async (tutorId: any, totalTuition = 1_600_000, slotId?: string | null) => {
+        await booking.recordOfficialEnrollment(tutorId, totalTuition, slotId);
         wallet.recordIncome(tutorId, totalTuition);
       },
       cancelTrialEnrollment: booking.cancelTrialEnrollment,

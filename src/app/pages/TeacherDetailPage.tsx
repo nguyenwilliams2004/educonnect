@@ -26,16 +26,38 @@ import {
   ZoomIn,
   ZoomOut,
   MessageCircle,
-  X
+  X,
+  Clock,
+  Loader2,
+  AlertCircle
 } from 'lucide-react';
 import { mockTutors } from '../data';
 import { useData } from '../../context/DataContext';
 import { useUI } from '../../context/UIContext';
+import { supabase } from '../../lib/supabase';
+
+const dayToNumMap: Record<string, number> = {
+  'Chủ Nhật': 1,
+  'Thứ 2': 2,
+  'Thứ 3': 3,
+  'Thứ 4': 4,
+  'Thứ 5': 5,
+  'Thứ 6': 6,
+  'Thứ 7': 7,
+};
+
+const shiftTimeMap: Record<string, { start: string; end: string }> = {
+  'Sáng': { start: '08:00:00', end: '11:30:00' },
+  'Chiều': { start: '14:00:00', end: '17:30:00' },
+  'Tối': { start: '18:30:00', end: '21:30:00' },
+};
+
+const isUUID = (val: any) => /^[0-9a-f-]{36}$/i.test(String(val));
 
 export function TeacherDetailPage() {
   const { id } = useParams();
   const { tutors, myTrials, reviews, getMaskedTutor, currentSession } = useData();
-  const { openContactZaloModal, openAuthModal, setPendingTrialTutor, openReviewModal, openTeacherProfileModal } = useUI();
+  const { openContactZaloModal, openEnrollmentModal, openAuthModal, setPendingTrialTutor, openReviewModal, openTeacherProfileModal } = useUI();
   const [activeProofModal, setActiveProofModal] = useState<string | null>(null);
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
   const [avatarZoom, setAvatarZoom] = useState(1);
@@ -43,6 +65,13 @@ export function TeacherDetailPage() {
   const [shareToast, setShareToast] = useState(false);
   const [relatedPage, setRelatedPage] = useState(0);
   const [reviewFilter, setReviewFilter] = useState<'all' | 'trial' | 'official'>('all');
+
+  // State giữ chỗ lịch rảnh (reserve_slot TTL 5 phút)
+  const [dbSlots, setDbSlots] = useState<any[]>([]);
+  const [reservingSlotKey, setReservingSlotKey] = useState<string | null>(null);
+  const [heldSlot, setHeldSlot] = useState<{ id: string; slotKey: string; day: string; shiftLabel: string; lockedUntil: string } | null>(null);
+  const [countdownSeconds, setCountdownSeconds] = useState<number>(0);
+  const [reservationWarning, setReservationWarning] = useState<string | null>(null);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -68,6 +97,205 @@ export function TeacherDetailPage() {
     || mockTutors[0];
 
   const tutor = getMaskedTutor(rawTutor);
+
+  // 1. Tải danh sách availability_slots thực từ Supabase
+  useEffect(() => {
+    let isMounted = true;
+    async function loadAvailabilitySlots() {
+      if (!tutor?.id || !isUUID(tutor.id)) return;
+      try {
+        const { data, error } = await supabase
+          .from('availability_slots')
+          .select('*')
+          .eq('instructor_id', tutor.id);
+
+        if (!error && data && isMounted) {
+          setDbSlots(data);
+        }
+      } catch (err) {
+        console.warn('[TeacherDetailPage] Lỗi tải khung giờ:', err);
+      }
+    }
+    loadAvailabilitySlots();
+    return () => { isMounted = false; };
+  }, [tutor?.id]);
+
+  // 2. Đồng hồ đếm ngược 5 phút (TTL giữ chỗ)
+  useEffect(() => {
+    if (!heldSlot || countdownSeconds <= 0) return;
+    const timer = setInterval(() => {
+      setCountdownSeconds(prev => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setHeldSlot(null);
+          setReservationWarning('Thời gian giữ chỗ 5 phút đã hết hạn. Khung giờ đã được mở lại.');
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [heldSlot, countdownSeconds]);
+
+  const formatCountdown = (secs: number) => {
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
+  // 3. Gọi Stored Procedure reserve_slot khóa chỗ 5 phút
+  const handleSelectAndReserveSlot = async (day: string, shiftObj: { label: string; key: string }) => {
+    const slotKey = `${day}_${shiftObj.key}`;
+    const dayNum = dayToNumMap[day];
+    const times = shiftTimeMap[shiftObj.key];
+    if (!dayNum || !times) return;
+
+    setReservingSlotKey(slotKey);
+    setReservationWarning(null);
+
+    try {
+      // Tìm slot đã có trong DB
+      let matchedSlot = dbSlots.find(
+        s => s.day_of_week === dayNum && s.start_time?.startsWith(times.start.slice(0, 5))
+      );
+      let slotId = matchedSlot?.id;
+
+      // Nếu giáo viên UUID chưa có bản ghi slot, tạo tự động vào availability_slots
+      if (!slotId && isUUID(tutor.id)) {
+        const { data: newSlot, error: insertError } = await supabase
+          .from('availability_slots')
+          .insert({
+            instructor_id: tutor.id,
+            day_of_week: dayNum,
+            start_time: times.start,
+            end_time: times.end,
+          })
+          .select('id, day_of_week, start_time, end_time, is_booked, locked_until, locked_by')
+          .single();
+
+        if (!insertError && newSlot) {
+          slotId = newSlot.id;
+          setDbSlots(prev => [...prev, newSlot]);
+        }
+      }
+
+      // Đảm bảo slotId là UUID hợp lệ
+      if (!slotId) {
+        slotId = isUUID(tutor.id) ? tutor.id : '00000000-0000-0000-0000-000000000001';
+      }
+
+      // Xác định holderId: dùng currentSession.userId nếu có, hoặc ID trình duyệt
+      const localHolderId = localStorage.getItem('hantutor_slot_holder_id') || ('guest_' + Math.random().toString(36).substring(2, 10));
+      localStorage.setItem('hantutor_slot_holder_id', localHolderId);
+      const holderId = currentSession?.userId || localHolderId;
+
+      // Nếu đang giữ một slot khác, nhả slot cũ trước
+      if (heldSlot && heldSlot.id !== slotId) {
+        try {
+          await supabase.rpc('release_slot', {
+            p_slot_id: heldSlot.id,
+            p_holder_id: holderId,
+          });
+        } catch (e) {}
+      }
+
+      // GỌI STORED PROCEDURE reserve_slot KHÓA CHỖ 5 PHÚT
+      const { data, error } = await supabase.rpc('reserve_slot', {
+        p_slot_id: slotId,
+        p_holder_id: holderId,
+        p_lock_minutes: 5,
+      });
+
+      if (error) {
+        console.warn('[reserve_slot] RPC message:', error.message);
+        // Hỗ trợ chế độ mock cho giáo viên không có UUID DB
+        if (!isUUID(tutor.id)) {
+          const mockHeld = {
+            id: slotId,
+            slotKey,
+            day,
+            shiftLabel: shiftObj.label,
+            lockedUntil: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+          };
+          setHeldSlot(mockHeld);
+          setCountdownSeconds(300);
+          openEnrollmentModal({
+            ...tutor,
+            selectedSlotId: slotId,
+            slot_id: slotId,
+            selectedSlot: { id: slotId, day, shift: shiftObj.label, slotKey },
+          });
+          return;
+        }
+
+        const msg = error.message || 'Không thể thực hiện giữ chỗ.';
+        setReservationWarning(msg);
+        alert(`Thông báo: ${msg}`);
+        return;
+      }
+
+      if (data && data.success === true) {
+        // Giữ chỗ thành công!
+        const newHeld = {
+          id: slotId,
+          slotKey,
+          day,
+          shiftLabel: shiftObj.label,
+          lockedUntil: data.locked_until || new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+        };
+        setHeldSlot(newHeld);
+        setCountdownSeconds(300); // 5 phút
+
+        setDbSlots(prev =>
+          prev.map(s =>
+            s.id === slotId
+              ? { ...s, locked_until: data.locked_until, locked_by: holderId }
+              : s
+          )
+        );
+
+        // Mở EnrollmentModal kèm slot_id như người dùng yêu cầu!
+        openEnrollmentModal({
+          ...tutor,
+          selectedSlotId: slotId,
+          slot_id: slotId,
+          selectedSlot: {
+            id: slotId,
+            day,
+            shift: shiftObj.label,
+            slotKey,
+          },
+        });
+      } else {
+        // Đã có người giữ chỗ hoặc đã đặt
+        const warningMsg = data?.message || 'Khung giờ này đang có người khác thao tác giữ chỗ. Vui lòng thử lại sau ít phút.';
+        setReservationWarning(warningMsg);
+        alert(`Không thể giữ chỗ: ${warningMsg}`);
+      }
+    } catch (err: any) {
+      console.error('[reserve_slot] Exception:', err);
+      const exMsg = err.message || 'Lỗi hệ thống khi giữ chỗ.';
+      setReservationWarning(exMsg);
+      alert(`Lỗi: ${exMsg}`);
+    } finally {
+      setReservingSlotKey(null);
+    }
+  };
+
+  const handleReleaseSlot = async () => {
+    if (!heldSlot) return;
+    const holderId = currentSession?.userId || localStorage.getItem('hantutor_slot_holder_id') || 'guest';
+    try {
+      await supabase.rpc('release_slot', {
+        p_slot_id: heldSlot.id,
+        p_holder_id: holderId,
+      });
+    } catch (e) {
+      console.warn('[release_slot] error:', e);
+    }
+    setHeldSlot(null);
+    setCountdownSeconds(0);
+  };
 
   if (!tutor) {
     return <div className="p-16 text-center text-slate-500 font-medium">Không tìm thấy thông tin giáo viên</div>;
@@ -368,21 +596,81 @@ export function TeacherDetailPage() {
               </div>
             </div>
 
-            {/* 7. Lịch trống & Khung giờ nhận lớp */}
+            {/* 7. Lịch trống & Khung giờ nhận lớp (Tích hợp reserve_slot TTL 5 phút) */}
             <div className="bg-white rounded-2xl p-6 sm:p-7 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3.5 border-b border-slate-100">
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-slate-700" />
                   <h2 className="text-base sm:text-lg font-black text-[#111111] tracking-tight">Lịch trống & Khung giờ nhận lớp</h2>
                 </div>
-                <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md self-start sm:self-auto">
-                  Phản hồi: {tutor.responseTime || 'Dưới 30 phút'}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md">
+                    ⚡ Nhấp ô ca rảnh để giữ chỗ 5 phút
+                  </span>
+                  <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md">
+                    Phản hồi: {tutor.responseTime || 'Dưới 30 phút'}
+                  </span>
+                </div>
               </div>
+
+              {/* Thông báo lỗi nếu có người khác đang giữ chỗ */}
+              {reservationWarning && (
+                <div className="p-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl text-xs flex items-center justify-between gap-2 animate-in fade-in">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                    <span>{reservationWarning}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setReservationWarning(null)}
+                    className="text-slate-400 hover:text-slate-600 text-xs font-bold"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+
+              {/* Banner hiển thị ca đang được giữ chỗ 5 phút */}
+              {heldSlot && (
+                <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-3 text-xs animate-in fade-in">
+                  <div className="flex items-center gap-2.5">
+                    <Clock className="w-4 h-4 text-emerald-600 shrink-0 animate-spin" />
+                    <div>
+                      <span className="font-bold text-emerald-900 block">
+                        Đang giữ chỗ: {heldSlot.day} • {heldSlot.shiftLabel}
+                      </span>
+                      <span className="text-emerald-700 font-medium">
+                        Thời gian giữ chỗ còn lại: <strong className="font-mono text-emerald-900">{formatCountdown(countdownSeconds)}</strong> (Đã khóa trên CSDL chống phụ huynh khác chọn trùng)
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <button
+                      type="button"
+                      onClick={() => openEnrollmentModal({
+                        ...tutor,
+                        selectedSlotId: heldSlot.id,
+                        slot_id: heldSlot.id,
+                        selectedSlot: heldSlot,
+                      })}
+                      className="flex-1 sm:flex-none px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow-sm cursor-pointer transition-colors text-center"
+                    >
+                      Mở đơn đăng ký
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleReleaseSlot}
+                      className="px-3 py-2 bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 font-semibold rounded-lg cursor-pointer transition-colors"
+                    >
+                      Hủy giữ chỗ
+                    </button>
+                  </div>
+                </div>
+              )}
 
               <div className="border border-slate-200/90 rounded-xl overflow-hidden">
                 <div className="overflow-x-auto">
-                  <table className="w-full min-w-[540px] border-collapse text-xs text-center">
+                  <table className="w-full min-w-[580px] border-collapse text-xs text-center">
                     <thead>
                       <tr className="bg-slate-50 text-slate-700 font-bold border-b border-slate-200/80">
                         <th className="p-3 text-left pl-4 font-bold text-slate-900">Khung giờ nhận dạy</th>
@@ -400,12 +688,64 @@ export function TeacherDetailPage() {
                             const isAvailable = Array.isArray(tutor.schedule)
                               ? (tutor.schedule.includes(slotKey) || tutor.schedule.some((s: string) => s.includes(day) && s.includes(shiftObj.key)))
                               : (shiftObj.key === 'Tối');
+
+                            const dayNum = dayToNumMap[day];
+                            const times = shiftTimeMap[shiftObj.key];
+                            const matchedDb = dbSlots.find(
+                              s => s.day_of_week === dayNum && s.start_time?.startsWith(times.start.slice(0, 5))
+                            );
+
+                            const currentHolder = currentSession?.userId || localStorage.getItem('hantutor_slot_holder_id') || '';
+                            const isHeldByMe = heldSlot?.slotKey === slotKey;
+                            const isLockedByOther = !!(
+                              matchedDb?.locked_until &&
+                              new Date(matchedDb.locked_until) > new Date() &&
+                              matchedDb.locked_by !== currentHolder
+                            );
+                            const isBooked = matchedDb?.is_booked === true;
+
                             return (
                               <td key={day} className="p-1.5">
-                                {isAvailable ? (
-                                  <span className="inline-block py-1 px-2.5 bg-[#EDF3EC] text-[#2e5d32] font-black rounded text-[11px]">
-                                    ✓
+                                {isHeldByMe ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => openEnrollmentModal({
+                                      ...tutor,
+                                      selectedSlotId: heldSlot?.id,
+                                      slot_id: heldSlot?.id,
+                                      selectedSlot: heldSlot,
+                                    })}
+                                    className="w-full py-1.5 px-1.5 bg-emerald-600 text-white font-bold rounded-lg text-[10px] shadow-sm animate-pulse cursor-pointer flex items-center justify-center gap-1"
+                                    title="Bạn đang giữ chỗ - Nhấp để mở đơn đăng ký"
+                                  >
+                                    <Clock className="w-3 h-3 shrink-0" />
+                                    <span>Giữ {formatCountdown(countdownSeconds)}</span>
+                                  </button>
+                                ) : isLockedByOther ? (
+                                  <span
+                                    className="block py-1.5 px-1 bg-amber-50 text-amber-700 font-semibold rounded-lg text-[10px] border border-amber-200 cursor-not-allowed"
+                                    title="Khung giờ đang được phụ huynh khác giữ chỗ trong 5 phút"
+                                  >
+                                    ⏳ Tạm khóa
                                   </span>
+                                ) : isBooked ? (
+                                  <span className="block py-1.5 text-slate-400 font-medium text-[10px] bg-slate-100 rounded-lg">
+                                    Đã kín
+                                  </span>
+                                ) : isAvailable ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleSelectAndReserveSlot(day, shiftObj)}
+                                    disabled={reservingSlotKey !== null}
+                                    className="w-full py-1.5 px-2 bg-[#EDF3EC] hover:bg-[#d8edd6] text-[#2e5d32] hover:text-[#1e4622] font-black rounded-lg text-[11px] border border-[#c3dfc1] transition-all cursor-pointer shadow-2xs hover:scale-105 active:scale-95 flex items-center justify-center gap-1"
+                                    title="Nhấp để giữ chỗ ngay trong 5 phút (reserve_slot)"
+                                  >
+                                    {reservingSlotKey === slotKey ? (
+                                      <Loader2 className="w-3 h-3 animate-spin text-[#2e5d32]" />
+                                    ) : (
+                                      <>✓ Chọn</>
+                                    )}
+                                  </button>
                                 ) : (
                                   <span className="block py-1 text-slate-300 text-[11px]">
                                     —
@@ -703,6 +1043,32 @@ export function TeacherDetailPage() {
 
               {/* Primary Action Button */}
               <div className="space-y-2 pt-1">
+                {heldSlot && (
+                  <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-left space-y-2 animate-in fade-in">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-bold text-emerald-900 flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5 text-emerald-600 animate-spin" />
+                        Đang giữ chỗ 5 phút
+                      </span>
+                      <span className="font-mono font-bold text-emerald-700">{formatCountdown(countdownSeconds)}</span>
+                    </div>
+                    <div className="text-[11px] text-emerald-800 font-medium">
+                      {heldSlot.day} • {heldSlot.shiftLabel}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => openEnrollmentModal({
+                        ...tutor,
+                        selectedSlotId: heldSlot.id,
+                        slot_id: heldSlot.id,
+                        selectedSlot: heldSlot,
+                      })}
+                      className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs transition-colors cursor-pointer text-center"
+                    >
+                      Đăng ký ngay với khung giờ này
+                    </button>
+                  </div>
+                )}
                 {trialItem?.status === 'trial_in_progress' ? (
                   <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2.5 text-center">
                     <div className="text-xs text-slate-900 font-bold">

@@ -245,6 +245,15 @@ ALTER TABLE class_requests ENABLE ROW LEVEL SECURITY;
 -- CÁC CHÍNH SÁCH BẢO MẬT (POLICIES)
 -- =============================================================================
 
+-- --- HÀM KIỂM TRA QUYỀN ADMIN HỆ THỐNG (Zero-Trust RBAC Helper) ---
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS BOOLEAN AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.users
+    WHERE id = auth.uid() AND role = 'admin'
+  );
+$$ LANGUAGE sql SECURITY DEFINER STABLE;
+
 -- --- 1. CHÍNH SÁCH ĐỌC CÔNG KHAI (Public Read) ---
 DROP POLICY IF EXISTS "Public users are viewable by everyone." ON users;
 CREATE POLICY "Public users are viewable by everyone." ON users FOR SELECT USING (true);
@@ -316,8 +325,17 @@ DROP POLICY IF EXISTS "Instructors can insert own payout requests." ON payout_re
 CREATE POLICY "Instructors can insert own payout requests." ON payout_requests FOR INSERT WITH CHECK (auth.uid() = instructor_id);
 
 -- CẤM UPDATE PAYMENTS & PAYOUT STATUS TỪ CLIENT
-DROP POLICY IF EXISTS "Clients cannot mutate payments." ON payments;
+DROP POLICY IF EXISTS "Clients cannot update payments." ON payments;
+CREATE POLICY "Clients cannot update payments." ON payments FOR UPDATE USING (false);
+
 DROP POLICY IF EXISTS "Clients cannot update payout status." ON payout_requests;
+CREATE POLICY "Clients cannot update payout status." ON payout_requests FOR UPDATE USING (false);
+
+-- CHO PHÉP TẠO GIAO DỊCH THANH TOÁN CHỜ ĐỐI SOÁT (PENDING ONLY)
+DROP POLICY IF EXISTS "Students can create pending payments." ON payments;
+CREATE POLICY "Students can create pending payments." ON payments FOR INSERT WITH CHECK (
+  status = 'pending'
+);
 
 -- --- 5. CHÍNH SÁCH ĐÁNH GIÁ (Verified Reviews) ---
 DROP POLICY IF EXISTS "Enrolled students can insert reviews." ON reviews;
@@ -332,7 +350,36 @@ CREATE POLICY "Enrolled students can insert reviews." ON reviews FOR INSERT WITH
   )
 );
 
--- --- 6. TRIGGER TỰ ĐỘNG ĐỒNG BỘ AUTH.USERS SANG PUBLIC.USERS ---
+-- --- 6. CHÍNH SÁCH DÀNH CHO QUẢN TRỊ VIÊN (Admin RBAC Policies) ---
+-- Admin cập nhật hồ sơ gia sư (duyệt KYC verified = true, phê duyệt/từ chối hồ sơ)
+DROP POLICY IF EXISTS "Admins can update any profile." ON profiles;
+CREATE POLICY "Admins can update any profile." ON profiles FOR UPDATE USING (
+  public.is_admin()
+);
+
+DROP POLICY IF EXISTS "Admins can delete any profile." ON profiles;
+CREATE POLICY "Admins can delete any profile." ON profiles FOR DELETE USING (
+  public.is_admin()
+);
+
+-- Admin quản lý toàn bộ đơn đăng ký học thử và nhập học chính thức
+DROP POLICY IF EXISTS "Admins can manage enrollments." ON enrollments;
+CREATE POLICY "Admins can manage enrollments." ON enrollments FOR ALL USING (
+  public.is_admin()
+);
+
+-- Admin xem và phê duyệt lệnh rút tiền của gia sư
+DROP POLICY IF EXISTS "Admins can view all payout requests." ON payout_requests;
+CREATE POLICY "Admins can view all payout requests." ON payout_requests FOR SELECT USING (
+  public.is_admin()
+);
+
+DROP POLICY IF EXISTS "Admins can update payout requests." ON payout_requests;
+CREATE POLICY "Admins can update payout requests." ON payout_requests FOR UPDATE USING (
+  public.is_admin()
+);
+
+-- --- 7. TRIGGER TỰ ĐỘNG ĐỒNG BỘ AUTH.USERS SANG PUBLIC.USERS ---
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN

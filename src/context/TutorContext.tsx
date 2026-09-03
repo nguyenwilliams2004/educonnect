@@ -1,4 +1,4 @@
-﻿import React, {
+import React, {
   createContext,
   useContext,
   useEffect,
@@ -168,11 +168,66 @@ export function TutorProvider({ children }: { children: React.ReactNode }) {
     [pageSize]
   );
 
+  // Fetch danh sách gia sư chờ duyệt KYC từ Supabase profiles (verified = false)
+  const fetchPendingTutors = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*, users!inner(full_name, email, role, phone, avatar_url)')
+        .eq('verified', false)
+        .order('created_at', { ascending: false });
+
+      if (!error && data && data.length > 0) {
+        const livePending = data.map((row) => {
+          let cccdFront = '';
+          let cccdBack = '';
+          let credentialFile = '';
+
+          if (Array.isArray(row.certificates)) {
+            for (const cert of row.certificates) {
+              if (typeof cert === 'string') {
+                if (cert.startsWith('KYC_CCCD_FRONT:')) cccdFront = cert.replace('KYC_CCCD_FRONT:', '');
+                else if (cert.startsWith('KYC_CCCD_BACK:')) cccdBack = cert.replace('KYC_CCCD_BACK:', '');
+                else if (cert.startsWith('KYC_CREDENTIAL:')) credentialFile = cert.replace('KYC_CREDENTIAL:', '');
+              }
+            }
+          }
+
+          const item = profileToTutor({
+            ...row,
+            full_name: row.users?.full_name,
+            avatar_url: row.avatar_url || row.users?.avatar_url,
+          });
+
+          return {
+            ...item,
+            cccdFront: cccdFront || item.cccdFront || 'https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=600',
+            cccdBack: cccdBack || item.cccdBack || 'https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=600',
+            credentialFile: credentialFile || item.credentialFile || 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=800',
+            phone: row.users?.phone,
+            email: row.users?.email,
+            kycStatus: 'pending',
+          };
+        });
+
+        // Hợp nhất dữ liệu live từ DB lên đầu, giữ mock data phía sau nếu cần fallback
+        setPendingTutors((prevMock) => {
+          const liveIds = new Set(livePending.map((p) => String(p.id)));
+          const filteredMock = prevMock.filter((m) => !liveIds.has(String(m.id)));
+          return [...livePending, ...filteredMock];
+        });
+      }
+    } catch (err) {
+      console.warn('[TutorContext] Không thể nạp pending tutors từ Supabase:', err);
+    }
+  }, []);
+
   // Initial load
   useEffect(() => {
     const boot = async () => {
       await Promise.all([
         fetchTutorsPage(1),
+        fetchPendingTutors(),
         (async () => {
           const { data, error } = await supabase
             .from('reviews')
@@ -185,7 +240,7 @@ export function TutorProvider({ children }: { children: React.ReactNode }) {
       ]);
     };
     boot();
-  }, [fetchTutorsPage]);
+  }, [fetchTutorsPage, fetchPendingTutors]);
 
   const updateTutorProfile = useCallback(
     async (tutorId: string | number, updatedData: Partial<any>) => {
@@ -260,18 +315,31 @@ export function TutorProvider({ children }: { children: React.ReactNode }) {
       };
       setPendingTutors((prev) => prev.filter((t) => String(t.id) !== String(tutorId)));
       setTutors((prev) => [approved, ...prev.filter((t) => String(t.id) !== String(tutorId))]);
-      if (!isUUID(tutorId)) return;
-      const { error } = await supabase
-        .from('profiles')
-        .update({ verified: true })
-        .eq('id', String(tutorId));
-      if (error) console.error('[Supabase] approveTutorKyc error:', error.message);
+
+      if (isUUID(tutorId)) {
+        const { error } = await supabase
+          .from('profiles')
+          .update({ verified: true })
+          .eq('id', String(tutorId));
+        if (error) {
+          console.error('[Supabase] approveTutorKyc error:', error.message);
+        } else {
+          // Refresh lại danh sách trang công khai
+          fetchTutorsPage(1);
+        }
+      }
     },
-    [pendingTutors]
+    [pendingTutors, fetchTutorsPage]
   );
 
   const rejectTutorKyc = useCallback(async (tutorId: any) => {
     setPendingTutors((prev) => prev.filter((t) => String(t.id) !== String(tutorId)));
+    if (isUUID(tutorId)) {
+      await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', String(tutorId));
+    }
   }, []);
 
   const addMockTutor = useCallback(async (newTutor: any) => {

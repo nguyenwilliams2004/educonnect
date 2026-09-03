@@ -1,4 +1,4 @@
-﻿import React, { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { X, ShieldCheck, ExternalLink, LogIn, UserCheck } from 'lucide-react';
 import { useData } from '../../../context/DataContext';
 import { useUI } from '../../../context/UIContext';
@@ -80,6 +80,21 @@ export function ContactZaloModal({
               </span>
             </div>
           </div>
+
+          {/* Thông tin khung giờ đã chọn */}
+          {tutor.selectedSlot && (
+            <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-2xl text-left text-xs flex items-center justify-between animate-in fade-in">
+              <div>
+                <span className="font-bold text-emerald-900 block">Khung giờ học thử đã chọn:</span>
+                <span className="text-emerald-700 font-medium">
+                  {tutor.selectedSlot.day} • {tutor.selectedSlot.shift || tutor.selectedSlot.shiftLabel}
+                </span>
+              </div>
+              <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-md">
+                Đã giữ chỗ 5p
+              </span>
+            </div>
+          )}
 
           {/* NẾU CHƯA ĐĂNG NHẬP: BẮT ĐĂNG NHẬP TRƯỚC */}
           {!isLoggedIn ? (

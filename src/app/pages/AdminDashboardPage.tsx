@@ -1,104 +1,337 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router';
-import { ShieldCheck, AlertCircle, ExternalLink, Zap, Target, X } from 'lucide-react';
+import { ShieldCheck, AlertCircle, ExternalLink, Zap, Target, X, ShieldAlert, Loader2 } from 'lucide-react';
 import { Logo } from '../components/Logo';
 export type UserRole = 'anonymous' | 'student' | 'teacher' | 'parent' | 'admin';
 import { useData } from '../../context/DataContext';
 import { useUI } from '../../context/UIContext';
+import { getSignedKycUrl } from '../../lib/kycService';
+import { supabase } from '../../lib/supabase';
 
 export function AdminDashboardPage() {
-  const { tutors, pendingTutors, adminStats, approveTutorKyc, rejectTutorKyc, securityLogs, refreshSecurityLogs, setCurrentSession, teacherWallets, getTeacherWallet } = useData();
+  const {
+    tutors,
+    pendingTutors,
+    adminStats,
+    approveTutorKyc,
+    rejectTutorKyc,
+    securityLogs,
+    refreshSecurityLogs,
+    currentSession,
+    setCurrentSession,
+    teacherWallets,
+    getTeacherWallet,
+  } = useData();
   const { openTeacherWalletModal } = useUI();
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return sessionStorage.getItem('hantutor_admin_auth') === 'true';
-  });
+
+  // State xác thực Admin qua Supabase
+  const [adminEmail, setAdminEmail] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [lockoutUntil, setLockoutUntil] = useState<number | null>(null);
 
   const [currentTab, setCurrentTab] = useState<'kyc' | 'requests' | 'analytics' | 'security'>('kyc');
   const [kycFilter, setKycFilter] = useState<'all' | 'pending' | 'approved'>('pending');
   const [selectedDocPreview, setSelectedDocPreview] = useState<{ isOpen: boolean; title: string; imageUrl: string; tutorName: string } | null>(null);
+
+  // Tự động kiểm tra phiên Supabase Auth đang hoạt động có role = 'admin' khi tải trang
+  useEffect(() => {
+    let isMounted = true;
+
+    async function checkExistingAdminSession() {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          const { data: dbUser } = await supabase
+            .from('users')
+            .select('id, email, full_name, role')
+            .eq('id', session.user.id)
+            .maybeSingle();
+
+          const resolvedRole = dbUser?.role || session.user.user_metadata?.role || session.user.app_metadata?.role;
+          if (resolvedRole === 'admin') {
+            setCurrentSession({
+              userId: session.user.id,
+              role: 'admin',
+              email: session.user.email,
+              fullName: dbUser?.full_name || session.user.user_metadata?.full_name || 'Quản trị viên',
+              sessionToken: session.access_token,
+            });
+          }
+        }
+      } catch (err) {
+        console.warn('[AdminDashboard] Kiểm tra phiên admin:', err);
+      } finally {
+        if (isMounted) setIsCheckingSession(false);
+      }
+    }
+
+    checkExistingAdminSession();
+    return () => { isMounted = false; };
+  }, [setCurrentSession]);
+
+  const handleViewDoc = async (title: string, rawUrlOrPath: string | undefined, tutorName: string) => {
+    if (!rawUrlOrPath) return;
+    try {
+      const signed = await getSignedKycUrl(rawUrlOrPath);
+      setSelectedDocPreview({
+        isOpen: true,
+        title,
+        imageUrl: signed || rawUrlOrPath,
+        tutorName,
+      });
+    } catch {
+      setSelectedDocPreview({
+        isOpen: true,
+        title,
+        imageUrl: rawUrlOrPath,
+        tutorName,
+      });
+    }
+  };
 
   // Security Sandbox State
   const [sandboxRole, setSandboxRole] = useState<UserRole>('anonymous');
   const [testInternalId, setTestInternalId] = useState('t1');
   const [generatedSecureToken, setGeneratedSecureToken] = useState('sec_tutor_t1_9a8b7c');
 
-  const handleAdminLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Enforce Rate Limit for Admin Login
-    
-
-    if (adminPassword === 'admin123' || adminPassword === 'hantutor@2026') {
-      sessionStorage.setItem('hantutor_admin_auth', 'true');
-      setIsAuthenticated(true);
-      setErrorMsg('');
-      
-      setCurrentSession({
-        userId: 'admin_root',
-        role: 'admin',
-        sessionToken: 'adm_' + Date.now()
-      });
-    } else {
-      setErrorMsg('Máº­t kháº©u quáº£n trá»‹ viÃªn khÃ´ng chÃ­nh xÃ¡c. Vui lÃ²ng thá»­ láº¡i!');
-      
+  const handleFailedAttempt = () => {
+    const nextAttempts = failedAttempts + 1;
+    setFailedAttempts(nextAttempts);
+    if (nextAttempts >= 5) {
+      const lockTime = Date.now() + 60 * 1000;
+      setLockoutUntil(lockTime);
+      setErrorMsg('Bạn đã nhập sai 5 lần liên tiếp. Cổng đăng nhập tạm khóa 60 giây để phòng chống brute-force.');
     }
   };
 
-  const handleAdminLogout = () => {
-    sessionStorage.removeItem('hantutor_admin_auth');
-    setIsAuthenticated(false);
+  // Đăng nhập Admin chuẩn Zero-Trust qua Supabase Auth
+  const handleAdminLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg('');
+
+    if (lockoutUntil && Date.now() < lockoutUntil) {
+      const remainingSecs = Math.ceil((lockoutUntil - Date.now()) / 1000);
+      setErrorMsg(`Hệ thống đang tạm khóa. Vui lòng thử lại sau ${remainingSecs} giây.`);
+      return;
+    }
+
+    const cleanEmail = adminEmail.trim();
+    const cleanPass = adminPassword.trim();
+
+    if (!cleanEmail || !cleanPass) {
+      setErrorMsg('Vui lòng nhập đầy đủ Email và Mật khẩu Quản trị viên.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // 1. Xác thực danh tính với Supabase Auth
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: cleanEmail,
+        password: cleanPass,
+      });
+
+      if (error) {
+        handleFailedAttempt();
+        if (error.message.includes('Invalid login credentials')) {
+          setErrorMsg('Email hoặc mật khẩu quản trị viên không chính xác.');
+        } else if (error.message.includes('Email not confirmed')) {
+          setErrorMsg('Tài khoản chưa xác nhận email. Vui lòng kiểm tra hộp thư.');
+        } else {
+          setErrorMsg(error.message || 'Lỗi xác thực hệ thống.');
+        }
+        return;
+      }
+
+      if (!data.user) {
+        setErrorMsg('Không tìm thấy thông tin tài khoản hợp lệ.');
+        return;
+      }
+
+      // 2. Zero-Trust RBAC: Kiểm tra trực tiếp role tại bảng public.users
+      const { data: dbUser, error: roleError } = await supabase
+        .from('users')
+        .select('id, email, full_name, role')
+        .eq('id', data.user.id)
+        .maybeSingle();
+
+      const resolvedRole = dbUser?.role || data.user.user_metadata?.role || data.user.app_metadata?.role;
+
+      // 3. Nghiêm cấm tài khoản không mang role 'admin'
+      if (resolvedRole !== 'admin') {
+        // Đăng xuất ngay lập tức khỏi Supabase
+        await supabase.auth.signOut();
+        setCurrentSession({ role: 'anonymous' });
+        handleFailedAttempt();
+        setErrorMsg('Từ chối truy cập: Tài khoản không có đặc quyền Quản trị viên (role ≠ "admin").');
+        return;
+      }
+
+      // 4. Xác thực thành công
+      setFailedAttempts(0);
+      setLockoutUntil(null);
+      setErrorMsg('');
+
+      setCurrentSession({
+        userId: data.user.id,
+        role: 'admin',
+        email: data.user.email,
+        fullName: dbUser?.full_name || data.user.user_metadata?.full_name || 'Quản trị viên',
+        sessionToken: data.session?.access_token,
+      });
+    } catch (err: any) {
+      console.error('[AdminDashboard] Lỗi đăng nhập:', err);
+      setErrorMsg('Lỗi kết nối máy chủ: ' + (err.message || 'Không thể xác thực.'));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleAdminLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.warn('[AdminDashboard] Lỗi đăng xuất:', err);
+    }
     setCurrentSession({ role: 'anonymous' });
   };
 
   const triggerSecuritySimulation = () => {
-    // 1. Simulate IDOR Probe Attack
-    
-    alert("ÄÃ£ táº¡o 3 sá»± kiá»‡n an ninh mÃ´ phá»ng (IDOR Probe, Rate Limit Block, RLS Violation) vÃ o Nháº­t kÃ½ An ninh!");
+    alert("Đã tạo 3 sự kiện an ninh mô phỏng (IDOR Probe, Rate Limit Block, RLS Violation) vào Nhật ký An ninh!");
   };
 
-  if (!isAuthenticated) {
+  // Màn hình chờ xác nhận phiên ban đầu
+  if (isCheckingSession) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+        <div className="flex flex-col items-center gap-3 text-white">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-400" />
+          <p className="text-xs text-slate-400">Đang kiểm tra quyền quản trị viên Supabase...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Trường hợp đang đăng nhập tài khoản người dùng thường (Học sinh/Giáo viên)
+  if (currentSession.role !== 'admin' && currentSession.role !== 'anonymous') {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+        <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100 text-center animate-in zoom-in-95 duration-200">
+          <div className="w-16 h-16 bg-amber-100 rounded-2xl flex items-center justify-center mx-auto mb-4 text-amber-600 shadow-md">
+            <ShieldAlert className="w-8 h-8" />
+          </div>
+          <h2 className="text-xl font-extrabold text-slate-900 mb-1">Quyền truy cập bị hạn chế</h2>
+          <p className="text-xs text-slate-500 mb-6">
+            Bạn đang đăng nhập với tài khoản <strong className="text-slate-800">{currentSession.email}</strong> (Vai trò: <span className="uppercase text-amber-600 font-bold">{currentSession.role}</span>). Tài khoản này không có quyền quản trị hệ thống.
+          </p>
+
+          <div className="space-y-3">
+            <button
+              onClick={handleAdminLogout}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-md text-sm cursor-pointer"
+            >
+              Đăng xuất & Đăng nhập tài khoản Admin
+            </button>
+            <Link
+              to="/"
+              className="block w-full py-3 text-center text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all"
+            >
+              ← Quay lại trang chủ người dùng
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Form Đăng nhập Admin (Khi chưa có session admin)
+  if (currentSession.role !== 'admin') {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
         <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100 text-center animate-in zoom-in-95 duration-200">
           <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4 text-blue-600 shadow-md">
             <ShieldCheck className="w-8 h-8" />
           </div>
-          <h2 className="text-2xl font-extrabold text-slate-900 mb-1">Cá»•ng Quáº£n trá»‹ viÃªn</h2>
-          <p className="text-xs text-slate-500 mb-6">XÃ¡c thá»±c quyá»n quáº£n trá»‹ há»‡ thá»‘ng HanTutor</p>
+          <h2 className="text-2xl font-extrabold text-slate-900 mb-1">Cổng Quản trị viên</h2>
+          <p className="text-xs text-slate-500 mb-6">Xác thực tài khoản Supabase có đặc quyền <strong>role = &apos;admin&apos;</strong></p>
 
           <form onSubmit={handleAdminLogin} className="space-y-4 text-left">
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Máº­t kháº©u quáº£n trá»‹</label>
+              <label className="block text-xs font-bold text-slate-700 mb-1">Email Quản trị viên</label>
+              <input
+                type="email"
+                value={adminEmail}
+                onChange={e => setAdminEmail(e.target.value)}
+                placeholder="admin@hantutor.vn"
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none text-sm"
+                required
+                autoComplete="email"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">Mật khẩu Quản trị</label>
               <input
                 type="password"
                 value={adminPassword}
                 onChange={e => setAdminPassword(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') handleAdminLogin(e); }}
-                placeholder="Nháº­p máº­t kháº©u quáº£n trá»‹ viÃªn..."
+                placeholder="••••••••••••"
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none text-sm"
                 required
+                autoComplete="current-password"
               />
             </div>
 
             {errorMsg && (
-              <div className="p-3 rounded-xl bg-red-50 text-red-600 text-xs font-semibold flex items-center gap-1.5">
+              <div className="p-3 rounded-xl bg-red-50 text-red-600 text-xs font-semibold flex items-center gap-1.5 animate-in fade-in">
                 <AlertCircle className="w-4 h-4 shrink-0" /> {errorMsg}
               </div>
             )}
 
             <button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-md shadow-blue-200 text-sm cursor-pointer"
+              disabled={isSubmitting}
+              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold py-3.5 rounded-xl transition-all shadow-md shadow-blue-200 text-sm cursor-pointer flex items-center justify-center gap-2"
             >
-              ÄÄƒng nháº­p Quáº£n trá»‹
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Đang xác thực Supabase RBAC...</span>
+                </>
+              ) : (
+                'Đăng nhập Quản trị'
+              )}
             </button>
           </form>
 
+          {/* Hộp hỗ trợ tài khoản mẫu cho kiểm thử */}
+          <div className="mt-4 p-3 bg-slate-50 border border-slate-100 rounded-xl text-left">
+            <p className="text-[11px] text-slate-500 font-semibold mb-1">Tài khoản Quản trị mẫu (Supabase DB):</p>
+            <div className="text-[11px] font-mono text-slate-700 flex flex-col gap-1">
+              <div className="flex justify-between items-center">
+                <span>Email: <strong className="text-blue-600">admin@hantutor.vn</strong></span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAdminEmail('admin@hantutor.vn');
+                    setAdminPassword('HanTutorAdmin2026!@#');
+                  }}
+                  className="text-[10px] bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-200 hover:bg-blue-100 cursor-pointer"
+                >
+                  Tự động điền
+                </button>
+              </div>
+              <div>Pass: <code className="bg-slate-200/70 px-1.5 py-0.5 rounded text-[10px]">HanTutorAdmin2026!@#</code></div>
+            </div>
+          </div>
+
           <div className="mt-6 pt-4 border-t border-slate-100">
             <Link to="/" className="text-xs text-slate-500 hover:text-blue-600 font-semibold">
-              â† Quay láº¡i trang chá»§ ngÆ°á»i dÃ¹ng
+              ← Quay lại trang chủ người dùng
             </Link>
           </div>
         </div>
@@ -113,7 +346,7 @@ export function AdminDashboardPage() {
   // Sample tutor for RLS Sandbox
   const sampleTutor = tutors[0] || {
     id: 't1',
-    name: 'ThS. Nguyá»…n VÄƒn An',
+    name: 'ThS. Nguyễn Văn An',
     phone: '0912345678',
     zalo: '0912345678',
     email: 'nguyenvanan.sp@gmail.com',
@@ -138,11 +371,17 @@ export function AdminDashboardPage() {
           </span>
         </div>
         <div className="flex items-center gap-4 text-xs">
+          <div className="hidden sm:flex items-center gap-2 text-slate-300 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700/50">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            <span className="text-slate-200 font-medium truncate max-w-[200px]">
+              {currentSession.fullName || currentSession.email || 'Quản trị viên'}
+            </span>
+          </div>
           <Link to="/" className="text-slate-300 hover:text-white px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors">
-            ðŸŒ Xem website ngÆ°á»i dÃ¹ng
+            🌐 Xem website người dùng
           </Link>
           <button onClick={handleAdminLogout} className="text-red-400 hover:text-red-300 font-bold cursor-pointer">
-            ÄÄƒng xuáº¥t
+            Đăng xuất
           </button>
         </div>
       </header>
@@ -251,38 +490,37 @@ export function AdminDashboardPage() {
                           <ExternalLink className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity text-blue-600" />
                         </Link>
                         <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full ${tutor.kycStatus === 'approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
-                          {tutor.kycStatus === 'approved' ? 'ÄÃƒ DUYá»†T' : 'CHá»œ DUYá»†T'}
+                          {tutor.kycStatus === 'approved' ? 'ĐÃ DUYỆT' : 'CHỜ DUYỆT'}
                         </span>
                       </div>
                       <p className="text-xs text-slate-500 mt-0.5">{tutor.title}</p>
-                      <p className="text-xs text-blue-600 font-semibold mt-1">SÄT/Zalo: {tutor.phone || tutor.zalo}</p>
+                      <p className="text-xs text-blue-600 font-semibold mt-1">SĐT/Zalo: {tutor.phone || tutor.zalo}</p>
                     </div>
                   </div>
 
                   <div className="bg-slate-50 p-3.5 rounded-2xl text-xs space-y-1 text-slate-700">
-                    <div><strong>Há»c váº¥n:</strong> {tutor.education}</div>
-                    <div><strong>MÃ´n dáº¡y:</strong> {tutor.subjects?.join(', ')}</div>
-                    <div><strong>Khu vá»±c:</strong> {tutor.location}</div>
+                    <div><strong>Học vấn:</strong> {tutor.education}</div>
+                    <div><strong>Môn dạy:</strong> {tutor.subjects?.join(', ')}</div>
+                    <div><strong>Khu vực:</strong> {tutor.location}</div>
                   </div>
 
                   {/* KYC Clickable Document Lightbox */}
                   <div>
                     <div className="flex justify-between items-center mb-2">
-                      <span className="text-xs font-bold text-slate-700">TÃ i liá»‡u CCCD & Báº±ng cáº¥p:</span>
-                      <span className="text-[11px] text-blue-600 font-semibold">ðŸ” Nháº¥p vÃ o áº£nh Ä‘á»ƒ phÃ³ng to</span>
+                      <span className="text-xs font-bold text-slate-700">Tài liệu CCCD & Bằng cấp:</span>
+                      <span className="text-[11px] text-blue-600 font-semibold">🔍 Nhấp vào ảnh để phóng to</span>
                     </div>
                     <div className="grid grid-cols-3 gap-2">
                       <button
                         type="button"
-                        onClick={() => setSelectedDocPreview({
-                          isOpen: true,
-                          title: 'CÄƒn cÆ°á»›c cÃ´ng dÃ¢n (Máº·t trÆ°á»›c)',
-                          imageUrl: tutor.cccdFront || 'https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=800',
-                          tutorName: tutor.name
-                        })}
+                        onClick={() => handleViewDoc(
+                          'Căn cước công dân (Mặt trước)',
+                          tutor.cccdFront,
+                          tutor.name
+                        )}
                         className="border border-slate-200 hover:border-blue-500 rounded-xl p-1 bg-slate-50 text-center cursor-pointer transition-all group block"
                       >
-                        <div className="text-[10px] text-slate-500 font-semibold mb-1 group-hover:text-blue-600">CCCD Máº·t trÆ°á»›c</div>
+                        <div className="text-[10px] text-slate-500 font-semibold mb-1 group-hover:text-blue-600">CCCD Mặt trước</div>
                         <div className="relative aspect-4/3 overflow-hidden rounded-lg bg-white">
                           <img src={tutor.cccdFront} alt="CCCD Front" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                         </div>
@@ -290,15 +528,14 @@ export function AdminDashboardPage() {
 
                       <button
                         type="button"
-                        onClick={() => setSelectedDocPreview({
-                          isOpen: true,
-                          title: 'CÄƒn cÆ°á»›c cÃ´ng dÃ¢n (Máº·t sau)',
-                          imageUrl: tutor.cccdBack || 'https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=800',
-                          tutorName: tutor.name
-                        })}
+                        onClick={() => handleViewDoc(
+                          'Căn cước công dân (Mặt sau)',
+                          tutor.cccdBack,
+                          tutor.name
+                        )}
                         className="border border-slate-200 hover:border-blue-500 rounded-xl p-1 bg-slate-50 text-center cursor-pointer transition-all group block"
                       >
-                        <div className="text-[10px] text-slate-500 font-semibold mb-1 group-hover:text-blue-600">CCCD Máº·t sau</div>
+                        <div className="text-[10px] text-slate-500 font-semibold mb-1 group-hover:text-blue-600">CCCD Mặt sau</div>
                         <div className="relative aspect-4/3 overflow-hidden rounded-lg bg-white">
                           <img src={tutor.cccdBack} alt="CCCD Back" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                         </div>
@@ -306,15 +543,14 @@ export function AdminDashboardPage() {
 
                       <button
                         type="button"
-                        onClick={() => setSelectedDocPreview({
-                          isOpen: true,
-                          title: 'Báº±ng Tá»‘t Nghiá»‡p Äáº¡i Há»c / Chá»©ng Chá»‰',
-                          imageUrl: tutor.credentialFile || 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=800',
-                          tutorName: tutor.name
-                        })}
+                        onClick={() => handleViewDoc(
+                          'Bằng Tốt Nghiệp Đại Học / Chứng Chỉ Sư Phạm',
+                          tutor.credentialFile,
+                          tutor.name
+                        )}
                         className="border border-slate-200 hover:border-blue-500 rounded-xl p-1 bg-slate-50 text-center cursor-pointer transition-all group block"
                       >
-                        <div className="text-[10px] text-slate-500 font-semibold mb-1 group-hover:text-blue-600">Báº±ng ÄH / Chá»©ng chá»‰</div>
+                        <div className="text-[10px] text-slate-500 font-semibold mb-1 group-hover:text-blue-600">Bằng ĐH / Chứng chỉ</div>
                         <div className="relative aspect-4/3 overflow-hidden rounded-lg bg-white">
                           <img src={tutor.credentialFile} alt="Degree" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                         </div>

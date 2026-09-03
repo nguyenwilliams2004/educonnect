@@ -63,7 +63,7 @@ export interface BookingContextType {
   adminStats: typeof mockAdminStats;
   setAdminStats: React.Dispatch<React.SetStateAction<typeof mockAdminStats>>;
   recordTrialContact: (tutor: any, studentInfo?: { name?: string; phone?: string }) => Promise<void>;
-  recordOfficialEnrollment: (tutorId: any, totalTuition?: number) => Promise<void>;
+  recordOfficialEnrollment: (tutorId: any, totalTuition?: number, slotId?: string | null) => Promise<void>;
   cancelTrialEnrollment: (tutorId: any) => Promise<void>;
 }
 
@@ -205,7 +205,7 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
   );
 
   const recordOfficialEnrollment = useCallback(
-    async (tutorId: any, totalTuition = 1_600_000) => {
+    async (tutorId: any, totalTuition = 1_600_000, slotId?: string | null) => {
       setTutors((prev) =>
         prev.map((t) => {
           if (String(t.id) !== String(tutorId)) return t;
@@ -237,10 +237,25 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
         ],
       }));
 
+      // Nếu có slot_id thì cập nhật slot thành is_booked = true
+      if (slotId && isUUID(slotId)) {
+        try {
+          await supabase
+            .from('availability_slots')
+            .update({ is_booked: true, locked_until: null, locked_by: null })
+            .eq('id', slotId);
+        } catch (e) {
+          console.warn('[BookingContext] update availability_slots error:', e);
+        }
+      }
+
       if (trial?.enrollmentId) {
+        const updatePayload: any = { status: 'enrolled' };
+        if (slotId) updatePayload.slot_id = slotId;
+
         const { error: updErr } = await supabase
           .from('enrollments')
-          .update({ status: 'enrolled' })
+          .update(updatePayload)
           .eq('id', trial.enrollmentId);
         if (updErr) console.error('[Supabase] enrollment update error:', updErr.message);
 

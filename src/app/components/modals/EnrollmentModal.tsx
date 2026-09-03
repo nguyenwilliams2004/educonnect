@@ -7,7 +7,7 @@ export interface EnrollmentModalProps {
   tutor?: any;
   isOpen?: boolean;
   onClose?: () => void;
-  onProceedToPayment?: (enrollmentId: string, amount: number, tutorId: string | number) => void;
+  onProceedToPayment?: (enrollmentId: string, amount: number, tutorId: string | number, slotId?: string | null) => void;
 }
 
 export function EnrollmentModal({
@@ -22,8 +22,8 @@ export function EnrollmentModal({
   const tutor = propTutor !== undefined ? propTutor : enrollmentModalTutor;
   const isOpen = propIsOpen !== undefined ? propIsOpen : !!enrollmentModalTutor;
   const onClose = propOnClose || closeEnrollmentModal;
-  const onProceedToPayment = propOnProceedToPayment || ((enrollmentId: string, amount: number, tutorId: string | number) => {
-    recordOfficialEnrollment(tutorId, amount);
+  const onProceedToPayment = propOnProceedToPayment || ((enrollmentId: string, amount: number, tutorId: string | number, slotId?: string | null) => {
+    recordOfficialEnrollment(tutorId, amount, slotId);
     openCheckoutModal(enrollmentId, amount, tutorId);
   });
 
@@ -37,13 +37,14 @@ export function EnrollmentModal({
   const priceString = tutor.levelPrices?.[currentLvl] || '200.000';
   const pricePerSession = parseInt(priceString.replace(/\D/g, '')) || 200000;
   const totalTuition = pricePerSession * totalSessions;
+  const activeSlotId = tutor.selectedSlotId || tutor.slot_id || tutor.selectedSlot?.id || null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // enrollmentId is a local reference; Supabase UUID is tracked inside recordOfficialEnrollment
     const enrollmentId = 'ENR_' + Date.now();
     onClose();
-    onProceedToPayment(enrollmentId, totalTuition, tutor.id);
+    onProceedToPayment(enrollmentId, totalTuition, tutor.id, activeSlotId);
   };
 
   return (
@@ -56,10 +57,25 @@ export function EnrollmentModal({
           <X className="w-5 h-5" />
         </button>
 
-        <div className="mb-5">
+        <div className="mb-4">
           <h3 className="text-xl font-extrabold text-slate-900">Đăng ký học chính thức</h3>
           <p className="text-xs text-slate-500 mt-0.5">Giáo viên: <strong className="text-slate-800">{tutor.name}</strong></p>
         </div>
+
+        {/* Thông tin khung giờ rảnh đã được giữ chỗ 5 phút */}
+        {tutor.selectedSlot && (
+          <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center justify-between text-xs">
+            <div>
+              <span className="font-bold text-emerald-900 block">Khung giờ đã chọn:</span>
+              <span className="text-emerald-700 font-medium">
+                {tutor.selectedSlot.day} • {tutor.selectedSlot.shift || tutor.selectedSlot.shiftLabel}
+              </span>
+            </div>
+            <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-md">
+              Đã giữ chỗ 5p
+            </span>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

@@ -62,7 +62,7 @@ export function TeacherWalletModal({
 
   if (!isOpen) return null;
 
-  const handleWithdraw = (e: React.FormEvent) => {
+  const handleWithdraw = async (e: React.FormEvent) => {
     e.preventDefault();
     const amountNum = parseInt(withdrawAmount.replace(/\D/g, '')) || 0;
     if (amountNum < 50000) {
@@ -75,19 +75,20 @@ export function TeacherWalletModal({
     }
 
     setLoading(true);
-    setTimeout(() => {
+    try {
+      const res = await requestWithdrawal(activeTutor?.id || 't1', amountNum, bankAccount);
       setLoading(false);
-      const res = requestWithdrawal(activeTutor?.id || 't1', amountNum, bankAccount);
       if (res?.success) {
         alert(res.message);
         setWithdrawAmount('');
         setActiveTab('history');
       } else {
-        alert(res?.message || 'Rút tiền thành công!');
-        setWithdrawAmount('');
-        setActiveTab('history');
+        alert(res?.message || 'Có lỗi xảy ra khi tạo yêu cầu rút tiền.');
       }
-    }, 600);
+    } catch (err: any) {
+      setLoading(false);
+      alert('Lỗi kết nối: ' + (err.message || 'Không thể hoàn tất rút tiền.'));
+    }
   };
 
   const filteredTransactions = (wallet.transactions || []).filter(tx => {
