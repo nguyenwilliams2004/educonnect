@@ -43,13 +43,13 @@ test('AI CHAT LLM - System Instruction chứa toàn bộ tri thức website và 
   assert.ok(content.includes('prompt injection'), 'Phải có cơ chế phòng chống prompt injection');
 });
 
-test('AI CHAT LLM - Tối ưu hóa tốc độ phản hồi bằng các model Flash thế hệ mới', () => {
+test('AI CHAT LLM - Cấu hình 2 model: gemini-3.8-flash làm model chính, gemini-3.7-flash làm model phụ', () => {
   const servicePath = path.join(rootDir, 'src', 'lib', 'aiChatService.ts');
   const serviceContent = fs.readFileSync(servicePath, 'utf8');
 
-  // Kiểm tra model: Ưu tiên gemini-3.7-flash và gemini-3.6-flash
-  assert.ok(serviceContent.includes('gemini-3.7-flash'), 'Phải hỗ trợ gemini-3.7-flash');
-  assert.ok(serviceContent.includes('gemini-3.6-flash'), 'Phải hỗ trợ gemini-3.6-flash');
+  // Kiểm tra 2 model theo yêu cầu: gemini-3.8-flash (chính) và gemini-3.7-flash (phụ)
+  assert.ok(serviceContent.includes('gemini-3.8-flash'), 'Phải hỗ trợ gemini-3.8-flash làm model chính');
+  assert.ok(serviceContent.includes('gemini-3.7-flash'), 'Phải hỗ trợ gemini-3.7-flash làm model phụ');
 
   // Kiểm tra widget
   const widgetPath = path.join(rootDir, 'src', 'app', 'components', 'AiChatWidget.tsx');

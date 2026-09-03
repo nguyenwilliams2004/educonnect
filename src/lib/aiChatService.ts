@@ -199,9 +199,9 @@ export async function queryGeminiChatbot(
     };
   }
 
-  // Danh sách model ưu tiên theo tốc độ phản hồi thực tế (sub-2s)
-  const highSpeedModels = [
-    'gemini-3.6-flash',
+  // Cấu hình 2 model: gemini-3.8-flash làm model chính và gemini-3.7-flash làm model phụ
+  const activeModels = [
+    'gemini-3.8-flash',
     'gemini-3.7-flash',
   ];
 
@@ -218,10 +218,10 @@ export async function queryGeminiChatbot(
 
   const systemInstructionText = buildSystemInstruction(tutorsList);
 
-  for (const model of highSpeedModels) {
+  for (const model of activeModels) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 giây timeout
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 giây timeout cho gemini-3.8-flash
 
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
