@@ -411,7 +411,7 @@ export function AuthModal({
                 disabled={loading}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-md shadow-blue-200 text-sm cursor-pointer disabled:opacity-50"
               >
-                {loading ? 'Đang xác thực trên Supabase...' : 'Đăng nhập ngay'}
+                {loading ? 'Đang đăng nhập...' : 'Đăng nhập ngay'}
               </button>
             </form>
 
@@ -534,7 +534,7 @@ export function AuthModal({
                   disabled={loading}
                   className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-md shadow-blue-200 text-sm cursor-pointer disabled:opacity-50"
                 >
-                  {loading ? 'Đang tạo tài khoản trên CSDL...' : 'Đăng ký tài khoản học sinh'}
+                  {loading ? 'Đang tạo tài khoản...' : 'Đăng ký tài khoản học sinh'}
                 </button>
               </form>
             )}
