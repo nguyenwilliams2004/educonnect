@@ -15,7 +15,11 @@ import {
   Award,
   MessageCircle,
   HelpCircle,
-  Edit3
+  Edit3,
+  Calendar,
+  Sparkles,
+  Camera,
+  Check
 } from 'lucide-react';
 import { useUI } from '../../../context/UIContext';
 import { useData } from '../../../context/DataContext';
@@ -49,7 +53,9 @@ const STUDENT_AVATARS = [
   'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400',
   'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=400',
   'https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=400',
-  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400'
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400',
+  'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=400',
+  'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=400'
 ];
 
 const GRADES = [
@@ -88,7 +94,7 @@ export function StudentProfileModal() {
       ...DEFAULT_STUDENT_PROFILE,
       phone: currentSession.phone || DEFAULT_STUDENT_PROFILE.phone,
       email: currentSession.email || DEFAULT_STUDENT_PROFILE.email,
-      name: currentSession.name || DEFAULT_STUDENT_PROFILE.name
+      name: currentSession.name || currentSession.fullName || DEFAULT_STUDENT_PROFILE.name
     };
   });
 
@@ -124,7 +130,7 @@ export function StudentProfileModal() {
       const trimmedPhone = profile.phone.trim();
       const finalAvatar = profile.avatar;
 
-      // 1. CẬP NHẬT DATABASE SUPABASE THẬT
+      // 1. CẬP NHẬT DATABASE SUPABASE THẬT (Bảng public.users)
       if (currentSession.userId && !String(currentSession.userId).startsWith('t')) {
         await supabase
           .from('users')
@@ -149,14 +155,17 @@ export function StudentProfileModal() {
         }).catch(() => {});
       }
 
-      // 2. LƯU LOCALSTORAGE VÀ CẬP NHẬT CLIENT SESSION
+      // 2. LƯU BỘ NHỚ LOCAL VÀ CẬP NHẬT CLIENT CONTEXT
       try {
-        localStorage.setItem('hantutor_student_profile', JSON.stringify({
-          ...profile,
-          name: trimmedName,
-          phone: trimmedPhone,
-          avatar: finalAvatar
-        }));
+        localStorage.setItem(
+          'hantutor_student_profile',
+          JSON.stringify({
+            ...profile,
+            name: trimmedName,
+            phone: trimmedPhone,
+            avatar: finalAvatar
+          })
+        );
       } catch {}
 
       setCurrentSession(prev => ({
@@ -170,7 +179,7 @@ export function StudentProfileModal() {
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 2500);
     } catch (err) {
-      console.error(err);
+      console.error('Lỗi khi lưu thông tin học sinh:', err);
     } finally {
       setSaving(false);
     }
@@ -191,84 +200,88 @@ export function StudentProfileModal() {
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl relative border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-200">
+      <div className="bg-white rounded-3xl max-w-3xl w-full max-h-[92vh] flex flex-col shadow-2xl relative border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200">
         
-        {/* MODAL HEADER: Clean Blue & White Banner */}
-        <div className="relative bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white px-6 pt-6 pb-4 sm:px-8 shrink-0">
-          {/* Nút đóng X luôn nằm trên cùng và không bị che */}
+        {/* MODAL HEADER: Deep Slate & Indigo Gradient */}
+        <div className="relative bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 text-white px-6 pt-6 pb-4 sm:px-8 shrink-0">
           <button
             type="button"
             onClick={closeStudentProfileModal}
-            className="absolute top-4 right-4 z-30 text-white/90 hover:text-white bg-black/20 hover:bg-black/35 p-2 rounded-full transition-colors cursor-pointer"
+            className="absolute top-4 right-4 z-20 text-slate-300 hover:text-white bg-white/10 hover:bg-white/20 p-2 rounded-full transition-colors cursor-pointer"
             title="Đóng hồ sơ"
           >
             <X className="w-5 h-5" />
           </button>
 
-          <div className="flex items-center gap-4 pr-12">
+          <div className="flex items-center gap-4 pr-10">
             <div className="relative shrink-0">
               <img
-                src={profile.avatar}
+                src={profile.avatar || STUDENT_AVATARS[0]}
                 alt={profile.name}
-                className="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl object-cover border-2 border-white shadow-md"
+                className="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl object-cover border-2 border-white/80 shadow-md ring-4 ring-white/10"
               />
-              <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full" title="Tài khoản học sinh đang hoạt động" />
+              <span
+                className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-slate-900 rounded-full"
+                title="Học sinh trực tuyến"
+              />
             </div>
 
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
+                <h2 className="text-lg sm:text-2xl font-bold text-white tracking-tight truncate">
                   {profile.name}
                 </h2>
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-white/20 text-white border border-white/30 backdrop-blur-xs">
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-white/15 text-blue-200 border border-white/20 backdrop-blur-xs">
                   {profile.grade}
                 </span>
               </div>
-              <p className="text-xs sm:text-sm text-blue-100 mt-1 flex items-center gap-2 flex-wrap">
+              <p className="text-xs text-slate-300 mt-1 flex items-center gap-2 flex-wrap truncate">
                 <span className="flex items-center gap-1">
-                  <GraduationCap className="w-3.5 h-3.5" />
-                  {profile.school}
+                  <GraduationCap className="w-3.5 h-3.5 text-blue-400" />
+                  {profile.school || 'Chưa cập nhật trường'}
                 </span>
                 <span>•</span>
                 <span className="flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5" />
-                  {profile.district}
+                  <MapPin className="w-3.5 h-3.5 text-blue-400" />
+                  {profile.district || 'Hà Nội'}
                 </span>
               </p>
             </div>
           </div>
 
-          {/* TAB NAVIGATION: 3 tabs gọn gàng */}
-          <div className="flex items-center gap-2 mt-5 overflow-x-auto pb-1 no-scrollbar text-xs font-bold">
+          {/* TAB NAVIGATION: Clean pill selector */}
+          <div className="flex items-center gap-2 mt-5 overflow-x-auto pb-1 no-scrollbar text-xs font-semibold">
             <button
               type="button"
               onClick={() => setActiveTab('info')}
-              className={`px-4 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+              className={`px-3.5 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap active:scale-[0.98] ${
                 activeTab === 'info'
-                  ? 'bg-white text-blue-700 shadow-sm'
-                  : 'text-white/80 hover:text-white hover:bg-white/10'
+                  ? 'bg-white text-slate-900 font-bold shadow-xs'
+                  : 'text-slate-300 hover:text-white hover:bg-white/10'
               }`}
             >
-              <User className="w-3.5 h-3.5" />
-              Thông tin học sinh
+              <User className="w-3.5 h-3.5 text-blue-500" />
+              <span>Hồ sơ học sinh</span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveTab('classes')}
-              className={`px-4 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+              className={`px-3.5 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap active:scale-[0.98] ${
                 activeTab === 'classes'
-                  ? 'bg-white text-blue-700 shadow-sm'
-                  : 'text-white/80 hover:text-white hover:bg-white/10'
+                  ? 'bg-white text-slate-900 font-bold shadow-xs'
+                  : 'text-slate-300 hover:text-white hover:bg-white/10'
               }`}
             >
-              <BookOpen className="w-3.5 h-3.5" />
-              Lớp học & Gia sư của tôi
+              <BookOpen className="w-3.5 h-3.5 text-indigo-400" />
+              <span>Lớp học & Gia sư</span>
               {myTrials.length > 0 && (
-                <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-extrabold ${
-                  activeTab === 'classes' ? 'bg-blue-600 text-white' : 'bg-white/30 text-white'
-                }`}>
+                <span
+                  className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                    activeTab === 'classes' ? 'bg-blue-600 text-white' : 'bg-white/20 text-white'
+                  }`}
+                >
                   {myTrials.length}
                 </span>
               )}
@@ -277,136 +290,145 @@ export function StudentProfileModal() {
             <button
               type="button"
               onClick={() => setActiveTab('tuition')}
-              className={`px-4 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+              className={`px-3.5 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap active:scale-[0.98] ${
                 activeTab === 'tuition'
-                  ? 'bg-white text-blue-700 shadow-sm'
-                  : 'text-white/80 hover:text-white hover:bg-white/10'
+                  ? 'bg-white text-slate-900 font-bold shadow-xs'
+                  : 'text-slate-300 hover:text-white hover:bg-white/10'
               }`}
             >
-              <CreditCard className="w-3.5 h-3.5" />
-              Học phí & Hóa đơn VietQR
+              <CreditCard className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Học phí & Hóa đơn</span>
             </button>
           </div>
         </div>
 
         {/* MODAL BODY (Scrollable) */}
-        <div className="p-6 sm:p-8 overflow-y-auto flex-1 bg-slate-50/50">
-
+        <div className="p-6 sm:p-7 overflow-y-auto flex-1 bg-slate-50/50">
+          
           {/* ========================================================================= */}
           {/* TAB 1: THÔNG TIN HỌC SINH */}
           {/* ========================================================================= */}
           {activeTab === 'info' && (
-            <form onSubmit={handleSaveProfile} className="space-y-6">
+            <form onSubmit={handleSaveProfile} className="space-y-5">
               
               {/* Alert Feedback Toast */}
               {saveSuccess && (
                 <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-2xl text-xs font-semibold flex items-center gap-2 animate-in fade-in">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  Đã cập nhật thông tin học sinh thành công!
+                  <span>Đã cập nhật và lưu hồ sơ học sinh vào cơ sở dữ liệu Supabase thành công!</span>
                 </div>
               )}
 
-              {/* SECTION: Chọn Avatar */}
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
-                <label className="block text-xs font-bold text-slate-800 mb-3 flex items-center gap-2">
-                  <User className="w-4 h-4 text-blue-600" />
-                  Ảnh đại diện
+              {/* SECTION 1: Chọn Avatar */}
+              <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs">
+                <label className="block text-xs font-bold text-slate-800 mb-3 flex items-center gap-1.5">
+                  <Camera className="w-4 h-4 text-blue-600" />
+                  <span>Ảnh đại diện học sinh</span>
                 </label>
-                <div className="flex items-center gap-3 flex-wrap">
-                  {STUDENT_AVATARS.map((url, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => setProfile({ ...profile, avatar: url })}
-                      className={`relative rounded-xl overflow-hidden p-0.5 transition-all cursor-pointer ${
-                        profile.avatar === url
-                          ? 'ring-3 ring-blue-600 scale-105 shadow-md'
-                          : 'opacity-70 hover:opacity-100'
-                      }`}
-                    >
-                      <img src={url} alt={`Avatar ${idx}`} className="w-12 h-12 rounded-lg object-cover" />
-                      {profile.avatar === url && (
-                        <div className="absolute inset-0 bg-blue-600/20 flex items-center justify-center">
-                          <CheckCircle2 className="w-4 h-4 text-white" />
-                        </div>
-                      )}
-                    </button>
-                  ))}
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  {STUDENT_AVATARS.map((url, idx) => {
+                    const isSelected = profile.avatar === url;
+                    return (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setProfile({ ...profile, avatar: url })}
+                        className={`relative rounded-xl overflow-hidden p-0.5 transition-all cursor-pointer active:scale-95 ${
+                          isSelected
+                            ? 'ring-2 ring-blue-600 scale-105 shadow-sm'
+                            : 'opacity-70 hover:opacity-100'
+                        }`}
+                      >
+                        <img src={url} alt={`Avatar ${idx}`} className="w-11 h-11 rounded-lg object-cover" />
+                        {isSelected && (
+                          <div className="absolute inset-0 bg-blue-600/30 flex items-center justify-center">
+                            <Check className="w-3.5 h-3.5 text-white drop-shadow-sm" />
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
                   <div className="flex-1 min-w-[200px]">
                     <input
-                      type="text"
-                      placeholder="Hoặc dán link ảnh (URL)..."
+                      type="url"
+                      placeholder="Hoặc dán liên kết ảnh (URL)..."
                       value={profile.avatar}
                       onChange={e => setProfile({ ...profile, avatar: e.target.value })}
-                      className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 focus:border-blue-600 outline-none text-slate-600 bg-slate-50"
+                      className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none text-slate-700 bg-slate-50"
                     />
                   </div>
                 </div>
               </div>
 
-              {/* SECTION: Thông tin liên hệ cơ bản */}
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
-                <h3 className="text-sm font-bold text-slate-900 border-b border-slate-100 pb-2 flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-blue-600" />
-                  Thông tin học sinh & Phụ huynh
+              {/* SECTION 2: Thông tin liên hệ cơ bản */}
+              <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs space-y-4">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 pb-1 border-b border-slate-100 flex items-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Thông tin học viên & Phụ huynh</span>
                 </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Họ và tên học sinh <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={profile.name}
-                      onChange={e => setProfile({ ...profile, name: e.target.value })}
-                      className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 focus:border-blue-600 outline-none transition-colors"
-                      placeholder="VD: Nguyễn Hoàng Nam"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Họ tên Phụ huynh
-                    </label>
-                    <input
-                      type="text"
-                      value={profile.parentName}
-                      onChange={e => setProfile({ ...profile, parentName: e.target.value })}
-                      className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 focus:border-blue-600 outline-none transition-colors"
-                      placeholder="VD: Bác Thành (Bố Nam)"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Số điện thoại liên hệ <span className="text-red-500">*</span>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Họ và tên học sinh <span className="text-rose-500">*</span>
                     </label>
                     <div className="relative">
-                      <Phone className="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />
+                      <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                       <input
                         type="text"
+                        value={profile.name}
+                        onChange={e => setProfile({ ...profile, name: e.target.value })}
                         required
-                        value={profile.phone}
-                        onChange={e => setProfile({ ...profile, phone: e.target.value })}
-                        className="w-full pl-10 pr-3.5 py-2.5 text-sm rounded-xl border border-slate-200 focus:border-blue-600 outline-none transition-colors font-mono"
-                        placeholder="0912345678"
+                        className="w-full pl-10 pr-3.5 py-2.5 text-xs font-medium rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none transition-colors text-slate-800"
+                        placeholder="VD: Nguyễn Hoàng Nam"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Email
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Họ tên người giám hộ / Phụ huynh
                     </label>
                     <div className="relative">
-                      <Mail className="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />
+                      <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <input
+                        type="text"
+                        value={profile.parentName}
+                        onChange={e => setProfile({ ...profile, parentName: e.target.value })}
+                        className="w-full pl-10 pr-3.5 py-2.5 text-xs font-medium rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none transition-colors text-slate-800"
+                        placeholder="VD: Bác Thành (Phụ huynh)"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Số điện thoại Zalo liên hệ <span className="text-rose-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <Phone className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <input
+                        type="tel"
+                        value={profile.phone}
+                        onChange={e => setProfile({ ...profile, phone: e.target.value })}
+                        required
+                        className="w-full pl-10 pr-3.5 py-2.5 text-xs font-medium rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none transition-colors text-slate-800"
+                        placeholder="0912 345 678"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Email đăng nhập
+                    </label>
+                    <div className="relative">
+                      <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                       <input
                         type="email"
                         value={profile.email}
-                        onChange={e => setProfile({ ...profile, email: e.target.value })}
-                        className="w-full pl-10 pr-3.5 py-2.5 text-sm rounded-xl border border-slate-200 focus:border-blue-600 outline-none transition-colors"
+                        readOnly
+                        className="w-full pl-10 pr-3.5 py-2.5 text-xs font-mono rounded-xl border border-slate-200 outline-none bg-slate-100 text-slate-600 cursor-not-allowed"
                         placeholder="email@example.com"
                       />
                     </div>
@@ -414,22 +436,22 @@ export function StudentProfileModal() {
                 </div>
               </div>
 
-              {/* SECTION: Khối lớp & Địa chỉ */}
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
-                <h3 className="text-sm font-bold text-slate-900 border-b border-slate-100 pb-2 flex items-center gap-2">
-                  <GraduationCap className="w-4 h-4 text-blue-600" />
-                  Khối lớp & Trường học
+              {/* SECTION 3: Khối lớp & Địa chỉ */}
+              <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs space-y-4">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 pb-1 border-b border-slate-100 flex items-center gap-1.5">
+                  <GraduationCap className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Khối lớp & Khu vực học tập</span>
                 </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Khối lớp hiện tại <span className="text-red-500">*</span>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Khối lớp hiện tại <span className="text-rose-500">*</span>
                     </label>
                     <select
                       value={profile.grade}
                       onChange={e => setProfile({ ...profile, grade: e.target.value })}
-                      className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 focus:border-blue-600 outline-none bg-white font-medium"
+                      className="w-full px-3.5 py-2.5 text-xs font-medium rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none bg-white text-slate-800"
                     >
                       {GRADES.map(g => (
                         <option key={g} value={g}>{g}</option>
@@ -438,26 +460,26 @@ export function StudentProfileModal() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
                       Trường đang theo học
                     </label>
                     <input
                       type="text"
                       value={profile.school}
                       onChange={e => setProfile({ ...profile, school: e.target.value })}
-                      className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 focus:border-blue-600 outline-none transition-colors"
+                      className="w-full px-3.5 py-2.5 text-xs font-medium rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none text-slate-800"
                       placeholder="VD: THPT Chuyên Hà Nội - Amsterdam"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Khu vực Quận / Huyện <span className="text-red-500">*</span>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Khu vực Quận / Huyện <span className="text-rose-500">*</span>
                     </label>
                     <select
                       value={profile.district}
                       onChange={e => setProfile({ ...profile, district: e.target.value })}
-                      className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 focus:border-blue-600 outline-none bg-white font-medium"
+                      className="w-full px-3.5 py-2.5 text-xs font-medium rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none bg-white text-slate-800"
                     >
                       {DISTRICTS.map(d => (
                         <option key={d} value={d}>{d}</option>
@@ -466,14 +488,14 @@ export function StudentProfileModal() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Địa chỉ chi tiết (Dành cho học kèm tại nhà)
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Địa chỉ chi tiết (Học kèm trực tiếp)
                     </label>
                     <input
                       type="text"
                       value={profile.address}
                       onChange={e => setProfile({ ...profile, address: e.target.value })}
-                      className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 focus:border-blue-600 outline-none transition-colors"
+                      className="w-full px-3.5 py-2.5 text-xs font-medium rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none text-slate-800"
                       placeholder="VD: Số 126 Hoàng Quốc Việt, Cầu Giấy"
                     />
                   </div>
@@ -481,11 +503,11 @@ export function StudentProfileModal() {
               </div>
 
               {/* SUBMIT BUTTON */}
-              <div className="flex items-center justify-end gap-3 pt-2">
+              <div className="flex items-center justify-end gap-2.5 pt-2">
                 <button
                   type="button"
                   onClick={closeStudentProfileModal}
-                  className="px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
                 >
                   Đóng
                 </button>
@@ -493,10 +515,10 @@ export function StudentProfileModal() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold shadow-md shadow-blue-200 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 active:scale-98"
+                  className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white text-xs font-bold shadow-md shadow-blue-200 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
                 >
-                  <Save className="w-4 h-4" />
-                  {saving ? 'Đang lưu...' : 'Lưu thay đổi'}
+                  <Save className="w-3.5 h-3.5" />
+                  <span>{saving ? 'Đang lưu CSDL...' : 'Lưu hồ sơ học sinh'}</span>
                 </button>
               </div>
             </form>
@@ -506,64 +528,65 @@ export function StudentProfileModal() {
           {/* TAB 2: LỚP HỌC & GIA SƯ CỦA TÔI */}
           {/* ========================================================================= */}
           {activeTab === 'classes' && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between pb-1 border-b border-slate-100">
                 <div>
-                  <h3 className="text-base font-extrabold text-slate-900">Danh sách lớp học đã đăng ký</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">Quản lý lịch học thử 1-1 và các khóa học chính thức của bạn</p>
+                  <h3 className="text-sm font-bold text-slate-900">Danh sách lớp học đã kết nối</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">Quản lý lịch học thử 1-1 và các khóa học gia sư của bạn</p>
                 </div>
 
                 <a
                   href="/tim-gia-su"
-                  className="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 cursor-pointer"
+                  className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 cursor-pointer"
                 >
-                  Tìm thêm gia sư <ChevronRight className="w-3.5 h-3.5" />
+                  <span>Tìm thêm gia sư</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
                 </a>
               </div>
 
               {myTrials.length === 0 ? (
-                <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center space-y-3">
+                <div className="bg-white rounded-2xl border border-slate-200/80 p-8 text-center space-y-3 shadow-2xs">
                   <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto">
                     <BookOpen className="w-6 h-6" />
                   </div>
                   <h4 className="text-sm font-bold text-slate-900">Chưa có lớp học thử nào</h4>
                   <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                    Hãy lựa chọn thầy cô phù hợp trên HanTutor để nhận ngay 01 buổi học thử 1-1 miễn phí!
+                    Hãy lựa chọn thầy cô trên HanTutor để trải nghiệm 01 buổi học thử 1-1 miễn phí!
                   </p>
                   <a
                     href="/tim-gia-su"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 text-white text-xs font-bold shadow-md shadow-blue-200 hover:bg-blue-700 transition-all"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 text-white text-xs font-bold shadow-xs shadow-blue-200 hover:bg-blue-700 transition-all"
                   >
                     Khám phá danh sách giáo viên
                   </a>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 gap-4">
+                <div className="grid grid-cols-1 gap-3">
                   {myTrials.map((item, idx) => {
                     const matchedTutor = tutors.find(t => String(t.id) === String(item.tutorId));
                     return (
                       <div
                         key={idx}
-                        className="bg-white rounded-2xl border border-slate-200 p-5 shadow-2xs hover:border-blue-300 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                        className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-2xs hover:border-blue-300 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
                       >
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-3.5">
                           <img
                             src={item.avatar}
                             alt={item.tutorName}
-                            className="w-14 h-14 rounded-2xl object-cover border border-slate-100 shrink-0"
+                            className="w-12 h-12 rounded-xl object-cover border border-slate-100 shrink-0"
                           />
                           <div>
                             <div className="flex items-center gap-2 flex-wrap">
-                              <h4 className="text-sm font-extrabold text-slate-900">{item.tutorName}</h4>
-                              <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                              <h4 className="text-sm font-bold text-slate-900">{item.tutorName}</h4>
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
                                 {item.badgeSubject}
                               </span>
                             </div>
-                            <p className="text-xs text-slate-500 mt-1 line-clamp-1">
+                            <p className="text-xs text-slate-500 mt-0.5 line-clamp-1">
                               {item.headline || 'Giáo viên chuyên môn dạy kèm 1-1'}
                             </p>
-                            <div className="flex items-center gap-3 mt-2 text-[11px] text-slate-500">
-                              <span className="flex items-center gap-1 font-medium text-emerald-600">
+                            <div className="flex items-center gap-3 mt-1.5 text-[11px] text-slate-500">
+                              <span className="flex items-center gap-1 font-semibold text-emerald-600">
                                 <CheckCircle2 className="w-3.5 h-3.5" />
                                 Đã xác nhận học thử 1-1
                               </span>
@@ -580,10 +603,10 @@ export function StudentProfileModal() {
                               href={`https://zalo.me/${item.zalo.replace(/\D/g, '')}`}
                               target="_blank"
                               rel="noreferrer"
-                              className="px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-colors flex items-center gap-1.5"
+                              className="px-3 py-2 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-colors flex items-center gap-1.5"
                             >
                               <MessageCircle className="w-3.5 h-3.5" />
-                              Zalo thầy cô
+                              <span>Zalo thầy cô</span>
                             </a>
                           )}
 
@@ -597,7 +620,7 @@ export function StudentProfileModal() {
                               className="px-3.5 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
                             >
                               <Award className="w-3.5 h-3.5" />
-                              Học chính thức
+                              <span>Đăng ký chính thức</span>
                             </button>
                           )}
 
@@ -627,57 +650,57 @@ export function StudentProfileModal() {
           {/* TAB 3: HỌC PHÍ & HÓA ĐƠN VIETQR */}
           {/* ========================================================================= */}
           {activeTab === 'tuition' && (
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-base font-extrabold text-slate-900">Lịch sử học phí & Hóa đơn VietQR</h3>
+            <div className="space-y-4">
+              <div className="pb-1 border-b border-slate-100">
+                <h3 className="text-sm font-bold text-slate-900">Lịch sử học phí & Hóa đơn VietQR</h3>
                 <p className="text-xs text-slate-500 mt-0.5">Minh bạch tài chính, hóa đơn điện tử bảo đảm quyền lợi học viên</p>
               </div>
 
               {/* Stats overview */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs">
                   <span className="text-xs font-semibold text-slate-500">Đã thanh toán</span>
-                  <div className="text-lg font-black text-blue-600 mt-1">1.600.000đ</div>
+                  <div className="text-lg font-bold text-blue-600 mt-1 tabular-nums">1.600.000đ</div>
                   <span className="text-[11px] text-slate-400">1 khóa học chính thức</span>
                 </div>
 
-                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs">
+                <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs">
                   <span className="text-xs font-semibold text-slate-500">Số buổi tích lũy</span>
-                  <div className="text-lg font-black text-slate-900 mt-1">8 buổi</div>
-                  <span className="text-[11px] text-emerald-600 font-medium">Bảo hiểm 100% học phí</span>
+                  <div className="text-lg font-bold text-slate-900 mt-1 tabular-nums">8 buổi</div>
+                  <span className="text-[11px] text-emerald-600 font-semibold">Bảo hiểm 100% học phí</span>
                 </div>
 
-                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs">
-                  <span className="text-xs font-semibold text-slate-500">Chính sách HanTutor</span>
+                <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs">
+                  <span className="text-xs font-semibold text-slate-500">Chính sách bảo đảm</span>
                   <div className="text-xs font-bold text-slate-800 mt-1 flex items-center gap-1">
                     <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                    Đổi giáo viên miễn phí
+                    <span>Đổi giáo viên miễn phí</span>
                   </div>
                   <span className="text-[11px] text-slate-400">Nếu không hài lòng sau 2 buổi</span>
                 </div>
               </div>
 
               {/* Invoice list */}
-              <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-2xs">
-                <div className="px-5 py-3.5 bg-slate-50/70 border-b border-slate-100 flex items-center justify-between text-xs font-bold text-slate-600">
+              <div className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-2xs">
+                <div className="px-4 py-3 bg-slate-50 border-b border-slate-100 flex items-center justify-between text-xs font-bold text-slate-600">
                   <span>Hóa đơn / Giao dịch</span>
                   <span>Trạng thái</span>
                 </div>
 
                 <div className="divide-y divide-slate-100">
                   {paidInvoices.map(inv => (
-                    <div key={inv.id} className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div key={inv.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div>
                         <div className="flex items-center gap-2">
-                          <h4 className="text-sm font-bold text-slate-900">{inv.title}</h4>
-                          <span className="font-mono text-[11px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">
+                          <h4 className="text-xs font-bold text-slate-900">{inv.title}</h4>
+                          <span className="font-mono text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200">
                             {inv.id}
                           </span>
                         </div>
                         <p className="text-xs text-slate-500 mt-1">
-                          Giáo viên: <strong>{inv.tutorName}</strong> • {inv.sessions}
+                          Giáo viên: <strong className="text-slate-700">{inv.tutorName}</strong> • {inv.sessions}
                         </p>
-                        <div className="flex items-center gap-3 text-[11px] text-slate-400 mt-1">
+                        <div className="flex items-center gap-2 text-[11px] text-slate-400 mt-1">
                           <span>{inv.date}</span>
                           <span>•</span>
                           <span>{inv.method}</span>
@@ -686,7 +709,9 @@ export function StudentProfileModal() {
 
                       <div className="flex items-center gap-4 justify-between sm:justify-end">
                         <div className="text-right">
-                          <div className="text-sm font-extrabold text-slate-900">{inv.amount.toLocaleString()}đ</div>
+                          <div className="text-sm font-bold text-slate-900 tabular-nums">
+                            {inv.amount.toLocaleString()}đ
+                          </div>
                           <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600">
                             <CheckCircle2 className="w-3 h-3" />
                             Đã thanh toán
@@ -694,9 +719,9 @@ export function StudentProfileModal() {
                         </div>
 
                         <a
-                          href={`tel:0912345678`}
+                          href="tel:0912345678"
                           className="p-2 rounded-xl text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
-                          title="Hỗ trợ / Khiếu nại đổi giáo viên"
+                          title="Hỗ trợ học phí & đổi giáo viên"
                         >
                           <HelpCircle className="w-4 h-4" />
                         </a>
@@ -707,6 +732,7 @@ export function StudentProfileModal() {
               </div>
             </div>
           )}
+
         </div>
       </div>
     </div>
