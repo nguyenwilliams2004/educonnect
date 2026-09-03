@@ -5,17 +5,20 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 // Đọc thông tin kết nối từ .env.local hoặc .env
 // =============================================================================
 
-const envUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const envAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+// Thông tin dự án Supabase Live mặc định của HanTutor
+const LIVE_SUPABASE_URL = 'https://wopxkprvcyvpmmrtrpvd.supabase.co';
+const LIVE_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvcHhrcHJ2Y3l2cG1tcnRycHZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg0MTQwNDMsImV4cCI6MjEwMzk5MDA0M30.ZkcOisR49i-bjuVp851RFS83ViP9jnQnGgodDFjDDdE';
+
+const envUrl = import.meta.env.VITE_SUPABASE_URL || LIVE_SUPABASE_URL;
+const envAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || LIVE_SUPABASE_ANON_KEY;
 
 /**
  * Kiểm tra xem cấu hình Supabase đã được điền thông tin dự án thực tế hay chưa.
- * Trả về false nếu URL còn chứa placeholder hoặc rỗng.
  */
 export const isSupabaseConfigured = (): boolean => {
   if (!envUrl || !envAnonKey) return false;
   if (envUrl.includes('[YOUR_PROJECT_REF]') || envAnonKey.includes('[YOUR_ANON_KEY]')) return false;
-  if (envUrl.includes('your-project-id')) return false;
+  if (envUrl.includes('placeholder.supabase.co')) return false;
   try {
     const parsed = new URL(envUrl);
     return parsed.protocol === 'https:' || parsed.protocol === 'http:';
@@ -24,12 +27,8 @@ export const isSupabaseConfigured = (): boolean => {
   }
 };
 
-// Sử dụng URL hợp lệ để createClient không throw error lúc khởi động web
-const defaultDummyUrl = 'https://placeholder.supabase.co';
-const defaultDummyKey = 'sb_publishable_dummy_key_placeholder_for_local_dev';
-
-const activeUrl = isSupabaseConfigured() ? envUrl : defaultDummyUrl;
-const activeKey = isSupabaseConfigured() ? envAnonKey : defaultDummyKey;
+const activeUrl = isSupabaseConfigured() ? envUrl : LIVE_SUPABASE_URL;
+const activeKey = isSupabaseConfigured() ? envAnonKey : LIVE_SUPABASE_ANON_KEY;
 
 if (!isSupabaseConfigured() && import.meta.env.DEV) {
   console.info(
