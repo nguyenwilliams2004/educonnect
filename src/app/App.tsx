@@ -1,4 +1,4 @@
-﻿import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router';
 import {
   DataContext,
@@ -100,6 +100,18 @@ function PageLoadingFallback() {
   );
 }
 
+import { trackPageView } from '../lib/analytics';
+
+function RouteChangeTracker() {
+  const location = useLocation();
+
+  React.useEffect(() => {
+    trackPageView(location.pathname + location.search);
+  }, [location.pathname, location.search]);
+
+  return null;
+}
+
 // ==========================================
 // ROOT APP LAYOUT & ROUTING
 // ==========================================
@@ -109,6 +121,7 @@ export function AppLayout() {
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans flex flex-col relative">
+      <RouteChangeTracker />
       {!isAdmin && <Navbar />}
 
       <main className="flex-1">

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import AiChatWidget, { AiChatLogoIcon, MessengerLogoIcon } from './AiChatWidget';
+import { trackContactClick, trackEvent } from '../../lib/analytics';
 
 export default function FloatingContactDock() {
   const [isAiChatOpen, setIsAiChatOpen] = useState(false);
@@ -14,6 +15,7 @@ export default function FloatingContactDock() {
           href="https://m.me/61593472564468"
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => trackContactClick('messenger')}
           className="group relative w-13 h-13 sm:w-14 sm:h-14 rounded-full shadow-lg hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center cursor-pointer p-0.5"
           title="Nhắn tin trực tiếp qua Facebook Messenger"
         >
@@ -35,7 +37,11 @@ export default function FloatingContactDock() {
         {/* 2. Nút Trợ lý AI Hỏi Đáp Nghiệp Vụ (Logo màu cam theo yêu cầu) */}
         <button
           type="button"
-          onClick={() => setIsAiChatOpen(!isAiChatOpen)}
+          onClick={() => {
+            const nextState = !isAiChatOpen;
+            setIsAiChatOpen(nextState);
+            if (nextState) trackEvent('ai_chat_open');
+          }}
           className="group relative w-13 h-13 sm:w-14 sm:h-14 rounded-full shadow-xl hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center cursor-pointer p-0.5"
           title="Hỏi đáp cùng Trợ lý AI HanTutor"
         >
