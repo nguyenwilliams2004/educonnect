@@ -42,7 +42,7 @@ function enrollmentToTrial(row: any, tutors: any[], isTeacher = false): StudentT
       ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400'
       : (tutor?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400'),
     badgeSubject: tutor?.badgeSubject || tutor?.subjects?.[0] || row.class_title || 'Môn học',
-    headline: row.notes || tutor?.headline,
+    headline: row.note || row.notes || tutor?.headline,
     rolePrefix: isTeacher ? 'Học sinh' : tutor?.rolePrefix,
     displayName: isTeacher ? row.student_name : (tutor?.displayName || tutor?.name),
     phone: isTeacher ? (row.parent_phone || '0987654321') : tutor?.phone,
@@ -61,7 +61,7 @@ function enrollmentToTrial(row: any, tutors: any[], isTeacher = false): StudentT
     studentPhone: row.parent_phone,
     studentName: row.student_name,
     enrollmentId: row.id,
-    slotDay: row.slot_day || (row.notes && row.notes.includes('Khung giờ:') ? row.notes.replace('Khung giờ:', '').trim() : undefined),
+    slotDay: row.slot_day || ((row.note || row.notes) && (row.note || row.notes).includes('Khung giờ:') ? (row.note || row.notes).replace('Khung giờ:', '').trim() : undefined),
     slotTime: row.slot_time,
     slotShift: row.slot_shift,
   };
@@ -259,7 +259,7 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
           parent_phone: studentPhone,
           status: 'trial_booked',
           source_type: 'platform',
-          notes: slotText,
+          note: slotText,
         })
         .select()
         .single();
