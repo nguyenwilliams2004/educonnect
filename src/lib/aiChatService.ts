@@ -64,9 +64,9 @@ export function sanitizeTutorsForContext(tutors: any[]): SanitizedTutorContext[]
 // 2. Xây dựng System Instruction tối ưu hóa token cho tốc độ phản hồi cực nhanh
 export function buildSystemInstruction(tutors: any[]): string {
   const sanitizedTutors = sanitizeTutorsForContext(tutors);
-  
+
   // Rút gọn định dạng danh sách gia sư để giảm 70% token context, giúp LLM nhả chữ tức thì
-  const compactRoster = sanitizedTutors.slice(0, 20).map(t => 
+  const compactRoster = sanitizedTutors.slice(0, 20).map(t =>
     `- [ID:${t.id}] ${t.name} | Môn: ${t.subjects.join(', ')} | Học phí: ${t.hourlyRate} | Khu vực: ${t.location} | Tỷ lệ nhận lớp: ${t.successRate}%`
   ).join('\n');
 
@@ -201,10 +201,8 @@ export async function queryGeminiChatbot(
 
   // Danh sách model ưu tiên theo tốc độ phản hồi thực tế (sub-2s)
   const highSpeedModels = [
-    'gemini-3.5-flash',
     'gemini-3.6-flash',
     'gemini-3.7-flash',
-    'gemini-3.8-flash'
   ];
 
   const contents = [

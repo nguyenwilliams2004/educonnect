@@ -47,8 +47,8 @@ test('AI CHAT LLM - Tối ưu hóa tốc độ phản hồi bằng các model Fl
   const servicePath = path.join(rootDir, 'src', 'lib', 'aiChatService.ts');
   const serviceContent = fs.readFileSync(servicePath, 'utf8');
 
-  // Kiểm tra model: Ưu tiên gemini-3.5-flash và gemini-3.6-flash cho tốc độ phản hồi sub-2s
-  assert.ok(serviceContent.includes('gemini-3.5-flash'), 'Phải hỗ trợ gemini-3.5-flash');
+  // Kiểm tra model: Ưu tiên gemini-3.7-flash và gemini-3.6-flash
+  assert.ok(serviceContent.includes('gemini-3.7-flash'), 'Phải hỗ trợ gemini-3.7-flash');
   assert.ok(serviceContent.includes('gemini-3.6-flash'), 'Phải hỗ trợ gemini-3.6-flash');
 
   // Kiểm tra widget
