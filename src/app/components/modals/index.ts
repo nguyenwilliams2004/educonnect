@@ -6,4 +6,5 @@ export * from './TeacherWalletModal';
 export * from './TeacherProfileModal';
 export * from './ReviewModal';
 export * from './MyTrialsModal';
+export * from './StudentProfileModal';
 export * from './ModalContainer';

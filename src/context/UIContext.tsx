@@ -72,6 +72,12 @@ export interface UIContextType {
   setTeacherProfileModalTutorId: React.Dispatch<React.SetStateAction<string | number | null>>;
   openTeacherProfileModal: (tutorId?: string | number) => void;
   closeTeacherProfileModal: () => void;
+
+  // Student Profile Modal
+  isStudentProfileOpen: boolean;
+  setIsStudentProfileOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  openStudentProfileModal: () => void;
+  closeStudentProfileModal: () => void;
 }
 
 export const UIContext = createContext<UIContextType | null>(null);
@@ -110,6 +116,7 @@ export function UIProvider({ children }: { children: React.ReactNode }) {
 
   const [teacherWalletModalTutorId, setTeacherWalletModalTutorId] = useState<string | number | null>(null);
   const [teacherProfileModalTutorId, setTeacherProfileModalTutorId] = useState<string | number | null>(null);
+  const [isStudentProfileOpen, setIsStudentProfileOpen] = useState(false);
 
   // Callbacks memoized for maximum performance
   const openAuthModal = useCallback((view: 'login' | 'register' = 'login', defaultRole: 'student' | 'teacher' = 'student') => {
@@ -180,6 +187,14 @@ export function UIProvider({ children }: { children: React.ReactNode }) {
     setTeacherProfileModalTutorId(null);
   }, []);
 
+  const openStudentProfileModal = useCallback(() => {
+    setIsStudentProfileOpen(true);
+  }, []);
+
+  const closeStudentProfileModal = useCallback(() => {
+    setIsStudentProfileOpen(false);
+  }, []);
+
   const uiContextValue = useMemo<UIContextType>(() => ({
     authModalState,
     setAuthModalState,
@@ -223,7 +238,12 @@ export function UIProvider({ children }: { children: React.ReactNode }) {
     teacherProfileModalTutorId,
     setTeacherProfileModalTutorId,
     openTeacherProfileModal,
-    closeTeacherProfileModal
+    closeTeacherProfileModal,
+
+    isStudentProfileOpen,
+    setIsStudentProfileOpen,
+    openStudentProfileModal,
+    closeStudentProfileModal
   }), [
     authModalState,
     contactZaloModalTutor,
@@ -234,6 +254,7 @@ export function UIProvider({ children }: { children: React.ReactNode }) {
     reviewModalState,
     teacherWalletModalTutorId,
     teacherProfileModalTutorId,
+    isStudentProfileOpen,
     openAuthModal,
     closeAuthModal,
     openContactZaloModal,
@@ -250,7 +271,9 @@ export function UIProvider({ children }: { children: React.ReactNode }) {
     openTeacherWalletModal,
     closeTeacherWalletModal,
     openTeacherProfileModal,
-    closeTeacherProfileModal
+    closeTeacherProfileModal,
+    openStudentProfileModal,
+    closeStudentProfileModal
   ]);
 
   return (

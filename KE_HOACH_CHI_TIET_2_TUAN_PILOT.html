@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kế Hoạch Tác Chiến Chi Tiết 02 Tuần Đầu (Day 1 - Day 12) • HanTutor Pilot Ready</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700;900&family=Roboto:wght@300;400;500;700&display=swap');
+
+    :root {
+      --primary: #0f172a;
+      --primary-accent: #2563eb;
+      --secondary: #334155;
+      --border: #cbd5e1;
+      --bg-header: #f8fafc;
+      --success: #16a34a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.65;
+      color: #1e293b;
+      background-color: #f1f5f9;
+      padding: 40px 20px;
+    }
+
+    .doc-container {
+      max-width: 960px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 50px 65px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .header-box {
+      border-bottom: 2px solid #0f172a;
+      padding-bottom: 20px;
+      margin-bottom: 28px;
+    }
+
+    h1 {
+      font-family: 'Merriweather', serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: #0f172a;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    h2 {
+      font-size: 14.5px;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+    }
+
+    .meta-box {
+      background-color: #f8fafc;
+      border-left: 4px solid #2563eb;
+      padding: 12px 18px;
+      font-size: 13.5px;
+      color: #334155;
+      border-radius: 0 4px 4px 0;
+      margin-top: 14px;
+    }
+
+    .meta-box p {
+      margin-bottom: 5px;
+    }
+    .meta-box p:last-child {
+      margin-bottom: 0;
+    }
+
+    h3.section-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #0f172a;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 6px;
+      margin-top: 36px;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .day-card {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      overflow: hidden;
+      page-break-inside: avoid;
+    }
+
+    .day-header {
+      background: #0f172a;
+      color: #ffffff;
+      padding: 10px 18px;
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .day-header .tag {
+      font-size: 11.5px;
+      background: rgba(255, 255, 255, 0.18);
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-weight: 500;
+    }
+
+    .day-body {
+      padding: 16px 20px;
+    }
+
+    .session-title {
+      font-weight: 700;
+      color: #0f172a;
+      font-size: 13.5px;
+      margin-top: 8px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .session-title::before {
+      content: "•";
+      color: #2563eb;
+      font-size: 18px;
+    }
+
+    ul.task-list {
+      list-style-type: none;
+      margin-left: 0;
+      margin-bottom: 12px;
+    }
+
+    ul.task-list li {
+      position: relative;
+      padding-left: 24px;
+      margin-bottom: 6px;
+      font-size: 13.5px;
+      line-height: 1.55;
+    }
+
+    ul.task-list li input[type="checkbox"] {
+      position: absolute;
+      left: 2px;
+      top: 3px;
+      cursor: pointer;
+    }
+
+    .code-tag {
+      font-family: Consolas, Monaco, "Courier New", monospace;
+      background: #f1f5f9;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12.5px;
+      color: #0f172a;
+      border: 1px solid #e2e8f0;
+    }
+
+    .file-ref {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 2px;
+      margin-bottom: 10px;
+      background: #f8fafc;
+      padding: 4px 10px;
+      border-left: 3px solid #94a3b8;
+      border-radius: 0 4px 4px 0;
+    }
+
+    .dod-box {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-left: 3px solid #16a34a;
+      padding: 8px 14px;
+      font-size: 12.5px;
+      color: #166534;
+      border-radius: 0 4px 4px 0;
+      margin-top: 10px;
+    }
+
+    .print-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #0f172a;
+      color: #ffffff;
+      padding: 10px 18px;
+      border-radius: 25px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+      border: none;
+      z-index: 999;
+    }
+
+    .print-btn:hover {
+      background: #1e293b;
+    }
+
+    @media print {
+      body {
+        background: #fff;
+        padding: 0;
+      }
+      .doc-container {
+        border: none;
+        box-shadow: none;
+        padding: 0;
+        max-width: 100%;
+      }
+      .print-btn {
+        display: none !important;
+      }
+      .day-card {
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <button class="print-btn" onclick="window.print()">
+    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+    In / Xuất PDF (Ctrl + P)
+  </button>
+
+  <div class="doc-container">
+    <div class="header-box">
+      <h1>Kế Hoạch Tác Chiến Chi Tiết 02 Tuần Đầu (Day 1 - Day 12)</h1>
+      <h2>Dự án HanTutor • Mục tiêu: Vận hành trơn tru đợt thử nghiệm kín (Closed Pilot) cho 10–20 Giáo viên</h2>
+
+      <div class="meta-box">
+        <p><strong>Cường độ làm việc:</strong> Full-time tiêu chuẩn (~6.5 – 7 giờ/ngày • 06 ngày/tuần • Tổng cộng 12 ngày tác chiến = 80 giờ).</p>
+        <p><strong>Phân bổ ngày:</strong> Tuần 1 (Day 1 – Day 6): Hoàn thiện hạ tầng Live, triệt tiêu 5 điểm nghẽn, Google Auth, Domain DNS & VietQR chuẩn Napas.</p>
+        <p><strong>Phân bổ ngày:</strong> Tuần 2 (Day 7 – Day 12): Chuyển đổi mã nguồn sang Supabase Live SDK, Ma trận lịch rảnh, Upload KYC và Mở đợt Pilot 10–20 giáo viên.</p>
+        <p><strong>Cơ chế phối hợp:</strong> Phân định rõ nhiệm vụ bạn cấu hình trực tiếp (Dashboard/Console) và nhiệm vụ chỉnh sửa mã nguồn codebase.</p>
+      </div>
+    </div>
+
+    <!-- ==================== TUẦN 1 ==================== -->
+    <h3 class="section-title">
+      <span>Tuần 1: Hạ Tầng Live, Triệt Tiêu 5 Điểm Nghẽn, Google Auth & Chuẩn Hóa VietQR</span>
+      <span style="font-size: 12px; color: #2563eb; font-weight: 500;">Day 1 → Day 6 (40 giờ)</span>
+    </h3>
+
+    <!-- DAY 1 -->
+    <div class="day-card">
+      <div class="day-header">
+        <span>Day 1 (Thứ 2): Chuẩn hóa package.json & Khởi tạo Dự án Supabase Production</span>
+        <span class="tag">Hạ tầng & Setup</span>
+      </div>
+      <div class="day-body">
+        <div class="session-title">Buổi Sáng (08:30 - 12:00): Chuẩn hóa tên dự án & Khởi tạo Supabase Project</div>
+        <ul class="task-list">
+          <li><input type="checkbox" checked> Sửa <span class="code-tag">package.json</span>: Đổi <span class="code-tag">"name": "@figma/my-make-file"</span> thành <span class="code-tag">"name": "hantutor-web"</span>.</li>
+          <li><input type="checkbox" checked> Đăng nhập <a href="https://supabase.com/dashboard" target="_blank">supabase.com/dashboard</a>, tạo New Project: Tên <strong>hantutor-production</strong>, khu vực <strong>Singapore (ap-southeast-1)</strong>, đặt mật khẩu database an toàn.</li>
+          <li><input type="checkbox" checked> Lấy thông tin <strong>Project URL</strong> và <strong>Anon Key (Public)</strong> trong Project Settings -> API.</li>
+        </ul>
+        <div class="file-ref">📁 File liên quan: <span class="code-tag">package.json</span>, <span class="code-tag">.env.local</span>, <span class="code-tag">src/lib/supabase.ts</span></div>
+
+        <div class="session-title">Buổi Chiều (13:30 - 17:00): Chạy Database Migration & Khởi tạo Storage Buckets</div>
+        <ul class="task-list">
+          <li><input type="checkbox" checked> Mở <strong>SQL Editor</strong> trên Supabase Dashboard, copy toàn bộ nội dung file <span class="code-tag">supabase/schema.sql</span> và bấm <strong>RUN</strong>.</li>
+          <li><input type="checkbox" checked> Kiểm tra 09 bảng quan hệ được tạo: <span class="code-tag">users</span>, <span class="code-tag">profiles</span>, <span class="code-tag">availability_slots</span>, <span class="code-tag">enrollments</span>, <span class="code-tag">payout_requests</span>, <span class="code-tag">reviews</span>, <span class="code-tag">audit_logs</span>, <span class="code-tag">security_rate_limits</span>, <span class="code-tag">daily_stats</span>.</li>
+          <li><input type="checkbox" checked> Vào <strong>Storage</strong> trên Supabase, tạo 02 Buckets:
+            <br>• Bucket 1: <span class="code-tag">tutor-avatars</span> (Đặt <strong>Public = ON</strong>, dung lượng tối đa 5MB, định dạng: <span class="code-tag">image/*</span>).
+            <br>• Bucket 2: <span class="code-tag">tutor-kyc-docs</span> (Đặt <strong>Public = OFF (Private)</strong>, dung lượng tối đa 10MB, định dạng: <span class="code-tag">image/*,application/pdf</span>).
+          </li>
+          <li><input type="checkbox" checked> Cập nhật biến môi trường vào file <span class="code-tag">.env.local</span>:
+            <br><span class="code-tag">VITE_SUPABASE_URL=https://wopxkprvcyvpmmrtrpvd.supabase.co</span>
+            <br><span class="code-tag">VITE_SUPABASE_ANON_KEY=[KEY_DA_CAP_NHAT]</span>
+          </li>
+        </ul>
+        <div class="dod-box">
+          <strong>DoD Day 1:</strong> Database PostgreSQL Live đã chạy xong schema; 02 bucket avatars/kyc đã sẵn sàng; <span class="code-tag">package.json</span> được đổi tên đúng chuẩn; <span class="code-tag">npm run build</span> hoàn tất không lỗi.
+        </div>
+      </div>
+    </div>
+
+    <!-- DAY 2 -->
+    <div class="day-card">
+      <div class="day-header">
+        <span>Day 2 (Thứ 3): Nạp Seeder Dữ Liệu Thật UUID v4 & Chuẩn Hóa Mock Data</span>
+        <span class="tag">Database & Models</span>
+      </div>
+      <div class="day-body">
+        <div class="session-title">Buổi Sáng (08:30 - 12:00): Chạy SQL Seeder mẫu trên Live Database</div>
+        <ul class="task-list">
+          <li><input type="checkbox"> Mở file <span class="code-tag">supabase/seed.sql</span>, kiểm tra 10 hồ sơ giáo viên thực tế (Cô Sương Mai, Thầy Thành Tài, Thầy Minh Thắng,...).</li>
+          <li><input type="checkbox"> Mở Supabase <strong>SQL Editor</strong>, dán toàn bộ nội dung <span class="code-tag">supabase/seed.sql</span> và bấm <strong>RUN</strong>.</li>
+          <li><input type="checkbox"> Vào <strong>Table Editor</strong> -> bảng <span class="code-tag">users</span> và <span class="code-tag">profiles</span>: Kiểm tra 10 dòng dữ liệu giáo viên hiển thị chuẩn xác với UUID xác định.</li>
+        </ul>
+        <div class="file-ref">📁 File liên quan: <span class="code-tag">supabase/seed.sql</span>, <span class="code-tag">src/app/data.ts</span></div>
+
+        <div class="session-title">Buổi Chiều (13:30 - 17:00): Đồng bộ ID chuẩn UUID vào src/app/data.ts</div>
+        <ul class="task-list">
+          <li><input type="checkbox"> Chuyển đổi các ID dạng chuỗi cũ (<span class="code-tag">'t1'</span>, <span class="code-tag">'t2'</span>,...) trong <span class="code-tag">src/app/data.ts</span> sang UUID chuẩn tương ứng với <span class="code-tag">supabase/seed.sql</span>:
+            <br>• t1 -> <span class="code-tag">00000000-0000-0000-0000-000000000001</span>
+            <br>• t2 -> <span class="code-tag">00000000-0000-0000-0000-000000000002</span>
+            <br>(Giữ slug cũ để URL thân thiện như <span class="code-tag">/giao-vien/co-suong-mai-ngu-van</span> không bị vỡ).
+          </li>
+          <li><input type="checkbox"> Kiểm tra hàm kiểm tra UUID <span class="code-tag">isUUID()</span> trong <span class="code-tag">src/context/BookingContext.tsx</span> hoạt động đồng nhất với tất cả các thao tác ghi dữ liệu.</li>
+        </ul>
+        <div class="dod-box">
+          <strong>DoD Day 2:</strong> 10 hồ sơ giáo viên mẫu có mặt trên PostgreSQL Live; Mã nguồn Frontend không còn sử dụng ID xung đột; Click xem hồ sơ giáo viên mở đúng URL theo cả UUID lẫn slug.
+        </div>
+      </div>
+    </div>
+
+    <!-- DAY 3 -->
+    <div class="day-card">
+      <div class="day-header">
+        <span>Day 3 (Thứ 4): Tên Miền Tùy Chỉnh, Cấu Hình DNS Vercel & Resend Email Warming</span>
+        <span class="tag">DevOps & Email</span>
+      </div>
+      <div class="day-body">
+        <div class="session-title">Buổi Sáng (08:30 - 12:00): Mua Tên Miền & Trỏ DNS về Vercel</div>
+        <ul class="task-list">
+          <li><input type="checkbox"> Mua tên miền chính thức cho HanTutor (ví dụ: <span class="code-tag">hantutor.vn</span> hoặc <span class="code-tag">hantutor.edu.vn</span>).</li>
+          <li><input type="checkbox"> Đăng nhập Vercel Dashboard -> Chọn project HanTutor -> Settings -> <strong>Domains</strong>: Thêm tên miền tùy chỉnh.</li>
+          <li><input type="checkbox"> Mở trang quản trị DNS tại nhà cung cấp tên miền, trỏ 02 bản ghi:
+            <br>• CNAME: <span class="code-tag">cname.vercel-dns.com</span> (cho subdomain <span class="code-tag">www</span>)
+            <br>• A Record: <span class="code-tag">76.76.21.21</span> (cho apex domain)
+          </li>
+          <li><input type="checkbox"> Kiểm tra chứng chỉ SSL Vercel được cấp tự động (Valid HTTPS).</li>
+        </ul>
+        <div class="file-ref">📁 File liên quan: Trang quản trị DNS nhà cung cấp, Vercel Dashboard</div>
+
+        <div class="session-title">Buổi Chiều (13:30 - 17:00): Đăng Ký Resend & Cấu Hình Xác Thực Email (DKIM, SPF, DMARC)</div>
+        <ul class="task-list">
+          <li><input type="checkbox"> Đăng ký tài khoản tại <a href="https://resend.com" target="_blank">resend.com</a>.</li>
+          <li><input type="checkbox"> Vào mục <strong>Domains</strong> -> <strong>Add Domain</strong>: Nhập tên miền <span class="code-tag">hantutor.vn</span>.</li>
+          <li><input type="checkbox"> Copy chính xác 03 bản ghi DNS Resend cung cấp (SPF, DKIM, DMARC/MX) vào trang quản trị DNS tên miền để hệ thống tiến hành kiểm duyệt trong 24h.</li>
+          <li><input type="checkbox"> Tạo 01 Resend API Key lưu tạm vào ghi chú bảo mật cá nhân (dùng cho tuần gửi email giao dịch tự động).</li>
+        </ul>
+        <div class="dod-box">
+          <strong>DoD Day 3:</strong> Tên miền truy cập được vào web qua giao thức HTTPS; Các bản ghi DNS Resend đã được cập nhật đầy đủ và hiển thị trạng thái "Pending/Verified".
+        </div>
+      </div>
+    </div>
+
+    <!-- DAY 4 -->
+    <div class="day-card">
+      <div class="day-header">
+        <span>Day 4 (Thứ 5): Google Cloud OAuth 2.0 & Tích Hợp Đăng Nhập 1-Chạm</span>
+        <span class="tag">Xác thực Auth</span>
+      </div>
+      <div class="day-body">
+        <div class="session-title">Buổi Sáng (08:30 - 12:00): Cấu hình Google Cloud Console & Supabase Auth Provider</div>
+        <ul class="task-list">
+          <li><input type="checkbox"> Truy cập <a href="https://console.cloud.google.com" target="_blank">console.cloud.google.com</a>, tạo Project mới: <strong>HanTutor Web</strong>.</li>
+          <li><input type="checkbox"> Cấu hình <strong>OAuth Consent Screen</strong>: Điền tên ứng dụng HanTutor, email hỗ trợ, logo.</li>
+          <li><input type="checkbox"> Tạo <strong>OAuth 2.0 Client ID (Web Application)</strong>:
+            <br>• Authorized JavaScript origins: <span class="code-tag">https://[YOUR_PROJECT_REF].supabase.co</span>, <span class="code-tag">http://localhost:5173</span>, <span class="code-tag">https://hantutor.vn</span>
+            <br>• Authorized redirect URIs: <span class="code-tag">https://[YOUR_PROJECT_REF].supabase.co/auth/v1/callback</span>
+          </li>
+          <li><input type="checkbox"> Mở Supabase Dashboard -> <strong>Authentication</strong> -> <strong>Providers</strong> -> Bật <strong>Google</strong>, dán <strong>Client ID</strong> và <strong>Client Secret</strong> vừa tạo.</li>
+        </ul>
+        <div class="file-ref">📁 File liên quan: Google Cloud Console, Supabase Auth Settings</div>
+
+        <div class="session-title">Buổi Chiều (13:30 - 17:00): Kết nối Đăng nhập Google vào AuthModal & AuthContext</div>
+        <ul class="task-list">
+          <li><input type="checkbox"> Mở file <span class="code-tag">src/context/AuthContext.tsx</span>, thêm phương thức đăng nhập bằng Google OAuth thật:
+            <br><span class="code-tag">supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } })</span>
+          </li>
+          <li><input type="checkbox"> Lắng nghe sự kiện <span class="code-tag">supabase.auth.onAuthStateChange</span> để tự động đồng bộ session thật vào <span class="code-tag">currentSession</span> khi người dùng đăng nhập bằng Google.</li>
+          <li><input type="checkbox"> Thêm nút "Tiếp tục với Google" nổi bật vào <span class="code-tag">src/app/components/modals/AuthModal.tsx</span> cho cả 2 luồng Học sinh và Giáo viên.</li>
+          <li><input type="checkbox"> Kiểm thử thực tế: Bấm "Tiếp tục với Google" -> Chọn email Google -> Trở về trang web với avatar và họ tên thật từ Google.</li>
+        </ul>
+        <div class="dod-box">
+          <strong>DoD Day 4:</strong> Đăng nhập Google 1-chạm hoạt động thành công trên Localhost và Production; Thông tin người dùng đồng bộ tự động vào bảng <span class="code-tag">users</span> của Supabase.
+        </div>
+      </div>
+    </div>
+
+    <!-- DAY 5 -->
+    <div class="day-card">
+      <div class="day-header">
+        <span>Day 5 (Thứ 6): Chuẩn Hóa API Cổng VietQR Chuẩn Napas 24/7 & CheckoutModal</span>
+        <span class="tag">Thanh toán</span>
+      </div>
+      <div class="day-body">
+        <div class="session-title">Buổi Sáng (08:30 - 12:00): Tích hợp chuẩn VietQR động Napas 24/7</div>
+        <ul class="task-list">
+          <li><input type="checkbox"> Mở <span class="code-tag">src/app/components/modals/CheckoutModal.tsx</span>, thay thế đường link mã QR cũ bằng chuẩn cú pháp VietQR quốc gia:
+            <br><span class="code-tag">https://img.vietqr.io/image/{bankBin}-{accountNumber}-{template}.png?amount={amount}&addInfo={addInfo}&accountName={accountName}</span>
+          </li>
+          <li><input type="checkbox"> Chuẩn hóa mã BIN các ngân hàng phổ biến (MBBank: 970422, Vietcombank: 970436, Techcombank: 970407, VPBank: 970432, BIDV: 970418,...).</li>
+          <li><input type="checkbox"> Cú pháp chuyển khoản tự động gán nhãn: <span class="code-tag">HT_{ENROLLMENT_ID_6_SO}</span> để phục vụ việc tự động bắt giao dịch bằng webhook ở Tuần 4.</li>
+        </ul>
+        <div class="file-ref">📁 File liên quan: <span class="code-tag">src/app/components/modals/CheckoutModal.tsx</span>, <span class="code-tag">src/context/WalletContext.tsx</span></div>
+
+        <div class="session-title">Buổi Chiều (13:30 - 17:00): Kiểm thử quét mã VietQR trên ứng dụng ngân hàng thật</div>
+        <ul class="task-list">
+          <li><input type="checkbox"> Mở ứng dụng ngân hàng thực tế (MBBank, Vietcombank,...), quét thử mã QR hiển thị trên <span class="code-tag">CheckoutModal</span>.</li>
+          <li><input type="checkbox"> Kiểm tra: Tên tài khoản thụ hưởng, số tài khoản, số tiền và nội dung chuyển tiền điền tự động chính xác 100%, không yêu cầu người dùng phải gõ tay bất kỳ ký tự nào.</li>
+          <li><input type="checkbox"> Thêm nút "Sao chép số tài khoản" và "Sao chép cú pháp chuyển tiền" tiện lợi dưới mã QR.</li>
+        </ul>
+        <div class="dod-box">
+          <strong>DoD Day 5:</strong> Mã VietQR tạo động đúng chuẩn Napas 24/7; Quét thử trên App ngân hàng thật tự động nhận diện đúng số tiền và nội dung chuyển tiền; Không còn lỗi sai định dạng QR.
+        </div>
+      </div>
+    </div>
+
+    <!-- DAY 6 -->
+    <div class="day-card">
+      <div class="day-header">
+        <span>Day 6 (Thứ 7): Vercel Edge Middleware Cho Social Bot SEO & Rà Soát Tuần 1</span>
+        <span class="tag">SEO & Kiểm thử</span>
+      </div>
+      <div class="day-body">
+        <div class="session-title">Buổi Sáng (08:30 - 12:00): Cấu hình Edge Middleware phục vụ SEO Bot Zalo/Facebook/Google</div>
+        <ul class="task-list">
+          <li><input type="checkbox"> Do website là Single Page Application (Vite React), tạo file <span class="code-tag">api/og.ts</span> hoặc cấu hình Vercel Serverless Function để nhận diện User-Agent của bot: <span class="code-tag">facebookexternalhit</span>, <span class="code-tag">zalo-bot</span>, <span class="code-tag">Googlebot</span>.</li>
+          <li><input type="checkbox"> Khi bot quét link hồ sơ gia sư <span class="code-tag">/giao-vien/:id</span>: Trả về thẻ HTML OpenGraph động:
+            <br>• <span class="code-tag">og:title</span>: [Tên Giáo Viên] - Giáo viên [Môn] trên HanTutor
+            <br>• <span class="code-tag">og:description</span>: Dòng giới thiệu / Slogan giáo viên
+            <br>• <span class="code-tag">og:image</span>: Ảnh đại diện giáo viên
+          </li>
+          <li><input type="checkbox"> Dán link giáo viên thử nghiệm lên Zalo chat và Facebook Debugger để kiểm tra ảnh thumbnail và tiêu đề hiển thị đẹp mắt.</li>
+        </ul>
+        <div class="file-ref">📁 File liên quan: <span class="code-tag">index.html</span>, <span class="code-tag">vercel.json</span></div>
+
+        <div class="session-title">Buổi Chiều (13:30 - 17:00): Tổng rà soát 05 điểm nghẽn & Đóng gói Tuần 1</div>
+        <ul class="task-list">
+          <li><input type="checkbox"> Kiểm tra danh sách 05 điểm nghẽn: (1) package.json chuẩn (2) UUID chuẩn (3) VietQR Napas (4) Supabase Auth Sync (5) Live DB. Đảm bảo đạt 100%.</li>
+          <li><input type="checkbox"> Chạy <span class="code-tag">npm run build</span> đảm bảo 0 lỗi biên dịch.</li>
+          <li><input type="checkbox"> Đẩy code lên GitHub: <span class="code-tag">git push origin main</span> để Vercel tự động deploy bản live mới nhất.</li>
+        </ul>
+        <div class="dod-box">
+          <strong>DoD Tuần 1:</strong> 100% 05 điểm nghẽn kỹ thuật được xử lý triệt để; Bản Live trên Vercel chạy ổn định trên tên miền chính; Đăng nhập Google hoạt động chuẩn xác; Chia sẻ link gia sư lên Zalo/FB hiển thị preview thẻ bài giảng chuyên nghiệp.
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ==================== TUẦN 2 ==================== -->
+    <h3 class="section-title">
+      <span>Tuần 2: Quản Lý Lịch Rảnh (Slots), Đăng Ký Gia Sư KYC & Khởi Động Đợt Pilot Test</span>
+      <span style="font-size: 12px; color: #16a34a; font-weight: 500;">Day 7 → Day 12 (40 giờ)</span>
+    </h3>
+
+    <!-- DAY 7 -->
+    <div class="day-card">
+      <div class="day-header">
+        <span>Day 7 (Thứ 2): Chuyển Đổi TutorContext Sang Truy Vấn Supabase SDK Trực Tiếp</span>
+        <span class="tag">Refactor Data</span>
+      </div>
+      <div class="day-body">
+        <div class="session-title">Buổi Sáng (08:30 - 12:00): Tái cấu trúc TutorContext tải danh sách gia sư Live</div>
+        <ul class="task-list">
+          <li><input type="checkbox"> Mở <span class="code-tag">src/context/TutorContext.tsx</span>: Thay thế việc đọc mảng <span class="code-tag">mockTutors</span> tĩnh bằng hàm truy vấn PostgreSQL:
+            <br><span class="code-tag">supabase.from('profiles').select('*, users(full_name, email, phone)').order('rating', { ascending: false })</span>
+          </li>
+          <li><input type="checkbox"> Xây dựng mapper chuẩn hóa: Ánh xạ cấu trúc bảng <span class="code-tag">profiles</span> sang interface <span class="code-tag">TutorType</span> mà các trang giao diện đang dùng.</li>
+          <li><input type="checkbox"> Bổ sung trạng thái <span class="code-tag">isLoading</span> và hiệu ứng Skeleton Loading trên thẻ giáo viên khi đang tải dữ liệu.</li>
+        </ul>
+        <div class="file-ref">📁 File liên quan: <span class="code-tag">src/context/TutorContext.tsx</span>, <span class="code-tag">src/context/DataContext.tsx</span></div>
+
+        <div class="session-title">Buổi Chiều (13:30 - 17:00): Tích hợp bộ lọc tìm kiếm & Phân trang từ Database</div>
+        <ul class="task-list">
+          <li><input type="checkbox"> Cập nhật hàm <span class="code-tag">fetchTutorsPage(page, filters)</span>: Lọc theo môn học (<span class="code-tag">contains('subjects', [filter])</span>), lọc theo hình thức (<span class="code-tag">eq('online', true)</span>), lọc theo quận/huyện.</li>
+          <li><input type="checkbox"> Đảm bảo tốc độ truy vấn trên Supabase dưới <strong>300ms</strong> cho trang <span class="code-tag">FindTutorsPage</span>.</li>
+        </ul>
+        <div class="dod-box">
+          <strong>DoD Day 7:</strong> Trang chủ và Trang tìm kiếm gia sư tải 100% dữ liệu từ Supabase Live; Bộ lọc môn học, hình thức và thanh tìm kiếm hoạt động mượt mà với dữ liệu thật.
+        </div>
+      </div>
+    </div>
+
+    <!-- DAY 8 -->
+    <div class="day-card">
+      <div class="day-header">
+        <span>Day 8 (Thứ 3): Xây Dựng Ma Trận Lịch Rảnh Lưu Bảng availability_slots</span>
+        <span class="tag">Lịch dạy 1-1</span>
+      </div>
+      <div class="day-body">
+        <div class="session-title">Buổi Sáng (08:30 - 12:00): Giao diện chọn lịch rảnh trực quan cho Giáo viên</div>
+        <ul class="task-list">
+          <li><input type="checkbox"> Mở <span class="code-tag">src/app/components/modals/TeacherProfileModal.tsx</span>, thiết kế ma trận 7x3 (7 ngày trong tuần x 3 ca: Sáng 8h-11h30, Chiều 14h-17h30, Tối 18h30-21h30).</li>
+          <li><input type="checkbox"> Cho phép giáo viên click 1 chạm bật/tắt các khung giờ mình có thể nhận dạy kèm 1-1.</li>
+          <li><input type="checkbox"> Hiển thị trực quan với màu sắc thương hiệu HanTutor (Xanh dương / Trắng).</li>
+        </ul>
+        <div class="file-ref">📁 File liên quan: <span class="code-tag">TeacherProfileModal.tsx</span>, <span class="code-tag">TeacherDetailPage.tsx</span></div>
+
+        <div class="session-title">Buổi Chiều (13:30 - 17:00): Ghi và đọc dữ liệu từ bảng availability_slots</div>
+        <ul class="task-list">
+          <li><input type="checkbox"> Viết hàm đồng bộ lịch: Khi giáo viên bấm "Lưu hồ sơ", xóa slots cũ và chèn danh sách slots mới vào bảng <span class="code-tag">availability_slots</span> trên Supabase.</li>
+          <li><input type="checkbox"> Cập nhật bảng hiển thị lịch trống trên <span class="code-tag">TeacherDetailPage.tsx</span> để học sinh nhìn thấy chính xác các ô có dấu tích (✓) theo đúng dữ liệu trong cơ sở dữ liệu thật.</li>
+        </ul>
+        <div class="dod-box">
+          <strong>DoD Day 8:</strong> Giáo viên tự do cài đặt khung giờ rảnh hàng tuần; Lịch lưu trực tiếp vào bảng <span class="code-tag">availability_slots</span>; Trang chi tiết hiển thị chuẩn từng ca dạy rảnh.
+        </div>
+      </div>
+    </div>
+
+    <!-- DAY 9 -->
+    <div class="day-card">
+      <div class="day-header">
+        <span>Day 9 (Thứ 4): Tích Hợp Upload Ảnh Avatar & CCCD Lên Supabase Storage</span>
+        <span class="tag">Storage & Bảo mật</span>
+      </div>
+      <div class="day-body">
+        <div class="session-title">Buổi Sáng (08:30 - 12:00): Upload ảnh đại diện vào Bucket tutor-avatars (Public)</div>
+        <ul class="task-list">
+          <li><input type="checkbox"> Viết helper <span class="code-tag">uploadAvatar(file, userId)</span> sử dụng <span class="code-tag">supabase.storage.from('tutor-avatars').upload(...)</span>.</li>
+          <li><input type="checkbox"> Tích hợp vào <span class="code-tag">TutorRegistrationPage.tsx</span> và <span class="code-tag">TeacherProfileModal.tsx</span>: Khi giáo viên chọn ảnh từ máy tính hoặc điện thoại -> Nén ảnh dưới 1MB -> Upload lên bucket -> Lấy URL công khai cập nhật vào cột <span class="code-tag">avatar_url</span>.</li>
+          <li><input type="checkbox"> Kiểm tra ảnh hiển thị trọn vẹn khuôn mặt (không bị che nửa mặt) trên avatar tròn và thẻ card.</li>
+        </ul>
+        <div class="file-ref">📁 File liên quan: <span class="code-tag">TutorRegistrationPage.tsx</span>, <span class="code-tag">TeacherProfileModal.tsx</span>, <span class="code-tag">src/lib/storage.ts</span></div>
+
+        <div class="session-title">Buổi Chiều (13:30 - 17:00): Upload tài liệu nhạy cảm vào Bucket tutor-kyc-docs (Private)</div>
+        <ul class="task-list">
+          <li><input type="checkbox"> Viết helper <span class="code-tag">uploadKycDocument(file, userId, docType)</span> tải ảnh mặt trước CCCD, mặt sau CCCD và bằng cấp vào bucket riêng tư <span class="code-tag">tutor-kyc-docs/{userId}/...</span>.</li>
+          <li><input type="checkbox"> Kiểm tra bảo mật: Thử mở trực tiếp URL file KYC từ trình duyệt ẩn danh -> Nhận mã lỗi <strong>403 Forbidden</strong> (đảm bảo không ai đọc trộm được tài liệu ngoài Quản trị viên).</li>
+        </ul>
+        <div class="dod-box">
+          <strong>DoD Day 9:</strong> Giáo viên tải ảnh chân dung hiển thị tức thì; Ảnh CCCD và văn bằng tải lên bucket bảo mật riêng tư an toàn 100%.
+        </div>
+      </div>
+    </div>
+
+    <!-- DAY 10 -->
+    <div class="day-card">
+      <div class="day-header">
+        <span>Day 10 (Thứ 5): Hoàn Thiện Luồng Đăng Ký Giáo Viên & Kiểm Thử Toàn Trình (E2E)</span>
+        <span class="tag">Testing E2E</span>
+      </div>
+      <div class="day-body">
+        <div class="session-title">Buổi Sáng (08:30 - 12:00): Hoàn thiện Form đăng ký gia sư TutorRegistrationPage</div>
+        <ul class="task-list">
+          <li><input type="checkbox"> Kết nối toàn bộ các trường nhập liệu: Họ tên, Số điện thoại Zalo, Tiểu sử/Phương pháp giảng dạy, Môn học tiếp nhận, Bảng giá theo cấp lớp, Thông tin tài khoản ngân hàng nhận tiền.</li>
+          <li><input type="checkbox"> Thêm thông báo thành công rõ ràng sau khi nộp hồ sơ: Hướng dẫn giáo viên biết hồ sơ đang ở trạng thái chờ duyệt và có thể xem trước link hồ sơ công khai của mình.</li>
+        </ul>
+        <div class="file-ref">📁 File liên quan: <span class="code-tag">TutorRegistrationPage.tsx</span>, <span class="code-tag">TeacherDetailPage.tsx</span></div>
+
+        <div class="session-title">Buổi Chiều (13:30 - 17:00): Kiểm thử toàn trình (E2E) trên cả Máy Tính & Điện Thoại Di Động</div>
+        <ul class="task-list">
+          <li><input type="checkbox"> Đóng vai 01 giáo viên mới hoàn toàn: Đăng nhập Google -> Vào trang Đăng ký gia sư -> Điền thông tin, chọn lịch rảnh, upload avatar, upload CCCD -> Bấm Lưu.</li>
+          <li><input type="checkbox"> Mở điện thoại di động (iPhone / Android) truy cập vào link hồ sơ vừa tạo: Kiểm tra layout không bị tràn viền, chữ không bị vỡ font, avatar hiển thị sắc nét.</li>
+          <li><input type="checkbox"> Thử dùng tài khoản học sinh bấm nút "Học thử Zalo" -> Xác nhận thông tin học sinh được ghi nhận chuẩn xác.</li>
+        </ul>
+        <div class="dod-box">
+          <strong>DoD Day 10:</strong> Luồng từ đăng nhập Google -> tạo hồ sơ -> cài lịch rảnh -> nhận đơn học thử vận hành trơn tru 100% trên cả Desktop và Mobile. Sẵn sàng mở Pilot!
+        </div>
+      </div>
+    </div>
+
+    <!-- DAY 11 -->
+    <div class="day-card">
+      <div class="day-header">
+        <span>Day 11 (Thứ 6): Soạn Tài Liệu Hướng Dẫn & Mở Đợt Pilot Test (10–20 Giáo Viên)</span>
+        <span class="tag">Mở Pilot Test</span>
+      </div>
+      <div class="day-body">
+        <div class="session-title">Buổi Sáng (08:30 - 12:00): Soạn Cẩm nang Hướng dẫn 1 trang (Onboarding Quick-Guide)</div>
+        <ul class="task-list">
+          <li><input type="checkbox"> Soạn tài liệu hướng dẫn 3 bước ngắn gọn kèm ảnh minh họa gửi qua Zalo cho các giáo viên thử nghiệm:
+            <br>• <strong>Bước 1:</strong> Truy cập website HanTutor và bấm Đăng nhập bằng Google.
+            <br>• <strong>Bước 2:</strong> Vào mục "Hồ sơ giáo viên" -> Cập nhật ảnh đại diện, môn dạy, học phí và lịch rảnh.
+            <br>• <strong>Bước 3:</strong> Nhận link hồ sơ cá nhân để gửi cho phụ huynh hoặc chia sẻ lên Zalo.
+          </li>
+          <li><input type="checkbox"> Thiết lập kênh hỗ trợ phản hồi nhanh (Zalo nhóm hoặc tin nhắn trực tiếp) để giải đáp thắc mắc cho giáo viên tham gia pilot.</li>
+        </ul>
+        <div class="file-ref">📁 File liên quan: Tài liệu Onboarding gửi Zalo, Kênh phản hồi hỗ trợ</div>
+
+        <div class="session-title">Buổi Chiều (13:30 - 17:00): Chính thức phát link & Hỗ trợ 10–20 giáo viên tạo hồ sơ Live</div>
+        <ul class="task-list">
+          <li><input type="checkbox"> Gửi link chính thức cho nhóm 10–20 giáo viên pilot.</li>
+          <li><input type="checkbox"> Theo dõi trực tiếp trên Supabase Dashboard: Quan sát các dòng dữ liệu hồ sơ mới được ghi nhận vào bảng <span class="code-tag">users</span>, <span class="code-tag">profiles</span> và các ảnh được upload vào storage buckets.</li>
+          <li><input type="checkbox"> Trực tiếp hỗ trợ nếu giáo viên gặp trục trặc về thao tác chọn lịch hoặc upload ảnh.</li>
+        </ul>
+        <div class="dod-box">
+          <strong>DoD Day 11:</strong> Ít nhất 10–15 giáo viên thực tế đăng nhập và khởi tạo hồ sơ thành công trên hệ thống Live; Dữ liệu hồ sơ và lịch dạy được ghi nhận đầy đủ vào database.
+        </div>
+      </div>
+    </div>
+
+    <!-- DAY 12 -->
+    <div class="day-card">
+      <div class="day-header">
+        <span>Day 12 (Thứ 7): Thu Thập Phản Hồi, Tinh Chỉnh Nhanh & Nghiệm Thu Mốc 02 Tuần</span>
+        <span class="tag">Nghiệm thu Mốc Pilot</span>
+      </div>
+      <div class="day-body">
+        <div class="session-title">Buổi Sáng (08:30 - 12:00): Thu thập phản hồi thực tế từ nhóm giáo viên Pilot</div>
+        <ul class="task-list">
+          <li><input type="checkbox"> Thu thập ý kiến đánh giá từ giáo viên về: Trải nghiệm nhập liệu form có dễ hiểu không? Bảng chọn lịch rảnh có thuận tiện không? Trang hồ sơ cá nhân hiển thị trên điện thoại của họ có ưng ý không?</li>
+          <li><input type="checkbox"> Tổng hợp danh sách các điểm cần tinh chỉnh nhỏ (Quick Polish: câu từ nhãn, cỡ chữ, độ nhạy khi bấm nút trên mobile).</li>
+        </ul>
+        <div class="file-ref">📁 File liên quan: Báo cáo phản hồi Pilot, Ghi chú cải tiến</div>
+
+        <div class="session-title">Buổi Chiều (13:30 - 17:00): Tinh chỉnh nóng (Hotfix) & Nghiệm thu đạt mốc Pilot Test 2 Tuần</div>
+        <ul class="task-list">
+          <li><input type="checkbox"> Thực hiện các tinh chỉnh giao diện nhanh dựa trên phản hồi của giáo viên.</li>
+          <li><input type="checkbox"> Đối soát toàn bộ các tiêu chí nghiệm thu của Mốc 02 Tuần đầu theo đúng bản Kế hoạch tổng thể:
+            <br>• Đăng nhập Google thật: Đạt ✓
+            <br>• Hồ sơ giáo viên thật lưu trữ trên PostgreSQL: Đạt ✓
+            <br>• Lịch rảnh hàng tuần lưu bảng availability_slots: Đạt ✓
+            <br>• Upload avatar và CCCD vào Storage bảo mật: Đạt ✓
+            <br>• Có 10–20 giáo viên thực tế trải nghiệm thành công: Đạt ✓
+          </li>
+          <li><input type="checkbox"> Chuẩn bị sẵn sàng tâm thế để bước sang <strong>Tuần 3</strong>: Tự động khóa slot chống trùng lịch 05 phút và Admin duyệt hồ sơ KYC.</li>
+        </ul>
+        <div class="dod-box">
+          <strong>DoD Day 12 (Cột Mốc 02 Tuần Đầu):</strong> Hoàn thành 100% mục tiêu Mốc Chạy Thử Nghiệm Kín (Closed Pilot); Hệ sinh thái HanTutor chính thức có người dùng thật hoạt động trên môi trường Live Production; Toàn bộ nền tảng vận hành ổn định.
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

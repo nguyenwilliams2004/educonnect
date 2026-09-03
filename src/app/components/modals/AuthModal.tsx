@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { X, Users, Briefcase, GraduationCap } from 'lucide-react';
+import { X, Users, Briefcase, GraduationCap, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useData } from '../../../context/DataContext';
 import { useUI } from '../../../context/UIContext';
+import { supabase } from '../../../lib/supabase';
 
 export interface AuthModalProps {
   isOpen?: boolean;
@@ -26,28 +27,25 @@ export function AuthModal({
   const initialView = propInitialView || authModalState.view || 'login';
   const defaultRole = propDefaultRole || authModalState.defaultRole || 'student';
 
-  const [view, setView] = useState<'login' | 'register' | 'forgot_step1' | 'forgot_step2' | 'forgot_step3'>(initialView);
+  const [view, setView] = useState<'login' | 'register' | 'forgot_step1'>(initialView);
   const [role, setRole] = useState<'student' | 'teacher'>(defaultRole);
-  const [identifier, setIdentifier] = useState('');
+  
+  // Form fields
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [otp, setOtp] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [countdown, setCountdown] = useState(60);
+  const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
+  
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
     setView(initialView);
     setRole(defaultRole);
+    setErrorMessage(null);
+    setSuccessMessage(null);
   }, [initialView, defaultRole, isOpen]);
-
-  useEffect(() => {
-    let timer: any;
-    if (view === 'forgot_step2' && countdown > 0) {
-      timer = setInterval(() => setCountdown(c => c - 1), 1000);
-    }
-    return () => clearInterval(timer);
-  }, [view, countdown]);
 
   if (!isOpen) return null;
 
@@ -64,101 +62,238 @@ export function AuthModal({
     }
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  // ĐĂNG NHẬP THẬT QUA SUPABASE AUTH
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!identifier.trim() || !password.trim()) {
-      alert("Vui lòng nhập đầy đủ Email/Số điện thoại và Mật khẩu");
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    const cleanEmail = email.trim();
+    const cleanPass = password.trim();
+
+    if (!cleanEmail || !cleanPass) {
+      setErrorMessage('Vui lòng nhập đầy đủ Email và Mật khẩu.');
       return;
     }
 
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      const isPhone = !identifier.includes('@');
-      const tutorId = role === 'teacher' ? 't1' : 'usr_' + Date.now();
-      setCurrentSession({
-        userId: tutorId,
-        role: role === 'student' ? 'student' : 'teacher',
-        phone: isPhone ? identifier : '0912345678',
-        email: isPhone ? 'giaovien.demo@hantutor.vn' : identifier,
-        sessionToken: 'tok_' + Math.random().toString(36).substring(2)
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: cleanEmail,
+        password: cleanPass,
       });
-      alert(`Đăng nhập thành công với vai trò: ${role === 'student' ? 'Học sinh / Phụ huynh' : 'Giáo viên (Cô Sương Mai)'}!`);
-      handlePostAuthSuccess(role);
-    }, 500);
+
+      if (error) {
+        if (error.message.includes('Invalid login credentials')) {
+          setErrorMessage('Email hoặc mật khẩu không chính xác.');
+        } else if (error.message.includes('Email not confirmed')) {
+          setErrorMessage('Tài khoản chưa xác nhận email. Vui lòng kiểm tra hộp thư của bạn.');
+        } else {
+          setErrorMessage(error.message);
+        }
+        return;
+      }
+
+      if (data.user) {
+        // Truy vấn bảng public.users để lấy hồ sơ
+        let userRole = (data.user.user_metadata?.role as any) || role;
+        let resolvedName = data.user.user_metadata?.full_name || '';
+        let resolvedPhone = data.user.phone || data.user.user_metadata?.phone || '';
+
+        try {
+          const { data: dbUser } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', data.user.id)
+            .single();
+          if (dbUser) {
+            userRole = dbUser.role === 'instructor' ? 'teacher' : dbUser.role;
+            resolvedName = dbUser.full_name || resolvedName;
+            resolvedPhone = dbUser.phone || resolvedPhone;
+          }
+        } catch {}
+
+        const appRole = userRole === 'instructor' ? 'teacher' : (userRole as 'student' | 'teacher');
+
+        setCurrentSession({
+          userId: data.user.id,
+          role: appRole,
+          email: data.user.email,
+          fullName: resolvedName,
+          phone: resolvedPhone,
+          sessionToken: data.session?.access_token,
+        });
+
+        setSuccessMessage('Đăng nhập thành công!');
+        setTimeout(() => {
+          handlePostAuthSuccess(appRole);
+        }, 500);
+      }
+    } catch (err: any) {
+      setErrorMessage('Lỗi hệ thống: ' + (err.message || 'Không thể kết nối.'));
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  // ĐĂNG KÝ THẬT VÀ LƯU DATABASE SUPABASE
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage(null);
+    setSuccessMessage(null);
 
     if (role === 'teacher') {
       onClose();
-      navigate(`/dang-ky-gia-su?email=${encodeURIComponent(identifier)}`);
-    } else {
-      if (!identifier.trim() || !password.trim()) {
-        alert("Vui lòng điền đầy đủ thông tin đăng ký");
+      navigate(`/dang-ky-gia-su?email=${encodeURIComponent(email.trim())}`);
+      return;
+    }
+
+    const cleanName = fullName.trim();
+    const cleanEmail = email.trim();
+    const cleanPhone = phone.trim();
+    const cleanPass = password.trim();
+
+    if (!cleanName || !cleanEmail || !cleanPass) {
+      setErrorMessage('Vui lòng điền đầy đủ Họ tên, Email và Mật khẩu.');
+      return;
+    }
+
+    if (cleanPass.length < 6) {
+      setErrorMessage('Mật khẩu cần tối thiểu 6 ký tự.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const dbRole = 'student';
+      const { data, error } = await supabase.auth.signUp({
+        email: cleanEmail,
+        password: cleanPass,
+        options: {
+          data: {
+            full_name: cleanName,
+            phone: cleanPhone || null,
+            role: dbRole,
+          },
+        },
+      });
+
+      if (error) {
+        if (error.message.includes('User already registered')) {
+          setErrorMessage('Email này đã được đăng ký. Vui lòng chuyển sang Đăng nhập.');
+        } else {
+          setErrorMessage(error.message);
+        }
         return;
       }
-      setLoading(true);
-      setTimeout(() => {
-        setLoading(false);
-        setCurrentSession({
-          userId: 'usr_' + Date.now(),
-          role: 'student',
-          phone: !identifier.includes('@') ? identifier : undefined,
-          email: identifier.includes('@') ? identifier : undefined,
-          sessionToken: 'tok_' + Math.random().toString(36).substring(2)
-        });
-        alert("Đăng ký tài khoản học sinh thành công!");
-        handlePostAuthSuccess('student');
-      }, 500);
+
+      if (data.user) {
+        // Ghi trực tiếp vào bảng public.users trên PostgreSQL
+        try {
+          await supabase.from('users').upsert({
+            id: data.user.id,
+            email: cleanEmail,
+            full_name: cleanName,
+            role: dbRole,
+            phone: cleanPhone || null,
+          });
+        } catch (dbErr) {
+          console.warn('[Register] Upsert public.users:', dbErr);
+        }
+
+        if (data.session) {
+          setCurrentSession({
+            userId: data.user.id,
+            role: 'student',
+            email: cleanEmail,
+            fullName: cleanName,
+            phone: cleanPhone,
+            sessionToken: data.session.access_token,
+          });
+          setSuccessMessage('Đăng ký tài khoản thành công!');
+          setTimeout(() => {
+            handlePostAuthSuccess('student');
+          }, 600);
+        } else {
+          setSuccessMessage('Đăng ký thành công! Hãy kiểm tra hòm thư email của bạn để xác thực tài khoản.');
+        }
+      }
+    } catch (err: any) {
+      setErrorMessage('Lỗi hệ thống: ' + (err.message || 'Không thể đăng ký.'));
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleSendOtp = (e: React.FormEvent) => {
+  // ĐĂNG NHẬP GOOGLE 1-CHẠM THẬT
+  const handleGoogleAuth = async () => {
+    setErrorMessage(null);
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin,
+          skipBrowserRedirect: true,
+        },
+      });
+      if (error) {
+        setErrorMessage('Lỗi Google Auth: ' + error.message);
+        return;
+      }
+      if (data?.url) {
+        // Kiểm tra nhanh xem Google Provider đã được bật trên Supabase chưa
+        try {
+          const check = await fetch(data.url, { redirect: 'manual' });
+          if (check.status === 400) {
+            const body = await check.json().catch(() => null);
+            if (body?.msg?.includes('provider is not enabled')) {
+              setErrorMessage(
+                'Google Provider hiện đang TẮT trên Supabase. ' +
+                'Vui lòng vào Supabase Dashboard -> Authentication -> Providers -> Bật Google (theo Day 4), ' +
+                'hoặc đăng ký/đăng nhập bằng Email ở bên dưới!'
+              );
+              return;
+            }
+          }
+        } catch {}
+        // Nếu đã bật, chuyển hướng đến Google
+        window.location.href = data.url;
+      }
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Không thể khởi động Google OAuth');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // GỬI LINK ĐẶT LẠI MẬT KHẨU QUA EMAIL THẬT
+  const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!identifier.trim()) {
-      alert("Vui lòng nhập Email hoặc Số điện thoại để nhận mã OTP");
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    const cleanEmail = email.trim();
+    if (!cleanEmail) {
+      setErrorMessage('Vui lòng nhập địa chỉ Email cần khôi phục mật khẩu.');
       return;
     }
 
     setLoading(true);
-    setTimeout(() => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
+        redirectTo: window.location.origin,
+      });
+      if (error) {
+        setErrorMessage(error.message);
+      } else {
+        setSuccessMessage('Đã gửi email khôi phục mật khẩu! Vui lòng kiểm tra hòm thư đến của bạn.');
+      }
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Lỗi gửi yêu cầu khôi phục');
+    } finally {
       setLoading(false);
-      setCountdown(60);
-      setView('forgot_step2');
-    }, 500);
-  };
-
-  const handleVerifyOtp = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (otp.length < 6) {
-      alert("Vui lòng nhập đúng mã OTP 6 chữ số");
-      return;
     }
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setView('forgot_step3');
-    }, 500);
-  };
-
-  const handleResetPassword = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newPassword.length < 6) {
-      alert("Mật khẩu mới phải có ít nhất 6 ký tự");
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      alert("Mật khẩu xác nhận không khớp!");
-      return;
-    }
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      alert("Đặt lại mật khẩu thành công! Vui lòng đăng nhập bằng mật khẩu mới.");
-      setView('login');
-    }, 500);
   };
 
   return (
@@ -171,17 +306,52 @@ export function AuthModal({
           <X className="w-5 h-5" />
         </button>
 
+        {/* THÔNG BÁO LỖI / THÀNH CÔNG INLINE */}
+        {errorMessage && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2.5 text-xs text-red-700">
+            <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+            <div className="leading-relaxed font-medium">{errorMessage}</div>
+          </div>
+        )}
+        {successMessage && (
+          <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-2.5 text-xs text-emerald-700">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+            <div className="leading-relaxed font-medium">{successMessage}</div>
+          </div>
+        )}
+
         {/* VIEW: LOGIN */}
         {view === 'login' && (
           <div>
             <div className="text-center mb-6">
               <h2 className="text-2xl font-extrabold text-slate-900">Chào mừng trở lại</h2>
-              <p className="text-sm text-slate-500 mt-1">Đăng nhập vào nền tảng HanTutor</p>
+              <p className="text-sm text-slate-500 mt-1">Đăng nhập tài khoản HanTutor của bạn</p>
               {pendingTrialTutor && (
                 <div className="mt-2.5 p-2.5 bg-blue-50 border border-blue-200 rounded-xl text-xs font-semibold text-blue-800 text-center">
                   Đăng nhập để kết nối học thử 1-1 cùng <strong>{pendingTrialTutor.name}</strong>
                 </div>
               )}
+            </div>
+
+            {/* Nút Đăng nhập Google 1-Chạm */}
+            <button
+              type="button"
+              onClick={handleGoogleAuth}
+              disabled={loading}
+              className="w-full mb-4 py-3 px-4 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-xs sm:text-sm flex items-center justify-center gap-3 transition-all cursor-pointer shadow-2xs"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+              </svg>
+              Tiếp tục với Google
+            </button>
+
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200"></div></div>
+              <div className="relative flex justify-center text-xs"><span className="px-3 bg-white text-slate-400 font-medium">Hoặc với Email</span></div>
             </div>
 
             {/* Role Switcher */}
@@ -204,12 +374,12 @@ export function AuthModal({
 
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Email hoặc Số điện thoại</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Email</label>
                 <input
-                  type="text"
-                  value={identifier}
-                  onChange={e => setIdentifier(e.target.value)}
-                  placeholder="Nhập email hoặc SĐT..."
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="name@example.com"
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none text-sm"
                   required
                 />
@@ -220,7 +390,7 @@ export function AuthModal({
                   <label className="text-xs font-bold text-slate-700">Mật khẩu</label>
                   <button
                     type="button"
-                    onClick={() => setView('forgot_step1')}
+                    onClick={() => { setView('forgot_step1'); setErrorMessage(null); }}
                     className="text-xs text-blue-600 hover:underline font-semibold cursor-pointer"
                   >
                     Quên mật khẩu?
@@ -241,14 +411,14 @@ export function AuthModal({
                 disabled={loading}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-md shadow-blue-200 text-sm cursor-pointer disabled:opacity-50"
               >
-                {loading ? 'Đang xử lý...' : 'Đăng nhập ngay'}
+                {loading ? 'Đang xác thực trên Supabase...' : 'Đăng nhập ngay'}
               </button>
             </form>
 
             <div className="mt-6 text-center text-xs text-slate-500">
               Chưa có tài khoản?{' '}
               <button
-                onClick={() => setView('register')}
+                onClick={() => { setView('register'); setErrorMessage(null); }}
                 className="text-blue-600 font-bold hover:underline cursor-pointer"
               >
                 Đăng ký tài khoản mới
@@ -271,7 +441,7 @@ export function AuthModal({
             </div>
 
             {/* Role Switcher */}
-            <div className="grid grid-cols-2 gap-2.5 mb-6">
+            <div className="grid grid-cols-2 gap-2.5 mb-5">
               <button
                 type="button"
                 onClick={() => setRole('student')}
@@ -296,7 +466,7 @@ export function AuthModal({
                 <div>
                   <h3 className="font-bold text-slate-900 text-base">Đăng ký làm Giáo viên / Gia sư</h3>
                   <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                    Tạo hồ sơ giảng dạy chuẩn quốc tế, công khai video demo, phương pháp dạy và nhận lớp học 1-1 với tỷ lệ thành công cao.
+                    Tạo hồ sơ giảng dạy chuẩn quốc tế, công khai phương pháp dạy và nhận lớp học 1-1 với tỷ lệ thành công cao.
                   </p>
                 </div>
                 <button
@@ -310,26 +480,51 @@ export function AuthModal({
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleRegister} className="space-y-4">
+              <form onSubmit={handleRegister} className="space-y-3.5">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Email hoặc Số điện thoại</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Họ và tên học sinh / phụ huynh</label>
                   <input
                     type="text"
-                    value={identifier}
-                    onChange={e => setIdentifier(e.target.value)}
-                    placeholder="Nhập email hoặc SĐT..."
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none text-sm"
+                    value={fullName}
+                    onChange={e => setFullName(e.target.value)}
+                    placeholder="Ví dụ: Nguyễn Văn An"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none text-sm"
                     required
                   />
                 </div>
+
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Mật khẩu</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Email</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    placeholder="name@example.com"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none text-sm"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Số điện thoại (Nhận liên hệ Zalo)</label>
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={e => setPhone(e.target.value)}
+                    placeholder="0912345678"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Mật khẩu (Tối thiểu 6 ký tự)</label>
                   <input
                     type="password"
                     value={password}
                     onChange={e => setPassword(e.target.value)}
-                    placeholder="Tạo mật khẩu (tối thiểu 6 ký tự)..."
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none text-sm"
+                    placeholder="••••••••"
+                    minLength={6}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none text-sm"
                     required
                   />
                 </div>
@@ -337,17 +532,17 @@ export function AuthModal({
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-md shadow-blue-200 text-sm cursor-pointer disabled:opacity-50"
+                  className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-md shadow-blue-200 text-sm cursor-pointer disabled:opacity-50"
                 >
-                  {loading ? 'Đang tạo tài khoản...' : 'Đăng ký tài khoản học sinh'}
+                  {loading ? 'Đang tạo tài khoản trên CSDL...' : 'Đăng ký tài khoản học sinh'}
                 </button>
               </form>
             )}
 
-            <div className="mt-6 text-center text-xs text-slate-500">
+            <div className="mt-5 text-center text-xs text-slate-500">
               Đã có tài khoản?{' '}
               <button
-                onClick={() => setView('login')}
+                onClick={() => { setView('login'); setErrorMessage(null); }}
                 className="text-blue-600 font-bold hover:underline cursor-pointer"
               >
                 Đăng nhập ngay
@@ -356,22 +551,22 @@ export function AuthModal({
           </div>
         )}
 
-        {/* FORGOT PASSWORD STEP 1 */}
+        {/* FORGOT PASSWORD */}
         {view === 'forgot_step1' && (
           <div>
             <div className="text-center mb-6">
               <h2 className="text-xl font-extrabold text-slate-900">Quên mật khẩu</h2>
-              <p className="text-xs text-slate-500 mt-1">Bước 1/3: Nhập Email hoặc Số điện thoại để nhận mã xác thực</p>
+              <p className="text-xs text-slate-500 mt-1">Nhập Email đã đăng ký để nhận liên kết đặt lại mật khẩu</p>
             </div>
 
-            <form onSubmit={handleSendOtp} className="space-y-4">
+            <form onSubmit={handleResetPassword} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Email hoặc SĐT đã đăng ký</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Email tài khoản</label>
                 <input
-                  type="text"
-                  value={identifier}
-                  onChange={e => setIdentifier(e.target.value)}
-                  placeholder="Nhập email hoặc SĐT..."
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="name@example.com"
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 outline-none text-sm"
                   required
                 />
@@ -380,101 +575,23 @@ export function AuthModal({
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl text-sm transition-all cursor-pointer"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl text-sm transition-all cursor-pointer disabled:opacity-50"
               >
-                {loading ? 'Đang gửi mã...' : 'Gửi mã xác thực OTP'}
+                {loading ? 'Đang gửi email...' : 'Gửi liên kết khôi phục mật khẩu'}
               </button>
             </form>
 
             <button
-              onClick={() => setView('login')}
+              onClick={() => { setView('login'); setErrorMessage(null); }}
               className="mt-4 w-full text-center text-xs text-slate-500 hover:text-slate-800 font-semibold"
             >
               ← Quay lại Đăng nhập
             </button>
           </div>
         )}
-
-        {/* FORGOT PASSWORD STEP 2 */}
-        {view === 'forgot_step2' && (
-          <div>
-            <div className="text-center mb-6">
-              <h2 className="text-xl font-extrabold text-slate-900">Xác thực mã OTP</h2>
-              <p className="text-xs text-slate-500 mt-1">Bước 2/3: Mã xác thực 6 số đã được gửi tới {identifier}</p>
-            </div>
-
-            <form onSubmit={handleVerifyOtp} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Nhập mã OTP (6 chữ số)</label>
-                <input
-                  type="text"
-                  maxLength={6}
-                  value={otp}
-                  onChange={e => setOtp(e.target.value.replace(/\D/g, ''))}
-                  placeholder="123456"
-                  className="w-full text-center tracking-widest text-lg font-bold px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 outline-none"
-                  required
-                />
-              </div>
-
-              <div className="text-center text-xs text-slate-500">
-                {countdown > 0 ? (
-                  <span>Gửi lại mã sau <strong className="text-blue-600">{countdown}s</strong></span>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => { setCountdown(60); alert("Mã OTP mới đã được gửi!"); }}
-                    className="text-blue-600 font-bold hover:underline"
-                  >
-                    Gửi lại mã OTP ngay
-                  </button>
-                )}
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading || otp.length < 6}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl text-sm transition-all cursor-pointer disabled:opacity-50"
-              >
-                {loading ? 'Đang kiểm tra...' : 'Xác thực OTP'}
-              </button>
-            </form>
-          </div>
-        )}
-
-        {/* FORGOT PASSWORD STEP 3 */}
-        {view === 'forgot_step3' && (
-          <div>
-            <div className="text-center mb-6">
-              <h2 className="text-xl font-extrabold text-slate-900">Tạo mật khẩu mới</h2>
-              <p className="text-xs text-slate-500 mt-1">Bước 3/3: Đặt mật khẩu an toàn cho tài khoản của bạn</p>
-            </div>
-
-            <form onSubmit={handleResetPassword} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Xác nhận mật khẩu mới</label>
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={e => setConfirmPassword(e.target.value)}
-                  placeholder="Nhập lại mật khẩu mới..."
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 outline-none text-sm"
-                  required
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl text-sm transition-all cursor-pointer shadow-md shadow-emerald-200"
-              >
-                {loading ? 'Đang cập nhật...' : 'Cập nhật mật khẩu & Đăng nhập'}
-              </button>
-            </form>
-          </div>
-        )}
       </div>
     </div>
   );
 }
+
 export default AuthModal;

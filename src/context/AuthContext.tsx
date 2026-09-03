@@ -1,4 +1,4 @@
-﻿import React, {
+import React, {
   createContext,
   useContext,
   useEffect,
@@ -11,10 +11,12 @@ import { supabase } from '../lib/supabase';
 export type UserRole = 'anonymous' | 'student' | 'teacher' | 'parent' | 'admin';
 
 export interface UserSessionContext {
-  userId?: string | number;
+  userId?: string;
   role: UserRole;
   phone?: string;
   email?: string;
+  fullName?: string;
+  avatarUrl?: string;
   sessionToken?: string;
 }
 
@@ -36,6 +38,7 @@ export interface AuthContextType {
   currentSession: UserSessionContext;
   setCurrentSession: React.Dispatch<React.SetStateAction<UserSessionContext>>;
   logout: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
   isAuthenticated: boolean;
   isTeacher: boolean;
   isAdmin: boolean;
@@ -56,44 +59,92 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     saveLocalSession(currentSession);
   }, [currentSession]);
 
+  // Đồng bộ thông tin từ bảng public.users dựa trên auth session
+  const syncUserFromDb = useCallback(async (authUser: any, token?: string) => {
+    if (!authUser?.id) return;
+    
+    let resolvedRole: UserRole = 'student';
+    let resolvedName = authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'Người dùng';
+    let resolvedPhone = authUser.phone || authUser.user_metadata?.phone;
+    let resolvedAvatar = authUser.user_metadata?.avatar_url;
+
+    try {
+      const { data: dbUser, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', authUser.id)
+        .single();
+
+      if (dbUser && !error) {
+        resolvedRole = dbUser.role === 'instructor' ? 'teacher' : (dbUser.role as UserRole);
+        resolvedName = dbUser.full_name || resolvedName;
+        resolvedPhone = dbUser.phone || resolvedPhone;
+        resolvedAvatar = dbUser.avatar_url || resolvedAvatar;
+      } else {
+        // Fallback metadata nếu DB chưa có dòng
+        const metaRole = authUser.user_metadata?.role;
+        if (metaRole === 'instructor' || metaRole === 'teacher') resolvedRole = 'teacher';
+        else if (metaRole === 'admin') resolvedRole = 'admin';
+        else resolvedRole = 'student';
+      }
+    } catch (err) {
+      console.warn('[AuthContext] syncUserFromDb warning:', err);
+    }
+
+    setCurrentSession({
+      userId: authUser.id,
+      email: authUser.email,
+      fullName: resolvedName,
+      role: resolvedRole,
+      phone: resolvedPhone,
+      avatarUrl: resolvedAvatar,
+      sessionToken: token || currentSession.sessionToken,
+    });
+  }, [currentSession.sessionToken]);
+
   useEffect(() => {
+    // 1. Kiểm tra session hiện có
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
-        setCurrentSession((prev) => ({
-          ...prev,
-          userId: session.user.id,
-          email: session.user.email,
-          role: (session.user.user_metadata?.role as any) || prev.role || 'student',
-          phone: session.user.phone || prev.phone,
-        }));
+        syncUserFromDb(session.user, session.access_token);
       }
     });
 
+    // 2. Lắng nghe thay đổi đăng nhập / đăng xuất
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session?.user) {
-        setCurrentSession((prev) => ({
-          ...prev,
-          userId: session.user.id,
-          email: session.user.email,
-          role: (session.user.user_metadata?.role as any) || prev.role || 'student',
-          phone: session.user.phone || prev.phone,
-        }));
-      } else {
+        await syncUserFromDb(session.user, session.access_token);
+      } else if (event === 'SIGNED_OUT') {
         setCurrentSession({ role: 'anonymous' });
+        try {
+          localStorage.removeItem('hantutor_user_session');
+        } catch {}
       }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [syncUserFromDb]);
 
   const logout = useCallback(async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch {}
     setCurrentSession({ role: 'anonymous' });
+    try {
+      localStorage.removeItem('hantutor_user_session');
+    } catch {}
   }, []);
+
+  const refreshProfile = useCallback(async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      await syncUserFromDb(session.user, session.access_token);
+    }
+  }, [syncUserFromDb]);
 
   const isAuthenticated = useMemo(() => currentSession.role !== 'anonymous', [currentSession.role]);
   const isTeacher = useMemo(() => currentSession.role === 'teacher', [currentSession.role]);
@@ -104,11 +155,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       currentSession,
       setCurrentSession,
       logout,
+      refreshProfile,
       isAuthenticated,
       isTeacher,
       isAdmin,
     }),
-    [currentSession, logout, isAuthenticated, isTeacher, isAdmin]
+    [currentSession, logout, refreshProfile, isAuthenticated, isTeacher, isAdmin]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

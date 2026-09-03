@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router';
-import { Search, Menu, X, ChevronRight } from 'lucide-react';
+import { Search, Menu, X, ChevronRight, User } from 'lucide-react';
 import { Logo } from './Logo';
 import { useData } from '../../context/DataContext';
 import { useUI } from '../../context/UIContext';
 
 export function Navbar() {
-  const { openAuthModal, openMyTrialsModal, openTeacherWalletModal, openTeacherProfileModal } = useUI();
+  const {
+    openAuthModal,
+    openMyTrialsModal,
+    openTeacherWalletModal,
+    openTeacherProfileModal,
+    openStudentProfileModal
+  } = useUI();
   const { myTrials, currentSession, setCurrentSession, getTeacherWallet } = useData();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -105,6 +111,18 @@ export function Navbar() {
                     <span>Ví: {getTeacherWallet(currentSession.userId || 't1').balance.toLocaleString()}đ</span>
                   </button>
                 </>
+              )}
+
+              {currentSession.role === 'student' && (
+                <button
+                  type="button"
+                  onClick={openStudentProfileModal}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 shadow-2xs cursor-pointer transition-all active:scale-95"
+                  title="Xem và chỉnh sửa hồ sơ học sinh"
+                >
+                  <User className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Hồ sơ của tôi</span>
+                </button>
               )}
 
               <span className={`hidden sm:inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold border ${
@@ -221,6 +239,23 @@ export function Navbar() {
               </div>
               <ChevronRight className="w-4 h-4 text-slate-400" />
             </button>
+            {currentSession.role === 'student' && (
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  openStudentProfileModal();
+                }}
+                className="w-full flex items-center justify-between p-3 rounded-xl text-sm font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 cursor-pointer text-left"
+              >
+                <div className="flex items-center gap-2">
+                  <User className="w-4 h-4 text-blue-600" />
+                  <span>👤 Hồ sơ học sinh của tôi</span>
+                </div>
+                <ChevronRight className="w-4 h-4 text-blue-400" />
+              </button>
+            )}
+
             <Link
               to="/dang-ky-gia-su"
               className="flex items-center justify-between p-3 rounded-xl text-sm font-bold text-amber-900 bg-amber-50 hover:bg-amber-100"

@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kế Hoạch Tổng Thể Phát Triển Website HanTutor (06 Tuần • Trọng Tâm 02 Tuần Đầu)</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700;900&family=Roboto:wght@300;400;500;700&display=swap');
+
+    :root {
+      --primary-color: #0f172a;
+      --secondary-color: #334155;
+      --border-color: #cbd5e1;
+      --bg-header: #f8fafc;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.65;
+      color: #1e293b;
+      background-color: #f1f5f9;
+      padding: 40px 20px;
+    }
+
+    .document-container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 60px 70px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      border-radius: 4px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .header-section {
+      border-bottom: 2px solid #0f172a;
+      padding-bottom: 24px;
+      margin-bottom: 32px;
+    }
+
+    h1 {
+      font-family: 'Merriweather', serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: #0f172a;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    h2 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 18px;
+      text-transform: uppercase;
+    }
+
+    .meta-box {
+      background-color: #f8fafc;
+      border-left: 4px solid #0f172a;
+      padding: 12px 18px;
+      font-size: 13.5px;
+      color: #334155;
+      margin-top: 15px;
+      border-radius: 0 4px 4px 0;
+    }
+
+    .meta-box p {
+      margin-bottom: 6px;
+    }
+    .meta-box p:last-child {
+      margin-bottom: 0;
+    }
+
+    h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #0f172a;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 6px;
+      margin-top: 36px;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+    }
+
+    h4 {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-top: 20px;
+      margin-bottom: 10px;
+    }
+
+    p {
+      margin-bottom: 12px;
+      text-align: justify;
+    }
+
+    ul, ol {
+      margin-left: 24px;
+      margin-bottom: 14px;
+    }
+
+    li {
+      margin-bottom: 8px;
+      text-align: justify;
+    }
+
+    strong {
+      color: #0f172a;
+    }
+
+    .pilot-focus-card {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-left: 4px solid #16a34a;
+      border-radius: 4px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+    }
+
+    .completed-card {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-left: 4px solid #0f172a;
+      border-radius: 4px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+    }
+
+    .week-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      page-break-inside: avoid;
+    }
+
+    .week-title {
+      font-weight: 700;
+      color: #0f172a;
+      font-size: 14.5px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px dashed #cbd5e1;
+      padding-bottom: 6px;
+    }
+
+    .dod-tag {
+      background-color: #eff6ff;
+      border-left: 3px solid #2563eb;
+      padding: 6px 12px;
+      font-size: 13px;
+      color: #1e40af;
+      margin-top: 10px;
+      border-radius: 0 2px 2px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: 13px;
+      page-break-inside: avoid;
+    }
+
+    th, td {
+      border: 1px solid #cbd5e1;
+      padding: 10px 14px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background-color: #f1f5f9;
+      color: #0f172a;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 12px;
+      letter-spacing: 0.5px;
+    }
+
+    .print-bar {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #0f172a;
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: 30px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 1000;
+      transition: all 0.2s ease;
+      border: none;
+    }
+
+    .print-bar:hover {
+      background: #1e293b;
+      transform: translateY(-2px);
+    }
+
+    @media print {
+      body {
+        background-color: #ffffff;
+        padding: 0;
+      }
+
+      .document-container {
+        border: none;
+        box-shadow: none;
+        padding: 0;
+        max-width: 100%;
+      }
+
+      .print-bar {
+        display: none !important;
+      }
+
+      @page {
+        size: A4;
+        margin: 20mm 15mm 20mm 15mm;
+      }
+
+      h3 {
+        page-break-after: avoid;
+      }
+
+      .week-card, table, .completed-card, .pilot-focus-card {
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <button class="print-bar" onclick="window.print()">
+    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+    </svg>
+    In hoặc Xuất sang PDF (Ctrl + P)
+  </button>
+
+  <div class="document-container">
+
+    <div class="header-section">
+      <h1>Kế Hoạch Tổng Thể Phát Triển Và Hoàn Thiện Website HanTutor (06 Tuần)</h1>
+      <h2>Dự án: Website Nền Tảng Gia Sư Và Quản Lý Lớp Học Trực Tuyến HanTutor (Full-Stack Web Development)</h2>
+
+      <div class="meta-box">
+        <p><strong>Thời lượng thực hiện toàn diện:</strong> 06 tuần (210 giờ làm việc tiêu chuẩn • 7 giờ/ngày, 5 ngày/tuần)</p>
+        <p><strong>Mục tiêu trọng tâm ngắn hạn:</strong> Hoàn thành mốc chạy thử nghiệm kín (Closed Pilot) cho nhóm 10 đến 20 giáo viên thực tế ngay sau 02 tuần đầu tiên.</p>
+        <p><strong>Mục tiêu bàn giao chung:</strong> Đóng kín toàn bộ chu trình nghiệp vụ (Dữ liệu Live, Google Auth, Lịch rảnh, Đặt lịch chống trùng lặp, Thanh toán VietQR tự động, Sổ cái 30/70, Email giao dịch và An toàn thông tin RLS) để bàn giao sản phẩm Turnkey Ready sẵn sàng ra mắt thị trường.</p>
+      </div>
+    </div>
+
+    <h3>Phần 1: Báo Cáo Hiện Trạng Và Xử Lý 05 Điểm Nghẽn Nền Tảng</h3>
+
+    <div class="completed-card">
+      <h4>1. Hiện trạng đã hoàn thành</h4>
+      <ul>
+        <li>Giao diện người dùng (Frontend UI/UX) đã hoàn thành khoảng 85-90% bao gồm: 05 trang chính (<code>HomePage</code>, <code>FindTutorsPage</code>, <code>TeacherDetailPage</code>, <code>TutorRegistrationPage</code>, <code>AdminDashboardPage</code>) và 08 Modal nghiệp vụ.</li>
+        <li>Đã thiết kế hoàn chỉnh file DDL cơ sở dữ liệu <code>supabase/schema.sql</code> (09 bảng quan hệ, RLS policies và Stored Procedures).</li>
+        <li>Mã nguồn biên dịch thành công 100% (<code>npm run build</code> hoàn tất trong 4.32 giây).</li>
+      </ul>
+    </div>
+
+    <h4>2. Năm điểm nghẽn kỹ thuật nền tảng được xử lý dứt điểm ngay trong Tuần 1</h4>
+    <ol>
+      <li><strong>Chuẩn hóa thông tin package.json:</strong> Chuyển đổi tên dự án sang <code>hantutor-web</code> để chuẩn hóa môi trường triển khai.</li>
+      <li><strong>Khắc phục xung đột ID (UUID vs Mock ID):</strong> Chuyển toàn bộ dữ liệu mẫu sang chuẩn UUID v4 để kích hoạt đúng các thao tác ghi dữ liệu vào PostgreSQL thật.</li>
+      <li><strong>Chuẩn hóa API VietQR quốc gia:</strong> Chuyển đổi sang chuẩn Napas 24/7 (<code>https://img.vietqr.io/image/...</code>) với đầy đủ mã BIN ngân hàng và số tài khoản thụ hưởng.</li>
+      <li><strong>Đồng bộ phiên đăng nhập (Session Sync):</strong> Thiết lập Supabase Auth làm nguồn xác thực duy nhất nhằm loại bỏ hiện tượng lệch vai trò khi tải lại trang.</li>
+      <li><strong>Kích hoạt Migration Live:</strong> Chạy file <code>schema.sql</code> trực tiếp trên Supabase Dashboard để chấm dứt hoàn toàn việc sử dụng dữ liệu giả lập.</li>
+    </ol>
+
+    <h3>Phần 2: Trọng Tâm Đặc Biệt Trong 02 Tuần Đầu (Mốc Chạy Thử Nghiệm Kín)</h3>
+    <p>Mục tiêu tối thượng của 02 tuần đầu tiên là đưa hệ sinh thái vào trạng thái hoạt động thực tế để nhóm 10–20 giáo viên có thể tham gia khởi tạo hồ sơ, cài đặt lịch dạy và nhận đơn học thử:</p>
+
+    <div class="pilot-focus-card">
+      <h4 style="color: #166534; margin-top: 0;">MỤC TIÊU 02 TUẦN ĐẦU: ĐẠT MỐC PILOT TEST CHO GIÁO VIÊN</h4>
+      <ul style="margin-bottom: 0;">
+        <li>Giáo viên đăng nhập trực tiếp bằng tài khoản Google thật.</li>
+        <li>Điền thông tin cá nhân, tiểu sử, môn dạy, mức học phí và số tài khoản ngân hàng.</li>
+        <li>Cài đặt khung giờ rảnh hàng tuần trên ma trận lịch (lưu vào <code>availability_slots</code>).</li>
+        <li>Tải ảnh đại diện và ảnh bằng cấp/CCCD lên Private Storage an toàn.</li>
+        <li>Sở hữu đường dẫn hồ sơ công khai (Profile URL) hiển thị chuẩn mực trên mọi thiết bị.</li>
+        <li>Nhận thông tin đăng ký học thử từ học sinh thử nghiệm.</li>
+      </ul>
+    </div>
+
+    <div class="week-card">
+      <div class="week-title">
+        <span>Tuần 1: Kích hoạt Database Live, Google Auth, Tên Miền và Edge Bot SEO</span>
+      </div>
+      <ul>
+        <li>Xử lý dứt điểm 05 điểm nghẽn kỹ thuật nền tảng; triển khai <code>schema.sql</code> lên PostgreSQL Supabase Live.</li>
+        <li>Khởi tạo 02 Storage Buckets: <code>tutor-avatars</code> (công khai) và <code>tutor-kyc-docs</code> (riêng tư).</li>
+        <li>Nạp dữ liệu Seeder chuẩn UUID cho 25+ hồ sơ gia sư thực tế mẫu.</li>
+        <li>Mua tên miền website; cấu hình các bản ghi DNS (DKIM, SPF, DMARC, MX) trên Resend từ sớm để hoàn tất xác thực 24h.</li>
+        <li>Tích hợp Google OAuth 2.0 và Email Auth vào <code>AuthModal</code>/<code>AuthContext</code>; thiết lập Route Guard bảo vệ <code>/admin</code>.</li>
+        <li>Viết Vercel Edge Middleware nhận diện bot tìm kiếm (Googlebot, Facebook, Zalo) để trả thẻ OpenGraph động phục vụ Web SEO.</li>
+      </ul>
+      <div class="dod-tag">
+        <strong>Tiêu chí nghiệm thu (DoD Tuần 1):</strong> Toàn bộ 05 điểm nghẽn nền tảng được triệt tiêu 100%; Cơ sở dữ liệu Live hoạt động ổn định; Tên miền đạt chứng nhận Verified trên Resend; Đăng nhập Google 1-chạm hoạt động chính xác.
+      </div>
+    </div>
+
+    <div class="week-card">
+      <div class="week-title">
+        <span>Tuần 2: Quản lý Lịch Rảnh (Slots), Đăng Ký Gia Sư KYC và Mở Pilot Test</span>
+      </div>
+      <ul>
+        <li>Tái cấu trúc <code>TutorContext</code> và <code>DataContext</code> sang truy vấn Supabase SDK thật; xóa bỏ hoàn toàn dữ liệu mock.</li>
+        <li>Nối biểu mẫu đăng ký (<code>TutorRegistrationPage</code>) và cập nhật hồ sơ (<code>TeacherProfileModal</code>) vào Supabase Storage.</li>
+        <li>Tích hợp giao diện ma trận chọn khung giờ rảnh lưu trực tiếp vào bảng <code>availability_slots</code>.</li>
+        <li><strong>Tiến hành mở đợt Pilot Test:</strong> Mời 10–20 giáo viên tham gia tạo tài khoản, hoàn thiện hồ sơ, cài đặt lịch dạy rảnh và tải lên tài liệu KYC.</li>
+        <li>Thu thập phản hồi ban đầu về trải nghiệm nhập liệu và giao diện hiển thị trên các dòng điện thoại khác nhau.</li>
+      </ul>
+      <div class="dod-tag">
+        <strong>Tiêu chí nghiệm thu (DoD Tuần 2):</strong> 100% trang tìm kiếm tải dữ liệu từ PostgreSQL dưới 300ms; 10–20 giáo viên thử nghiệm hoàn thiện hồ sơ thật trên hệ thống Live thành công; Hồ sơ lưu ở trạng thái chờ duyệt (<code>verified = false</code>), ảnh CCCD nằm an toàn trong bucket riêng tư.
+      </div>
+    </div>
+
+    <h3>Phần 3: Lộ Trình Triển Khai Hoàn Thiện Các Tuần Tiếp Theo (Tuần 3 - Tuần 6)</h3>
+
+    <div class="week-card">
+      <div class="week-title">
+        <span>Tuần 3: Đặt Lịch Học Thử TTL 5 Phút, Realtime Notification và Admin Duyệt KYC</span>
+      </div>
+      <ul>
+        <li>Kết nối <code>EnrollmentModal</code> và <code>BookingContext</code> với hàm Stored Procedure <code>reserve_slot()</code>: Tạm giữ chỗ khung giờ trong 05 phút chống trùng lặp; tự động nhả slot nếu quá thời gian mà không cần can thiệp thủ công.</li>
+        <li>Kích hoạt Supabase Realtime Channel gửi thông báo tức thì đến Gia sư và Quản trị viên khi có lịch hẹn mới.</li>
+        <li>Nâng cấp <code>AdminDashboardPage</code>: Xem trước ảnh CCCD/Bằng cấp qua Signed URL bảo mật (hạn 05 phút); nút Phê duyệt (<code>verified = true</code>) hoặc Từ chối kèm lý do.</li>
+      </ul>
+      <div class="dod-tag">
+        <strong>Tiêu chí nghiệm thu (DoD Tuần 3):</strong> Triệt tiêu 100% rủi ro trùng lịch giữa các học sinh; Gia sư và Quản trị viên nhận thông báo thời gian thực; Quản trị viên duyệt KYC thành công qua Signed URL.
+      </div>
+    </div>
+
+    <div class="week-card">
+      <div class="week-title">
+        <span>Tuần 4: Tự Động Hóa Cổng VietQR PayOS Webhook và Sổ Cái Doanh Thu 30/70</span>
+      </div>
+      <ul>
+        <li>Sinh mã VietQR động chuẩn ngân hàng trên <code>CheckoutModal</code> chứa đúng số tiền học phí và cú pháp <code>HT_{ENROLLMENT_ID}</code>.</li>
+        <li>Viết Supabase Edge Function <code>payos-webhook-handler</code>: Xác thực chữ ký số HMAC-SHA256 và cơ chế Idempotency chống nạp tiền 02 lần; tự động chuyển trạng thái đơn sang <code>enrolled</code>.</li>
+        <li>Tự động phân tách dòng tiền: 30% thuộc về nền tảng HanTutor và 70% cộng vào số dư thù lao của gia sư phụ trách.</li>
+        <li>Xây dựng chức năng "Yêu cầu rút tiền" (<code>payout_requests</code>) cho gia sư và bảng đối soát cho Quản trị viên trên Admin Dashboard (sử dụng khóa giao dịch <code>SELECT ... FOR UPDATE</code> chống race condition).</li>
+      </ul>
+      <div class="dod-tag">
+        <strong>Tiêu chí nghiệm thu (DoD Tuần 4):</strong> Quét mã QR chuyển tiền thật -> Webhook bắt giao dịch trong 02 giây và tự kích hoạt trạng thái ghi danh; Doanh thu và số dư ví tính toán chính xác 100%, không bị sai lệch.
+      </div>
+    </div>
+
+    <div class="week-card">
+      <div class="week-title">
+        <span>Tuần 5: Kích Hoạt Resend Transactional Email, Trợ Lý AI và Đánh Giá Verified</span>
+      </div>
+      <ul>
+        <li>Tích hợp Resend API gửi email HTML tiêu chuẩn thương hiệu HanTutor tự động trong 03 trường hợp: Phụ huynh đặt lịch học thử, Gia sư có học sinh mới và Biên lai thanh toán học phí thành công.</li>
+        <li>Viết Supabase Edge Function proxy cho Trợ lý AI Gemini nhằm bảo mật tuyệt đối <code>VITE_GEMINI_API_KEY</code> và thiết lập hạn mức truy cập (Rate Limit: 15 yêu cầu/phút).</li>
+        <li>Áp dụng cơ chế Verified Reviews: Chỉ những học sinh đã hoàn tất thanh toán khóa học (<code>status = 'enrolled'</code>) mới được cấp quyền gửi đánh giá sao cho gia sư; tính năng tự động tính lại điểm rating trung bình.</li>
+      </ul>
+      <div class="dod-tag">
+        <strong>Tiêu chí nghiệm thu (DoD Tuần 5):</strong> Email giao dịch gửi thẳng vào hộp thư Inbox trong 03 giây; Trợ lý AI trên web vận hành an toàn; Học sinh chưa học chính thức không thể gửi đánh giá ảo.
+      </div>
+    </div>
+
+    <div class="week-card">
+      <div class="week-title">
+        <span>Tuần 6: Bảo Mật Pentest, Tối Ưu Web Responsive, SEO Schema và Bàn Giao Turnkey</span>
+      </div>
+      <ul>
+        <li>Rà soát toàn diện 100% các chính sách Row Level Security (RLS) trên cả 09 bảng dữ liệu PostgreSQL.</li>
+        <li>Kiểm thử phòng chống các lỗ hổng website theo tiêu chuẩn OWASP Top 10: XSS (sử dụng <code>DOMPurify</code>), SQL Injection, CSRF và lỗ hổng đọc trộm dữ liệu chéo (IDOR).</li>
+        <li>Tối ưu hóa Web Responsive trên Desktop, Laptop, Tablet và Mobile Browser; Code Splitting và nén ảnh WebP đạt điểm Google Lighthouse: Performance > 90, Accessibility > 95, Best Practices > 95, SEO = 100.</li>
+        <li>Kích hoạt sao lưu tự động hàng ngày (Daily Automated Database Backups); tích hợp hệ thống giám sát sự cố Sentry; thực hiện diễn tập khôi phục dữ liệu (Disaster Recovery Drill) dưới 10 phút.</li>
+        <li>Hoàn thiện tài liệu hướng dẫn vận hành, đối soát và xử trị website chi tiết (<code>ADMIN_RUNBOOK.md</code>).</li>
+      </ul>
+      <div class="dod-tag">
+        <strong>Tiêu chí nghiệm thu (DoD Tuần 6):</strong> Website đạt điểm Lighthouse > 90; Zero lỗ hổng bảo mật; Toàn bộ hệ thống website đạt tiêu chuẩn bàn giao trọn gói (Turnkey Web Product), sẵn sàng vận hành thương mại ngay lập tức.
+      </div>
+    </div>
+
+    <h3>Phần 4: Ma Trận Quản Trị Rủi Ro Và Giải Pháp Kỹ Thuật Triệt Để</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 28%;">Rủi Ro Tiềm Ẩn</th>
+          <th style="width: 15%; text-align: center;">Mức Độ</th>
+          <th style="width: 57%;">Giải Pháp Kỹ Thuật Triệt Để</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Trùng lặp lịch dạy của Gia sư</strong></td>
+          <td style="text-align: center; color: #dc2626; font-weight: 700;">Cao</td>
+          <td>Áp dụng cơ chế giữ chỗ tạm thời 05 phút (<code>locked_until TIMESTAMPTZ</code>) và khóa giao dịch cơ sở dữ liệu (<code>SELECT ... FOR UPDATE</code>).</td>
+        </tr>
+        <tr>
+          <td><strong>Gian lận trạng thái thanh toán</strong></td>
+          <td style="text-align: center; color: #7f1d1d; font-weight: 700;">Nghiêm trọng</td>
+          <td>Cấm tuyệt đối quyền sửa trạng thái đơn hàng từ Client Web; Chỉ chấp nhận kết quả thanh toán từ Webhook có chữ ký số bí mật HMAC-SHA256.</td>
+        </tr>
+        <tr>
+          <td><strong>Rút tiền vượt quá số dư ví</strong></td>
+          <td style="text-align: center; color: #7f1d1d; font-weight: 700;">Nghiêm trọng</td>
+          <td>Tính toán số dư khả dụng tức thời trên cơ sở dữ liệu bằng công thức: <code>Tổng thu nhập 70% - Tổng tiền đã chi trả</code>, lưu nhật ký kiểm toán bất biến.</td>
+        </tr>
+        <tr>
+          <td><strong>Lộ lọt thông tin CCCD / Bằng cấp</strong></td>
+          <td style="text-align: center; color: #dc2626; font-weight: 700;">Cao</td>
+          <td>Lưu trữ tài liệu trên Private Storage Bucket; chỉ sinh đường dẫn truy cập tạm thời (Signed URL có hạn 05 phút) khi Quản trị viên tiến hành xét duyệt trên Admin Dashboard.</td>
+        </tr>
+        <tr>
+          <td><strong>Lộ lọt khóa bảo mật (API Keys)</strong></td>
+          <td style="text-align: center; color: #7f1d1d; font-weight: 700;">Nghiêm trọng</td>
+          <td>Toàn bộ khóa bảo mật (Gemini AI, Supabase Service Role, Resend Secret Key) đều được lưu trữ và thực thi tại Edge Functions, không xuất hiện ở mã nguồn Frontend Web.</td>
+        </tr>
+        <tr>
+          <td><strong>Email thông báo bị đánh dấu Spam</strong></td>
+          <td style="text-align: center; color: #d97706; font-weight: 700;">Trung bình</td>
+          <td>Đăng ký tên miền website và hoàn tất cấu hình các bản ghi xác thực DNS (DKIM, SPF, DMARC, MX) ngay từ Tuần 1 để làm ấm danh tiếng gửi thư của tên miền.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Phần 5: Tiêu Chuẩn Nghiệm Thu Và Bàn Giao Website (Definition of Done)</h3>
+    <ol>
+      <li><strong>Tính đúng đắn về chức năng:</strong> Vận hành trơn tru, hiển thị chuẩn xác trên mọi trình duyệt web (Chrome, Safari, Edge, Firefox) và mọi kích thước màn hình.</li>
+      <li><strong>Tính an toàn bảo mật:</strong> Được bảo vệ chặt chẽ bởi PostgreSQL RLS, xác thực phân quyền nghiêm ngặt, tuyệt đối không để lộ khóa bí mật.</li>
+      <li><strong>Tính toàn vẹn tài chính:</strong> Không phát sinh bất kỳ sai lệch nào trong quá trình tự động phân chia doanh thu 30/70 và đối soát lệnh rút tiền.</li>
+      <li><strong>Hiệu năng tải trang web:</strong> Thời gian phản hồi và tải trang trung bình dưới 1.5 giây, đạt chuẩn Google Lighthouse tối ưu.</li>
+      <li><strong>Tài liệu bàn giao:</strong> Mã nguồn website được chú thích rõ ràng, đi kèm bộ tài liệu hướng dẫn vận hành và xử trị sự cố đầy đủ (<code>ADMIN_RUNBOOK.md</code>).</li>
+    </ol>
+
+    <h3>Phần 6: Kết Luận Và Cam Kết Triển Khai</h3>
+    <p>Bản kế hoạch 06 tuần tinh gọn phân bổ nguồn lực hợp lý, tập trung giải quyết dứt điểm các bài toán thực tế ngay trong 02 tuần đầu để mở đợt thử nghiệm Pilot cho giáo viên, tạo nền tảng vững chắc cho các phân hệ thanh toán và bảo mật tiếp theo. Dự án được cam kết bàn giao đúng hạn 1.5 tháng với chất lượng kỹ thuật cao nhất.</p>
+
+  </div>
+
+</body>
+</html>
