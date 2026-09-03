@@ -8,6 +8,7 @@ import { TeacherProfileModal } from './TeacherProfileModal';
 import { ReviewModal } from './ReviewModal';
 import { MyTrialsModal } from './MyTrialsModal';
 import { StudentProfileModal } from './StudentProfileModal';
+import { UserProfileModal } from './UserProfileModal';
 
 export function ModalContainer() {
   return (
@@ -21,6 +22,7 @@ export function ModalContainer() {
       <ReviewModal />
       <MyTrialsModal />
       <StudentProfileModal />
+      <UserProfileModal />
     </>
   );
 }

@@ -1,9 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router';
-import { Search, Menu, X, ChevronRight, User } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router';
+import {
+  Search,
+  Menu,
+  X,
+  ChevronRight,
+  ChevronDown,
+  User,
+  Calendar,
+  Wallet,
+  BookOpen,
+  Shield,
+  LogOut,
+  ExternalLink,
+  GraduationCap,
+  Sparkles
+} from 'lucide-react';
 import { Logo } from './Logo';
 import { useData } from '../../context/DataContext';
 import { useUI } from '../../context/UIContext';
+import { useAuth } from '../../context/AuthContext';
 
 export function Navbar() {
   const {
@@ -11,11 +27,17 @@ export function Navbar() {
     openMyTrialsModal,
     openTeacherWalletModal,
     openTeacherProfileModal,
-    openStudentProfileModal
+    openStudentProfileModal,
+    openUserProfileModal
   } = useUI();
-  const { myTrials, currentSession, setCurrentSession, getTeacherWallet } = useData();
+  const { myTrials, currentSession, getTeacherWallet } = useData();
+  const { logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const activeTrialsCount = myTrials.filter(t => t.status === 'trial_in_progress').length;
 
@@ -25,9 +47,39 @@ export function Navbar() {
     return false;
   };
 
+  // Close menus on page change
   useEffect(() => {
     setMobileMenuOpen(false);
+    setUserDropdownOpen(false);
   }, [location.pathname]);
+
+  // Click outside listener for avatar dropdown
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setUserDropdownOpen(false);
+      }
+    }
+    if (userDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [userDropdownOpen]);
+
+  const userAvatar =
+    currentSession.avatar ||
+    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400';
+
+  const displayName =
+    currentSession.name ||
+    currentSession.fullName ||
+    (currentSession.role === 'teacher'
+      ? 'Giáo viên'
+      : currentSession.role === 'admin'
+      ? 'Quản trị viên'
+      : 'Học sinh');
 
   return (
     <header className="sticky top-0 z-50 bg-white/98 backdrop-blur-md border-b border-slate-100 shadow-2xs">
@@ -49,21 +101,29 @@ export function Navbar() {
             to="/tim-gia-su"
             className={`text-sm font-semibold transition-colors ${isActive('/tim-gia-su') ? 'text-blue-600 font-bold' : 'text-slate-600 hover:text-blue-600'}`}
           >
-            Tìm Gia Sư & Giáo Viên
+            Tìm gia sư
           </Link>
 
           {currentSession.role === 'teacher' ? (
-            <button
-              type="button"
-              onClick={openMyTrialsModal}
-              className="text-sm font-semibold text-slate-700 hover:text-emerald-600 transition-colors flex items-center gap-1.5 cursor-pointer"
+            <Link
+              to="/dang-ky-gia-su"
+              className="text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors flex items-center gap-1.5"
             >
-              Học sinh hẹn học thử
-              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-600 text-white animate-pulse">
-                2
+              Hồ sơ gia sư
+              <span className="text-[10px] font-extrabold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                Đối tác
               </span>
-            </button>
+            </Link>
           ) : (
+            <Link
+              to="/dang-ky-gia-su"
+              className="text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors"
+            >
+              Trở thành gia sư
+            </Link>
+          )}
+
+          {currentSession.role !== 'anonymous' && (
             <button
               type="button"
               onClick={openMyTrialsModal}
@@ -79,7 +139,7 @@ export function Navbar() {
           )}
         </nav>
 
-        {/* Nút hành động */}
+        {/* Nút hành động góc phải */}
         <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
           <Link
             to="/tim-gia-su"
@@ -90,60 +150,239 @@ export function Navbar() {
           </Link>
 
           {currentSession.role !== 'anonymous' ? (
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              {currentSession.role === 'teacher' && (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => openTeacherProfileModal(currentSession.userId || 't1')}
-                    className="inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 shadow-2xs cursor-pointer transition-all active:scale-95"
-                    title="Chỉnh sửa thông tin hồ sơ giáo viên"
-                  >
-                    <span>Hồ sơ của tôi</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => openTeacherWalletModal(currentSession.userId || 't1')}
-                    className="inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-blue-600 hover:bg-blue-700 text-white shadow-xs shadow-blue-200 cursor-pointer transition-all active:scale-95"
-                    title="Mở Ví Thu Nhập"
-                  >
-                    <span>Ví: {getTeacherWallet(currentSession.userId || 't1').balance.toLocaleString()}đ</span>
-                  </button>
-                </>
-              )}
-
-              {currentSession.role === 'student' && (
-                <button
-                  type="button"
-                  onClick={openStudentProfileModal}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 shadow-2xs cursor-pointer transition-all active:scale-95"
-                  title="Xem và chỉnh sửa hồ sơ học sinh"
-                >
-                  <User className="w-3.5 h-3.5 text-blue-600" />
-                  <span>Hồ sơ của tôi</span>
-                </button>
-              )}
-
-              <span className={`hidden sm:inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold border ${
-                currentSession.role === 'admin' ? 'bg-red-50 text-red-700 border-red-200' :
-                currentSession.role === 'teacher' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                'bg-blue-50 text-blue-700 border-blue-200'
-              }`}>
-                {currentSession.role === 'admin' ? 'Quản trị viên' : currentSession.role === 'teacher' ? 'Giáo viên' : 'Học sinh'}
-              </span>
+            /* AVATAR DROPDOWN (Khi đã đăng nhập) */
+            <div className="relative" ref={dropdownRef}>
               <button
                 type="button"
-                onClick={() => {
-                  setCurrentSession({ role: 'anonymous' });
-                  alert("Đã đăng xuất tài khoản thành công!");
-                }}
-                className="text-xs text-slate-500 hover:text-red-600 font-semibold px-2 py-1 cursor-pointer transition-colors"
+                onClick={() => setUserDropdownOpen(prev => !prev)}
+                className="flex items-center gap-2 p-1 pl-1.5 sm:pr-2.5 rounded-full hover:bg-slate-100/80 border border-slate-200 transition-all cursor-pointer group active:scale-95"
+                title="Tài khoản cá nhân"
               >
-                Đăng xuất
+                <div className="relative shrink-0">
+                  <img
+                    src={userAvatar}
+                    alt={displayName}
+                    className="w-8 h-8 rounded-full object-cover border border-slate-200"
+                  />
+                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full" />
+                </div>
+                <div className="hidden sm:flex flex-col text-left max-w-[120px]">
+                  <span className="text-xs font-bold text-slate-800 truncate leading-tight">
+                    {displayName}
+                  </span>
+                  <span className="text-[10px] font-semibold text-slate-500 leading-none mt-0.5">
+                    {currentSession.role === 'teacher'
+                      ? 'Giáo viên'
+                      : currentSession.role === 'admin'
+                      ? 'Quản trị viên'
+                      : 'Học sinh'}
+                  </span>
+                </div>
+                <ChevronDown
+                  className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
+                    userDropdownOpen ? 'rotate-180 text-blue-600' : 'group-hover:text-slate-600'
+                  }`}
+                />
               </button>
+
+              {/* VERTICAL DROPDOWN MENU */}
+              {userDropdownOpen && (
+                <div className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-white rounded-2xl shadow-xl border border-slate-100 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-150">
+                  {/* Header tóm tắt tài khoản */}
+                  <div className="px-4 py-3 bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50 border-b border-slate-100">
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={userAvatar}
+                        alt="Avatar"
+                        className="w-11 h-11 rounded-2xl object-cover border border-white shadow-xs shrink-0"
+                      />
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-slate-900 truncate">{displayName}</p>
+                        <p className="text-[11px] text-slate-500 truncate">
+                          {currentSession.email || currentSession.phone || 'Tài khoản tiêu chuẩn'}
+                        </p>
+                        <span
+                          className={`inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                            currentSession.role === 'admin'
+                              ? 'bg-red-50 text-red-700 border-red-200'
+                              : currentSession.role === 'teacher'
+                              ? 'bg-blue-50 text-blue-700 border-blue-200'
+                              : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                          }`}
+                        >
+                          <Sparkles className="w-2.5 h-2.5" />
+                          {currentSession.role === 'admin'
+                            ? 'Quản trị viên'
+                            : currentSession.role === 'teacher'
+                            ? 'Giáo viên đối tác'
+                            : 'Học sinh / Phụ huynh'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Vertical Options Menu */}
+                  <div className="p-1.5 space-y-0.5">
+                    {/* Option 1: Cài đặt hồ sơ tiêu chuẩn (Cập nhật DB) */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUserDropdownOpen(false);
+                        openUserProfileModal();
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-blue-50/60 hover:text-blue-700 transition-colors cursor-pointer text-left"
+                    >
+                      <User className="w-4 h-4 text-blue-600 shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-slate-800">Cài đặt & Hồ sơ của tôi</p>
+                        <p className="text-[10px] text-slate-400 font-normal truncate">
+                          Họ tên, số điện thoại, đổi ảnh đại diện
+                        </p>
+                      </div>
+                    </button>
+
+                    {/* Options dành riêng cho Giáo viên */}
+                    {currentSession.role === 'teacher' && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setUserDropdownOpen(false);
+                            openTeacherProfileModal(currentSession.userId || 't1');
+                          }}
+                          className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-blue-600 transition-colors cursor-pointer text-left"
+                        >
+                          <BookOpen className="w-4 h-4 text-indigo-600 shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-slate-800">Hồ sơ giảng dạy & Bảng giá</p>
+                            <p className="text-[10px] text-slate-400 font-normal truncate">
+                              Giới thiệu kinh nghiệm và môn học
+                            </p>
+                          </div>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setUserDropdownOpen(false);
+                            openTeacherWalletModal(currentSession.userId || 't1');
+                          }}
+                          className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-blue-600 transition-colors cursor-pointer text-left"
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <Wallet className="w-4 h-4 text-emerald-600 shrink-0" />
+                            <div className="min-w-0">
+                              <p className="font-bold text-slate-800">Ví thu nhập & Rút tiền</p>
+                              <p className="text-[10px] text-slate-400 font-normal truncate">
+                                Tài khoản ngân hàng, yêu cầu rút
+                              </p>
+                            </div>
+                          </div>
+                          <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 shrink-0 ml-2">
+                            {getTeacherWallet(currentSession.userId || 't1').balance.toLocaleString()}đ
+                          </span>
+                        </button>
+
+                        <Link
+                          to={`/giao-vien/${currentSession.userId || 't1'}`}
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-blue-600 transition-colors cursor-pointer text-left"
+                        >
+                          <ExternalLink className="w-4 h-4 text-purple-600 shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-slate-800">Xem trang hồ sơ công khai</p>
+                            <p className="text-[10px] text-slate-400 font-normal truncate">
+                              Giao diện phụ huynh nhìn thấy
+                            </p>
+                          </div>
+                        </Link>
+                      </>
+                    )}
+
+                    {/* Options dành riêng cho Học sinh */}
+                    {currentSession.role === 'student' && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setUserDropdownOpen(false);
+                            openStudentProfileModal();
+                          }}
+                          className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-blue-600 transition-colors cursor-pointer text-left"
+                        >
+                          <GraduationCap className="w-4 h-4 text-blue-600 shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-slate-800">Hồ sơ học tập chi tiết</p>
+                            <p className="text-[10px] text-slate-400 font-normal truncate">
+                              Lớp học, trường học và địa chỉ
+                            </p>
+                          </div>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setUserDropdownOpen(false);
+                            openMyTrialsModal();
+                          }}
+                          className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-blue-600 transition-colors cursor-pointer text-left"
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <Calendar className="w-4 h-4 text-amber-500 shrink-0" />
+                            <div className="min-w-0">
+                              <p className="font-bold text-slate-800">Lịch học thử đã đặt</p>
+                              <p className="text-[10px] text-slate-400 font-normal truncate">
+                                Lịch hẹn và kết nối gia sư
+                              </p>
+                            </div>
+                          </div>
+                          {myTrials.length > 0 && (
+                            <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-500 text-white shrink-0 ml-2">
+                              {myTrials.length}
+                            </span>
+                          )}
+                        </button>
+                      </>
+                    )}
+
+                    {/* Admin option */}
+                    {currentSession.role === 'admin' && (
+                      <Link
+                        to="/admin"
+                        onClick={() => setUserDropdownOpen(false)}
+                        className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-rose-600 transition-colors cursor-pointer text-left"
+                      >
+                        <Shield className="w-4 h-4 text-rose-600 shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-slate-800">Bảng quản trị Admin</p>
+                          <p className="text-[10px] text-slate-400 font-normal truncate">
+                            Duyệt KYC gia sư và đối soát
+                          </p>
+                        </div>
+                      </Link>
+                    )}
+
+                    {/* Divider */}
+                    <div className="my-1 border-t border-slate-100" />
+
+                    {/* Logout button */}
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        setUserDropdownOpen(false);
+                        await logout();
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer text-left"
+                    >
+                      <LogOut className="w-4 h-4 text-rose-500 shrink-0" />
+                      <span>Đăng xuất tài khoản</span>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
+            /* Khi CHƯA đăng nhập */
             <>
               <button
                 type="button"
@@ -175,52 +414,69 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Thanh điều hướng 3 mục trên điện thoại (Không bao giờ bị khuất trên mobile) */}
+      {/* Thanh điều hướng 3 mục trên điện thoại */}
       <div className="md:hidden border-t border-slate-100 bg-slate-50/95 px-2 py-1.5 flex items-center justify-around gap-1 overflow-x-auto scrollbar-none">
         <Link
           to="/"
-          className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${isActive('/') ? 'bg-white text-blue-600 shadow-2xs' : 'text-slate-600 hover:text-blue-600'}`}
+          className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${isActive('/') ? 'bg-blue-600 text-white shadow-2xs' : 'text-slate-600 hover:bg-slate-200/60'}`}
         >
           Trang chủ
         </Link>
         <Link
           to="/tim-gia-su"
-          className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${isActive('/tim-gia-su') ? 'bg-white text-blue-600 shadow-2xs' : 'text-slate-600 hover:text-blue-600'}`}
+          className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${isActive('/tim-gia-su') ? 'bg-blue-600 text-white shadow-2xs' : 'text-slate-600 hover:bg-slate-200/60'}`}
         >
-          Tìm Gia Sư & Giáo Viên
+          Tìm gia sư
         </Link>
-        <button
-          type="button"
-          onClick={openMyTrialsModal}
-          className="px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap text-slate-600 hover:text-blue-600 flex items-center gap-1 cursor-pointer"
+        <Link
+          to="/dang-ky-gia-su"
+          className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${isActive('/dang-ky-gia-su') ? 'bg-blue-600 text-white shadow-2xs' : 'text-slate-600 hover:bg-slate-200/60'}`}
         >
-          <span>Lớp học thử của tôi</span>
-          {myTrials.length > 0 && (
-            <span className={`text-[9px] font-black px-1.5 py-0.2 rounded-full ${activeTrialsCount > 0 ? 'bg-amber-500 text-white animate-pulse' : 'bg-slate-200 text-slate-700'}`}>
-              {myTrials.length}
-            </span>
-          )}
-        </button>
+          Trở thành gia sư
+        </Link>
       </div>
 
-      {/* Mobile Drawer (khi bấm vào nút Menu) */}
+      {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-slate-200 bg-white px-4 py-4 space-y-3 animate-in slide-in-from-top-2 duration-200 shadow-xl">
+        <div className="md:hidden border-t border-slate-200/80 bg-white px-4 pt-3 pb-6 space-y-3 shadow-lg animate-in slide-in-from-top-2 duration-150">
+          {/* User info on mobile drawer */}
+          {currentSession.role !== 'anonymous' && (
+            <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <img
+                  src={userAvatar}
+                  alt="Avatar"
+                  className="w-10 h-10 rounded-xl object-cover border border-slate-200 shrink-0"
+                />
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-slate-900 truncate">{displayName}</p>
+                  <p className="text-[10px] text-slate-500 truncate">
+                    {currentSession.email || currentSession.phone || 'Đang đăng nhập'}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  openUserProfileModal();
+                }}
+                className="px-2.5 py-1 rounded-lg text-xs font-bold text-blue-600 bg-blue-50 border border-blue-200 cursor-pointer"
+              >
+                Cài đặt
+              </button>
+            </div>
+          )}
+
           <div className="space-y-1">
             <Link
-              to="/"
-              className={`flex items-center justify-between p-3 rounded-xl text-sm font-bold ${isActive('/') ? 'bg-blue-50 text-blue-600' : 'text-slate-700 hover:bg-slate-50'}`}
-            >
-              <span>🏠 Trang chủ</span>
-              <ChevronRight className="w-4 h-4 text-slate-400" />
-            </Link>
-            <Link
               to="/tim-gia-su"
-              className={`flex items-center justify-between p-3 rounded-xl text-sm font-bold ${isActive('/tim-gia-su') ? 'bg-blue-50 text-blue-600' : 'text-slate-700 hover:bg-slate-50'}`}
+              className="flex items-center justify-between p-3 rounded-xl text-sm font-bold text-slate-700 hover:bg-slate-50"
             >
               <span>🎓 Tìm Gia Sư & Giáo Viên</span>
               <ChevronRight className="w-4 h-4 text-slate-400" />
             </Link>
+
             <button
               type="button"
               onClick={() => {
@@ -239,6 +495,7 @@ export function Navbar() {
               </div>
               <ChevronRight className="w-4 h-4 text-slate-400" />
             </button>
+
             {currentSession.role === 'student' && (
               <button
                 type="button"
@@ -249,11 +506,47 @@ export function Navbar() {
                 className="w-full flex items-center justify-between p-3 rounded-xl text-sm font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 cursor-pointer text-left"
               >
                 <div className="flex items-center gap-2">
-                  <User className="w-4 h-4 text-blue-600" />
+                  <GraduationCap className="w-4 h-4 text-blue-600" />
                   <span>👤 Hồ sơ học sinh của tôi</span>
                 </div>
                 <ChevronRight className="w-4 h-4 text-blue-400" />
               </button>
+            )}
+
+            {currentSession.role === 'teacher' && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    openTeacherProfileModal(currentSession.userId || 't1');
+                  }}
+                  className="w-full flex items-center justify-between p-3 rounded-xl text-sm font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 cursor-pointer text-left"
+                >
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="w-4 h-4 text-indigo-600" />
+                    <span>Hồ sơ giảng dạy của tôi</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-indigo-400" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    openTeacherWalletModal(currentSession.userId || 't1');
+                  }}
+                  className="w-full flex items-center justify-between p-3 rounded-xl text-sm font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 cursor-pointer text-left"
+                >
+                  <div className="flex items-center gap-2">
+                    <Wallet className="w-4 h-4 text-emerald-600" />
+                    <span>Ví thù lao & Rút tiền</span>
+                  </div>
+                  <span className="text-xs font-bold text-emerald-700">
+                    {getTeacherWallet(currentSession.userId || 't1').balance.toLocaleString()}đ
+                  </span>
+                </button>
+              </>
             )}
 
             <Link
@@ -265,32 +558,47 @@ export function Navbar() {
             </Link>
           </div>
 
-          <div className="pt-3 border-t border-slate-100 grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setMobileMenuOpen(false);
-                openAuthModal('login');
-              }}
-              className="w-full py-2.5 rounded-xl border border-slate-200 text-slate-700 font-bold text-xs hover:bg-slate-50 text-center"
-            >
-              Đăng nhập
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setMobileMenuOpen(false);
-                openAuthModal('register', 'student');
-              }}
-              className="w-full py-2.5 rounded-xl bg-blue-600 text-white font-bold text-xs hover:bg-blue-700 text-center shadow-xs"
-            >
-              Đăng ký ngay
-            </button>
+          <div className="pt-3 border-t border-slate-100">
+            {currentSession.role !== 'anonymous' ? (
+              <button
+                type="button"
+                onClick={async () => {
+                  setMobileMenuOpen(false);
+                  await logout();
+                }}
+                className="w-full py-2.5 rounded-xl bg-rose-50 text-rose-600 font-bold text-xs hover:bg-rose-100 text-center flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <LogOut className="w-4 h-4 text-rose-500" />
+                <span>Đăng xuất tài khoản</span>
+              </button>
+            ) : (
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    openAuthModal('login');
+                  }}
+                  className="w-full py-2.5 rounded-xl border border-slate-200 text-slate-700 font-bold text-xs hover:bg-slate-50 text-center cursor-pointer"
+                >
+                  Đăng nhập
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    openAuthModal('register', 'student');
+                  }}
+                  className="w-full py-2.5 rounded-xl bg-blue-600 text-white font-bold text-xs hover:bg-blue-700 text-center shadow-xs cursor-pointer"
+                >
+                  Đăng ký ngay
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
     </header>
   );
 }
-
 export default Navbar;
