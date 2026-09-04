@@ -181,7 +181,40 @@ export function TeacherDetailPage() {
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  // 3. Gọi Stored Procedure reserve_slot khóa chỗ 5 phút
+  const isLoggedIn = Boolean(currentSession && currentSession.role !== 'anonymous' && currentSession.userId);
+
+  // 3. Đặt lịch hẹn học thử 1-1 tinh gọn (Zero-Friction: mở thẳng modal Zalo với ca học đã chọn, không đếm ngược áp lực)
+  const handleSelectTrialSlot = (day: string, shiftObj: { label: string; key: string }) => {
+    if (!tutor) return;
+    const times = shiftTimeMap[shiftObj.key];
+    const slotInfo = {
+      day,
+      shift: shiftObj.label,
+      shiftLabel: shiftObj.label,
+      time: times ? `${times.start.slice(0, 5)} - ${times.end.slice(0, 5)}` : '',
+      slotKey: `${day}_${shiftObj.key}`,
+    };
+
+    const tutorWithSlot = {
+      ...tutor,
+      selectedSlot: slotInfo,
+    };
+
+    if (!isLoggedIn) {
+      setPendingTrialTutor(tutorWithSlot);
+      alert(
+        `Vui lòng đăng nhập tài khoản học sinh để nhận 01 buổi học thử 1-1 (${day} • ${shiftObj.label}) cùng ${
+          tutor.displayName || tutor.name
+        }!`
+      );
+      openAuthModal('login', 'student');
+      return;
+    }
+
+    openContactZaloModal(tutorWithSlot);
+  };
+
+  // 4. Gọi Stored Procedure reserve_slot khóa chỗ 5 phút (hỗ trợ luồng nhập học chính thức có đặt cọc)
   const handleSelectAndReserveSlot = async (day: string, shiftObj: { label: string; key: string }) => {
     const slotKey = `${day}_${shiftObj.key}`;
     const dayNum = dayToNumMap[day];
@@ -346,8 +379,6 @@ export function TeacherDetailPage() {
       </div>
     );
   }
-
-  const isLoggedIn = currentSession && currentSession.role !== 'anonymous' && !!currentSession.userId;
 
   const handleTrialContactClick = () => {
     if (!isLoggedIn) {
@@ -863,19 +894,19 @@ export function TeacherDetailPage() {
                     </div>
                     <div>
                       <h2 className="text-lg font-black text-stone-900 tracking-tight">
-                        Lịch rảnh & Đặt lịch hẹn
+                        Lịch rảnh & Hẹn học thử 1-1
                       </h2>
-                      <p className="text-xs text-stone-400">Khóa chỗ trực tiếp trên CSDL chống trùng lịch</p>
+                      <p className="text-xs text-stone-400">Chọn khung giờ phù hợp để gửi yêu cầu kết nối với giáo viên</p>
                     </div>
                   </div>
 
                   <span className="px-3.5 py-1.5 rounded-full text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200/80 flex items-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                    Nhấp ca để giữ chỗ 5 phút
+                    Lịch dạy trống trong tuần
                   </span>
                 </div>
 
-                {/* Cảnh báo khi có người khác đang giữ chỗ */}
+                {/* Cảnh báo khi có sự cố */}
                 {reservationWarning && (
                   <div className="p-4 bg-amber-50 border border-amber-200/90 text-amber-900 rounded-2xl text-xs flex items-center justify-between gap-3 animate-in fade-in">
                     <div className="flex items-center gap-2.5">
@@ -889,48 +920,6 @@ export function TeacherDetailPage() {
                     >
                       ✕
                     </button>
-                  </div>
-                )}
-
-                {/* Banner khi chính bạn đang giữ chỗ (Countdown 5 phút) */}
-                {heldSlot && (
-                  <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 p-5 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 text-xs animate-in fade-in">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold shadow-xs shrink-0">
-                        <Clock className="w-5 h-5 animate-spin" />
-                      </div>
-                      <div>
-                        <span className="font-bold text-emerald-950 text-sm block">
-                          Đang giữ chỗ: {heldSlot.day} • {heldSlot.shiftLabel}
-                        </span>
-                        <span className="text-emerald-800 font-medium">
-                          Thời gian còn lại: <strong className="font-mono text-emerald-950 text-sm font-bold">{formatCountdown(countdownSeconds)}</strong> (Đã khóa trên PostgreSQL)
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2.5 w-full sm:w-auto">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          openEnrollmentModal({
-                            ...tutor,
-                            selectedSlotId: heldSlot.id,
-                            slot_id: heldSlot.id,
-                            selectedSlot: heldSlot,
-                          })
-                        }
-                        className="flex-1 sm:flex-none px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl shadow-md cursor-pointer transition-colors text-center"
-                      >
-                        Tiến hành đăng ký
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleReleaseSlot}
-                        className="px-4 py-2.5 bg-white border border-stone-200 text-stone-600 hover:bg-stone-50 font-semibold rounded-xl cursor-pointer transition-colors"
-                      >
-                        Hủy giữ chỗ
-                      </button>
-                    </div>
                   </div>
                 )}
 
@@ -971,61 +960,22 @@ export function TeacherDetailPage() {
                                   s.start_time?.startsWith(times.start.slice(0, 5))
                               );
 
-                              const currentHolder =
-                                currentSession?.userId ||
-                                localStorage.getItem('hantutor_slot_holder_id') ||
-                                '';
-                              const isHeldByMe = heldSlot?.slotKey === slotKey;
-                              const isLockedByOther = !!(
-                                matchedDb?.locked_until &&
-                                new Date(matchedDb.locked_until) > new Date() &&
-                                matchedDb.locked_by !== currentHolder
-                              );
                               const isBooked = matchedDb?.is_booked === true;
 
                               return (
                                 <td key={day} className="p-2">
-                                  {isHeldByMe ? (
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        openEnrollmentModal({
-                                          ...tutor,
-                                          selectedSlotId: heldSlot?.id,
-                                          slot_id: heldSlot?.id,
-                                          selectedSlot: heldSlot,
-                                        })
-                                      }
-                                      className="w-full py-2 px-2 bg-emerald-700 text-white font-bold rounded-xl text-[11px] shadow-sm animate-pulse cursor-pointer flex items-center justify-center gap-1"
-                                      title="Bạn đang giữ chỗ - Nhấp để mở đơn"
-                                    >
-                                      <Clock className="w-3 h-3 shrink-0" />
-                                      <span>{formatCountdown(countdownSeconds)}</span>
-                                    </button>
-                                  ) : isLockedByOther ? (
-                                    <span
-                                      className="block py-2 px-1 bg-amber-50 text-amber-800 font-semibold rounded-xl text-[10px] border border-amber-200/60 cursor-not-allowed"
-                                      title="Khung giờ đang được phụ huynh khác giữ chỗ trong 5 phút"
-                                    >
-                                      ⏳ Tạm khóa
-                                    </span>
-                                  ) : isBooked ? (
+                                  {isBooked ? (
                                     <span className="block py-2 text-stone-400 font-medium text-[11px] bg-stone-100 rounded-xl">
                                       Đã kín
                                     </span>
                                   ) : isAvailable ? (
                                     <button
                                       type="button"
-                                      onClick={() => handleSelectAndReserveSlot(day, shiftObj)}
-                                      disabled={reservingSlotKey !== null}
-                                      className="w-full py-2 px-2 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-800 font-bold rounded-xl text-[11px] border border-emerald-200/80 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] cursor-pointer hover:scale-105 active:scale-95 flex items-center justify-center gap-1 shadow-2xs"
-                                      title="Nhấp để giữ chỗ ngay trong 5 phút (reserve_slot)"
+                                      onClick={() => handleSelectTrialSlot(day, shiftObj)}
+                                      className="w-full py-2 px-2 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-800 font-bold rounded-xl text-[11px] border border-emerald-200/80 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] cursor-pointer hover:scale-105 active:scale-95 flex items-center justify-center gap-1 shadow-2xs group"
+                                      title={`Chọn ${day} (${shiftObj.label}) để hẹn học thử 1-1`}
                                     >
-                                      {reservingSlotKey === slotKey ? (
-                                        <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-700" />
-                                      ) : (
-                                        <>✓ Chọn</>
-                                      )}
+                                      <span>✓ Hẹn ca này</span>
                                     </button>
                                   ) : (
                                     <span className="block py-2 text-stone-300 text-xs">—</span>
@@ -1278,35 +1228,7 @@ export function TeacherDetailPage() {
                   </div>
                 </div>
 
-                {/* Trạng thái giữ chỗ */}
-                {heldSlot && (
-                  <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs space-y-2">
-                    <div className="flex items-center justify-between font-bold text-emerald-950">
-                      <span className="flex items-center gap-1.5">
-                        <Clock className="w-3.5 h-3.5 animate-spin text-emerald-700" />
-                        Đang giữ chỗ 5 phút
-                      </span>
-                      <span className="font-mono">{formatCountdown(countdownSeconds)}</span>
-                    </div>
-                    <div className="text-emerald-800">
-                      {heldSlot.day} • {heldSlot.shiftLabel}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        openEnrollmentModal({
-                          ...tutor,
-                          selectedSlotId: heldSlot.id,
-                          slot_id: heldSlot.id,
-                          selectedSlot: heldSlot,
-                        })
-                      }
-                      className="w-full py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl text-xs transition-colors cursor-pointer text-center"
-                    >
-                      Đăng ký ngay với khung giờ này
-                    </button>
-                  </div>
-                )}
+
 
                 {/* Primary Action Button (Button-in-Button Architecture) */}
                 <div className="space-y-3 pt-2">
