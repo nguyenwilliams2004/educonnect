@@ -63,20 +63,30 @@ test('TEACHER TRIAL STUDENT NAME - MyTrialsModal lọc sạch bookmark học sin
   );
 });
 
-test('TEACHER TRIAL STUDENT NAME - AuthModal hỗ trợ tài khoản kiểm thử nhanh (Demo Test Accounts)', () => {
+test('TEACHER TRIAL STUDENT NAME - AuthContext định danh chính xác Cô Sương Mai và AuthModal giữ UI Production tinh gọn', () => {
+  const authCtxPath = path.join(rootDir, 'src', 'context', 'AuthContext.tsx');
+  const authCtxContent = fs.readFileSync(authCtxPath, 'utf8');
+
+  // Kiểm tra liên kết tài khoản giáo viên tới Cô Sương Mai
+  assert.ok(
+    authCtxContent.includes('isCoSuongMai'),
+    'AuthContext phải nhận diện tài khoản Cô Sương Mai'
+  );
+  assert.ok(
+    authCtxContent.includes("cleanName = isCoSuongMai\n      ? 'Cô Sương Mai'"),
+    'AuthContext phải chuẩn hóa họ tên Cô Sương Mai không dính chữ Demo'
+  );
+  assert.ok(
+    authCtxContent.includes('photo-1544005313-94ddf0286df2'),
+    'AuthContext phải dùng đúng avatar của Cô Sương Mai'
+  );
+
+  // Kiểm tra AuthModal tuyệt đối không để lộ debug UI / nút test ra màn hình đăng nhập người dùng
   const authModalPath = path.join(rootDir, 'src', 'app', 'components', 'modals', 'AuthModal.tsx');
-  const content = fs.readFileSync(authModalPath, 'utf8');
+  const authModalContent = fs.readFileSync(authModalPath, 'utf8');
 
   assert.ok(
-    content.includes('giaovien.demo@gmail.com'),
-    'AuthModal phải tích hợp email giáo viên demo sẵn sàng test'
-  );
-  assert.ok(
-    content.includes('hocsinh.demo@gmail.com'),
-    'AuthModal phải tích hợp email học sinh demo sẵn sàng test'
-  );
-  assert.ok(
-    content.includes('HanTutor2026!@#'),
-    'AuthModal phải có mật khẩu kiểm thử chuẩn'
+    !authModalContent.includes('Tài khoản Test nghiệm thu'),
+    'AuthModal phải là giao diện Production sạch, không để lộ UI test cho người dùng cuối'
   );
 });

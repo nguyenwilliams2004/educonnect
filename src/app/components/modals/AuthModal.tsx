@@ -12,7 +12,6 @@ import {
   Mail,
   ExternalLink,
   RefreshCw,
-  Sparkles,
 } from 'lucide-react';
 import { useData } from '../../../context/DataContext';
 import { useUI } from '../../../context/UIContext';
@@ -488,64 +487,6 @@ export function AuthModal({
               >
                 <Briefcase className="w-4 h-4" /> Tôi là giáo viên
               </button>
-            </div>
-
-            {/* Quick Fill Test Accounts (Dành cho kiểm thử nghiệm thu nhanh) */}
-            <div className="mb-4 p-3 bg-gradient-to-r from-blue-50/70 to-slate-50 border border-blue-100 rounded-2xl space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-extrabold text-blue-900 uppercase tracking-wider flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-500" /> Tài khoản Test nghiệm thu
-                </span>
-                <span className="text-[10px] text-slate-400 font-medium">Bấm để điền nhanh</span>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setRole('teacher');
-                    setEmail('giaovien.demo@gmail.com');
-                    setPassword('HanTutor2026!@#');
-                    setErrorMessage(null);
-                  }}
-                  className="p-2.5 bg-white hover:bg-blue-50 hover:border-blue-300 border border-slate-200 rounded-xl text-left transition-all cursor-pointer group shadow-2xs flex items-center gap-2.5"
-                  title="Điền tài khoản Cô Sương Mai"
-                >
-                  <img
-                    src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=400&auto=format&fit=crop"
-                    alt="Cô Sương Mai"
-                    className="w-8 h-8 rounded-lg object-cover border border-slate-200 shrink-0"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <div className="text-[11px] font-bold text-slate-800 group-hover:text-blue-700 truncate">
-                      Cô Sương Mai
-                    </div>
-                    <div className="text-[10px] text-slate-500 truncate">GV Ngữ Văn (t1)</div>
-                  </div>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setRole('student');
-                    setEmail('hocsinh.demo@gmail.com');
-                    setPassword('HanTutor2026!@#');
-                    setErrorMessage(null);
-                  }}
-                  className="p-2.5 bg-white hover:bg-emerald-50 hover:border-emerald-300 border border-slate-200 rounded-xl text-left transition-all cursor-pointer group shadow-2xs flex items-center gap-2.5"
-                  title="Điền tài khoản học sinh Nguyễn Văn An"
-                >
-                  <img
-                    src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=400&auto=format&fit=crop"
-                    alt="Nguyễn Văn An"
-                    className="w-8 h-8 rounded-lg object-cover border border-slate-200 shrink-0"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <div className="text-[11px] font-bold text-slate-800 group-hover:text-emerald-700 truncate">
-                      Nguyễn Văn An
-                    </div>
-                    <div className="text-[10px] text-slate-500 truncate">Học sinh (Demo)</div>
-                  </div>
-                </button>
-              </div>
             </div>
 
             <form onSubmit={handleLogin} className="space-y-4">
