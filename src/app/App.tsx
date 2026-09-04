@@ -150,6 +150,14 @@ export function AuthUrlHandler() {
           initialErrorMessage: `Xác thực email không thành công: ${decoded}`,
         });
       }
+    } else if (hash.includes('type=signup') || hash.includes('email_verified=true') || hash.includes('confirmation=success')) {
+      // Dọn sạch hash sau khi xác thực thành công
+      try {
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      } catch {}
+      openAuthModal('login', 'student', {
+        initialErrorMessage: 'Xác thực email thành công! Bạn có thể đăng nhập ngay bây giờ.',
+      });
     }
   }, [openAuthModal]);
 

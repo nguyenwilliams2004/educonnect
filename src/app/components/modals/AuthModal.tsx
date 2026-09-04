@@ -1,6 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { X, Users, Briefcase, GraduationCap, AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react';
+import {
+  X,
+  Users,
+  Briefcase,
+  GraduationCap,
+  AlertCircle,
+  CheckCircle2,
+  Eye,
+  EyeOff,
+  Mail,
+  ExternalLink,
+  RefreshCw,
+} from 'lucide-react';
 import { useData } from '../../../context/DataContext';
 import { useUI } from '../../../context/UIContext';
 import { supabase } from '../../../lib/supabase';
@@ -16,7 +28,7 @@ export function AuthModal({
   isOpen: propIsOpen,
   onClose: propOnClose,
   initialView: propInitialView,
-  defaultRole: propDefaultRole
+  defaultRole: propDefaultRole,
 }: AuthModalProps = {}) {
   const { authModalState, closeAuthModal, pendingTrialTutor, setPendingTrialTutor, openContactZaloModal } = useUI();
   const { setCurrentSession } = useData();
@@ -27,7 +39,7 @@ export function AuthModal({
   const initialView = propInitialView || authModalState.view || 'login';
   const defaultRole = propDefaultRole || authModalState.defaultRole || 'student';
 
-  const [view, setView] = useState<'login' | 'register' | 'forgot_step1'>(initialView);
+  const [view, setView] = useState<'login' | 'register' | 'forgot_step1' | 'pending_verification'>(initialView);
   const [role, setRole] = useState<'student' | 'teacher'>(defaultRole);
   
   // Form fields
@@ -102,8 +114,13 @@ export function AuthModal({
       if (error) {
         if (error.message.includes('Invalid login credentials')) {
           setErrorMessage('Email hoặc mật khẩu không chính xác.');
-        } else if (error.message.includes('Email not confirmed')) {
-          setErrorMessage('Tài khoản chưa xác nhận email. Bạn có thể nhấn nút "Gửi lại link xác nhận email" bên dưới.');
+        } else if (
+          error.message.includes('Email not confirmed') ||
+          error.message.toLowerCase().includes('not confirmed')
+        ) {
+          setErrorMessage(
+            'Tài khoản chưa được kích hoạt qua email. Vui lòng kiểm tra hộp thư và nhấn vào liên kết xác nhận để kích hoạt tài khoản.'
+          );
         } else {
           setErrorMessage(error.message);
         }
@@ -111,6 +128,15 @@ export function AuthModal({
       }
 
       if (data.user) {
+        // Zero-Trust Check: Bắt buộc tài khoản đăng ký bằng email phải được xác thực qua link email
+        if (!data.user.email_confirmed_at && data.user.app_metadata?.provider === 'email') {
+          await supabase.auth.signOut();
+          setErrorMessage(
+            'Tài khoản chưa được kích hoạt qua email. Vui lòng mở email và nhấn vào liên kết xác nhận trước khi đăng nhập.'
+          );
+          return;
+        }
+
         // Truy vấn bảng public.users để lấy hồ sơ
         let userRole = (data.user.user_metadata?.role as any) || role;
         let resolvedName = data.user.user_metadata?.full_name || '';
@@ -253,38 +279,29 @@ export function AuthModal({
           console.warn('[Register] Upsert public.users:', dbErr);
         }
 
-        let activeSession = data.session;
-
-        // Nếu signUp chưa trả về session ngay, tự động đăng nhập ngầm để người dùng không phải chuyển tab nhập lại
-        if (!activeSession) {
-          try {
-            const { data: signInData } = await supabase.auth.signInWithPassword({
-              email: cleanEmail,
-              password: cleanPass,
-            });
-            if (signInData?.session) {
-              activeSession = signInData.session;
-            }
-          } catch (autoLoginErr) {
-            console.warn('[Register] Auto sign-in fallback:', autoLoginErr);
-          }
+        // BẮT BUỘC XÁC THỰC EMAIL:
+        // Nếu tài khoản chưa xác thực qua email, chuyển sang màn hình chờ xác thực
+        if (!data.user.email_confirmed_at) {
+          setView('pending_verification');
+          setErrorMessage(null);
+          setSuccessMessage(null);
+          return;
         }
 
-        if (activeSession) {
+        // Nếu tài khoản đã được xác thực trước
+        if (data.session) {
           setCurrentSession({
             userId: data.user.id,
             role: 'student',
             email: cleanEmail,
             fullName: cleanName,
             phone: cleanPhone,
-            sessionToken: activeSession.access_token,
+            sessionToken: data.session.access_token,
           });
-          setSuccessMessage('Đăng ký tài khoản thành công! Đang tự động đăng nhập...');
+          setSuccessMessage('Đăng ký tài khoản thành công!');
           setTimeout(() => {
             handlePostAuthSuccess('student');
           }, 600);
-        } else {
-          setSuccessMessage('Đăng ký thành công! Hãy kiểm tra hòm thư email của bạn để xác thực tài khoản.');
         }
       }
     } catch (err: any) {
@@ -721,6 +738,69 @@ export function AuthModal({
             >
               ← Quay lại Đăng nhập
             </button>
+          </div>
+        )}
+
+        {/* PENDING EMAIL VERIFICATION VIEW */}
+        {view === 'pending_verification' && (
+          <div className="text-center py-2 animate-in fade-in zoom-in-95 duration-200">
+            <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-inner ring-8 ring-blue-50/50">
+              <Mail className="w-8 h-8 animate-pulse text-blue-600" />
+            </div>
+
+            <h2 className="text-2xl font-black text-slate-900 mb-1.5">Xác thực tài khoản Email</h2>
+            <p className="text-xs text-slate-500 leading-relaxed max-w-sm mx-auto mb-3">
+              Một liên kết xác nhận đã được gửi đến hòm thư:
+            </p>
+            <div className="bg-blue-50/80 border border-blue-200 rounded-xl py-2 px-3 inline-block font-semibold text-blue-700 text-xs mb-4 break-all">
+              {email}
+            </div>
+
+            <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-2xl text-left mb-5 text-xs text-amber-900 space-y-1">
+              <p className="font-bold flex items-center gap-1.5 text-amber-800">
+                <AlertCircle className="w-4 h-4 shrink-0 text-amber-600" />
+                Yêu cầu bảo mật bắt buộc:
+              </p>
+              <p className="text-amber-800/90 leading-relaxed">
+                Bạn <strong>bắt buộc phải bấm vào liên kết trong email</strong> để kích hoạt tài khoản thì mới có thể đăng nhập vào hệ thống.
+              </p>
+            </div>
+
+            <div className="space-y-2.5">
+              {email.toLowerCase().includes('@gmail.com') && (
+                <a
+                  href="https://mail.google.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-md shadow-blue-500/20 cursor-pointer"
+                >
+                  <span>Mở hòm thư Gmail</span>
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              )}
+
+              <button
+                type="button"
+                onClick={handleResendConfirmEmail}
+                disabled={resendLoading}
+                className="w-full py-2.5 px-4 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${resendLoading ? 'animate-spin' : ''}`} />
+                <span>{resendLoading ? 'Đang gửi lại...' : 'Chưa nhận được? Gửi lại email xác thực'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setView('login');
+                  setErrorMessage(null);
+                  setSuccessMessage(null);
+                }}
+                className="text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors cursor-pointer pt-2 inline-block"
+              >
+                Đã bấm link kích hoạt? <strong>Chuyển sang Đăng nhập</strong>
+              </button>
+            </div>
           </div>
         )}
       </div>

@@ -62,6 +62,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Đồng bộ thông tin từ bảng public.users dựa trên auth session
   const syncUserFromDb = useCallback(async (authUser: any, token?: string) => {
     if (!authUser?.id) return;
+
+    // Zero-Trust Check: Bắt buộc tài khoản đăng ký qua email phải đã xác nhận email
+    if (authUser.app_metadata?.provider === 'email' && !authUser.email_confirmed_at) {
+      console.warn('[AuthContext] Chặn phiên đăng nhập: Email chưa được xác thực!');
+      try {
+        await supabase.auth.signOut();
+      } catch {}
+      setCurrentSession({ role: 'anonymous' });
+      try {
+        localStorage.removeItem('hantutor_user_session');
+      } catch {}
+      return;
+    }
     
     let resolvedRole: UserRole = 'student';
     let resolvedName = authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'Người dùng';
