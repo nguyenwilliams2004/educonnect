@@ -25,8 +25,7 @@ export interface MyTrialsModalProps {
   onOpenEnrollment?: (tutor: any) => void;
 }
 
-/* Hallmark · pre-emit critique: P5 H5 E5 S5 R5 V5
- * Hallmark · component: MyTrialsModal · genre: editorial · theme: Broadside Academic Roster
+/* Hallmark · component: MyTrialsModal · genre: editorial · theme: Broadside Academic Roster
  * states: default · hover · focus · active · disabled · loading
  * contrast: pass (WCAG AA)
  */
@@ -165,12 +164,12 @@ export function MyTrialsModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl max-w-3xl w-full p-5 sm:p-7 shadow-[0_25px_60px_-15px_rgba(15,23,42,0.2)] relative border border-slate-200/90 animate-in zoom-in-95 duration-200 max-h-[92vh] flex flex-col font-sans">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/65 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white rounded-3xl max-w-3xl w-full p-5 sm:p-7 shadow-2xl relative border border-slate-200/90 animate-in zoom-in-95 duration-200 max-h-[92vh] flex flex-col font-sans">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 text-slate-400 hover:text-slate-800 hover:bg-slate-100 p-2 rounded-full transition-colors cursor-pointer"
+          className="absolute top-5 right-5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 p-2 rounded-full transition-colors cursor-pointer"
           title="Đóng"
         >
           <X className="w-5 h-5" />
@@ -179,17 +178,17 @@ export function MyTrialsModal({
         {/* Header Hallmark Editorial - Broadsheet Academic Masthead */}
         <div className="mb-4 pb-4 border-b border-slate-100 pr-10">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-blue-800 text-white flex items-center justify-center shadow-lg shadow-indigo-500/20 ring-4 ring-blue-50 shrink-0">
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-blue-800 text-white flex items-center justify-center shadow-md shadow-blue-500/15 shrink-0">
               <BookOpen className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-extrabold uppercase tracking-widest text-indigo-700 bg-indigo-50 border border-indigo-200/80 px-2.5 py-0.5 rounded-md shadow-3xs">
+                <span className="text-[10px] font-extrabold uppercase tracking-widest text-blue-700 bg-blue-50 border border-blue-200/80 px-2 py-0.5 rounded">
                   {isTeacher ? 'HANTUTOR QUẢN LÝ LỚP DẠY' : 'SỔ TAY THEO DÕI HỌC THỬ 1-1'}
                 </span>
                 <span className="text-[11px] font-medium text-slate-400 hidden sm:inline">· Cam kết 100% miễn phí</span>
               </div>
-              <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mt-1">
+              <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mt-0.5">
                 {isTeacher
                   ? `Danh sách học sinh học thử (${rawList.length})`
                   : `Lớp học thử của tôi (${rawList.length})`}
@@ -209,50 +208,50 @@ export function MyTrialsModal({
                 <button
                   type="button"
                   onClick={() => setActiveTab('all')}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
                     activeTab === 'all'
-                      ? 'bg-slate-900 text-white shadow-sm shadow-slate-900/20'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80 hover:text-slate-900 border border-slate-200/60'
+                      ? 'bg-slate-900 text-white shadow-xs'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                   }`}
                 >
                   <span>Tất cả</span>
-                  <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-bold ${activeTab === 'all' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'}`}>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded font-bold ${activeTab === 'all' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'}`}>
                     {rawList.length}
                   </span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setActiveTab('in_progress')}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
                     activeTab === 'in_progress'
-                      ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-sm shadow-amber-500/25'
-                      : 'bg-amber-50/80 text-amber-800 hover:bg-amber-100/90 border border-amber-200/80'
+                      ? 'bg-amber-600 text-white shadow-xs'
+                      : 'bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200/60'
                   }`}
                 >
                   <span>{isTeacher ? 'Chờ dạy thử' : 'Đang học thử'}</span>
-                  <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-bold ${activeTab === 'in_progress' ? 'bg-white/20 text-white' : 'bg-amber-200/80 text-amber-950'}`}>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded font-bold ${activeTab === 'in_progress' ? 'bg-white/20 text-white' : 'bg-amber-200/70 text-amber-900'}`}>
                     {rawList.filter((i) => i.status === 'trial_in_progress' || i.status === 'trial_completed').length}
                   </span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setActiveTab('enrolled')}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
                     activeTab === 'enrolled'
-                      ? 'bg-gradient-to-r from-emerald-600 to-teal-700 text-white shadow-sm shadow-emerald-600/25'
-                      : 'bg-emerald-50/80 text-emerald-800 hover:bg-emerald-100/90 border border-emerald-200/80'
+                      ? 'bg-emerald-600 text-white shadow-xs'
+                      : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200/60'
                   }`}
                 >
                   <span>{isTeacher ? 'Đã chốt học' : 'Đã học chính thức'}</span>
-                  <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-bold ${activeTab === 'enrolled' ? 'bg-white/20 text-white' : 'bg-emerald-200/80 text-emerald-950'}`}>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded font-bold ${activeTab === 'enrolled' ? 'bg-white/20 text-white' : 'bg-emerald-200/70 text-emerald-900'}`}>
                     {rawList.filter((i) => i.status === 'enrolled').length}
                   </span>
                 </button>
               </div>
 
-              <div className="text-[11px] text-slate-500 hidden md:flex items-center gap-1.5 font-medium">
-                <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                <span>Bảo chứng học thử 1-1 chính quy</span>
+              <div className="text-[11px] text-slate-400 hidden md:flex items-center gap-1">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Bảo chứng chất lượng học thử 1-1</span>
               </div>
             </div>
           )}
@@ -261,7 +260,7 @@ export function MyTrialsModal({
         {/* Content Body */}
         {displayedList.length === 0 ? (
           <div className="py-12 text-center text-slate-400 space-y-3 flex-1 flex flex-col items-center justify-center">
-            <div className="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-1 shadow-inner ring-4 ring-blue-50/50">
+            <div className="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-1 shadow-inner">
               <BookOpen className="w-8 h-8" />
             </div>
             <div>
@@ -284,7 +283,7 @@ export function MyTrialsModal({
               <Link
                 to="/tim-gia-su"
                 onClick={onClose}
-                className="inline-flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition-all shadow-sm shadow-blue-500/25 active:scale-98"
+                className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition-all shadow-sm active:scale-98"
               >
                 <span>Khám phá danh sách giáo viên</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -298,18 +297,10 @@ export function MyTrialsModal({
               const cleanPhone = (item.zalo || item.phone || '').replace(/[^0-9]/g, '');
               const bookingTimeStr = getBookingTimeString(item);
 
-              // Tinh chỉnh dải màu viền đầu thẻ theo trạng thái
-              const accentStripeClass =
-                item.status === 'enrolled'
-                  ? 'before:from-emerald-500 before:via-teal-500 before:to-emerald-600'
-                  : item.status === 'trial_completed'
-                  ? 'before:from-blue-600 before:via-indigo-500 before:to-blue-700'
-                  : 'before:from-amber-500 before:via-indigo-500 before:to-blue-600';
-
               return (
                 <div
                   key={String(item.enrollmentId || item.tutorId)}
-                  className={`relative bg-white border border-slate-200/90 hover:border-slate-300 rounded-2xl p-5 transition-all shadow-xs hover:shadow-md space-y-4 overflow-hidden before:absolute before:top-0 before:left-0 before:right-0 before:h-1 before:bg-gradient-to-r ${accentStripeClass}`}
+                  className="relative bg-white border border-slate-200/90 hover:border-slate-300 rounded-2xl p-5 transition-all shadow-xs hover:shadow-md space-y-4 overflow-hidden before:absolute before:top-0 before:left-0 before:right-0 before:h-1 before:bg-gradient-to-r before:from-blue-600 before:via-indigo-500 before:to-amber-500"
                 >
                   {/* VÙNG 1: AVATAR, TÊN ĐẦY ĐỦ KHÔNG BỊ CẮT, MÔN HỌC & TRẠNG THÁI */}
                   <div className="flex items-start justify-between gap-3 flex-wrap sm:flex-nowrap">
@@ -321,7 +312,7 @@ export function MyTrialsModal({
                           className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl object-cover shadow-xs border-2 border-white ring-1 ring-slate-200/80"
                         />
                         <span
-                          className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-2 border-white rounded-full flex items-center justify-center text-[9px] text-white font-black shadow-xs"
+                          className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-2 border-white rounded-full flex items-center justify-center text-[9px] text-white font-bold shadow-xs"
                           title="Đã xác thực danh tính & chuyên môn"
                         >
                           ✓
@@ -334,7 +325,7 @@ export function MyTrialsModal({
                           <h4 className="font-extrabold text-base sm:text-lg text-slate-900 leading-snug tracking-tight">
                             {item.tutorName}
                           </h4>
-                          <span className="inline-flex items-center gap-1 bg-slate-900 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-md shrink-0 shadow-3xs border border-slate-700/60">
+                          <span className="inline-flex items-center gap-1 bg-slate-900 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-md shrink-0 shadow-3xs">
                             <BookOpen className="w-3 h-3 text-amber-400" />
                             {item.badgeSubject}
                           </span>
@@ -342,7 +333,7 @@ export function MyTrialsModal({
 
                         {/* Châm ngôn sư phạm / Ghi chú trang nhã */}
                         {item.headline && (
-                          <div className="text-xs text-slate-600 leading-relaxed font-normal pl-2.5 border-l-2 border-indigo-200 mt-1.5 italic">
+                          <div className="text-xs text-slate-600 leading-relaxed font-normal pl-2.5 border-l-2 border-slate-200 mt-1.5 italic">
                             “{item.headline}”
                           </div>
                         )}
@@ -352,58 +343,50 @@ export function MyTrialsModal({
                     {/* Huy hiệu trạng thái chính quy */}
                     <div className="shrink-0">
                       {item.status === 'trial_in_progress' && (
-                        <span className="inline-flex items-center gap-2 text-xs font-bold text-amber-950 bg-gradient-to-r from-amber-50 via-amber-100/70 to-amber-50 px-3 py-1.5 rounded-xl border border-amber-300/80 shadow-3xs">
-                          <span className="relative flex h-2 w-2 shrink-0">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
-                          </span>
-                          <Clock className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                        <span className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-900 bg-amber-50 px-3 py-1 rounded-lg border border-amber-200/80 shadow-3xs">
+                          <Clock className="w-3.5 h-3.5 text-amber-600" />
                           <span>{isTeacher ? 'Chờ xếp lịch & dạy thử 1-1' : 'Đang trao đổi & học thử 1-1'}</span>
                         </span>
                       )}
                       {item.status === 'trial_completed' && (
-                        <span className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-950 bg-gradient-to-r from-blue-50 via-indigo-50/70 to-blue-50 px-3 py-1.5 rounded-xl border border-blue-300/80 shadow-3xs">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                        <span className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-900 bg-blue-50 px-3 py-1 rounded-lg border border-blue-200/80 shadow-3xs">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-blue-600" />
                           <span>{isTeacher ? 'Đã dạy thử xong' : 'Đã học thử • Sẵn sàng đăng ký'}</span>
                         </span>
                       )}
                       {item.status === 'enrolled' && (
-                        <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-950 bg-gradient-to-r from-emerald-50 via-teal-50/70 to-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-300/80 shadow-3xs">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-900 bg-emerald-50 px-3 py-1 rounded-lg border border-emerald-200/80 shadow-3xs">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                           <span>{isTeacher ? 'Đã là học viên chính thức' : 'Đã đăng ký học chính thức'}</span>
                         </span>
                       )}
                     </div>
                   </div>
 
-                  {/* VÙNG 2: PHIẾU HẸN HỌC THỬ (TICKET SLIP) - HAI MẢNG MÀU CHUYÊN NGHIỆP */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {/* 1. Thời điểm đặt lịch - Sắc xanh Sapphire vương giả */}
-                    <div className="flex items-start gap-3 p-3.5 rounded-xl bg-gradient-to-br from-blue-50/90 via-indigo-50/30 to-white border border-blue-200/80 shadow-3xs">
-                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white flex items-center justify-center shrink-0 shadow-sm shadow-blue-500/25 mt-0.5">
+                  {/* VÙNG 2: PHIẾU HẸN HỌC THỬ (TICKET SLIP) - XEM THỜI ĐIỂM ĐẶT LÚC MẤY GIỜ & LỊCH HỌC THỬ */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 rounded-xl bg-slate-50/90 border border-slate-200/80 shadow-3xs">
+                    {/* 1. Thời điểm đặt lịch */}
+                    <div className="flex items-start gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center shrink-0 mt-0.5">
                         <Clock className="w-4 h-4" />
                       </div>
                       <div className="min-w-0">
-                        <span className="text-[10px] font-extrabold text-blue-800 uppercase tracking-wider block">
-                          Thời điểm đặt lịch
-                        </span>
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Thời điểm đặt lịch</span>
                         <div className="text-xs text-slate-800 font-medium mt-0.5">
-                          Lúc <strong className="text-blue-950 font-black text-sm font-mono tracking-tight">{bookingTimeStr}</strong>
+                          Lúc <strong className="text-slate-900 font-extrabold text-sm font-mono">{bookingTimeStr}</strong>
                           <span className="text-slate-500 font-normal"> · Ngày {item.date || '04/09/2026'}</span>
                         </div>
                       </div>
                     </div>
 
-                    {/* 2. Lịch học thử đã hẹn trước - Sắc ngọc bích Emerald thanh tao */}
-                    <div className="flex items-start gap-3 p-3.5 rounded-xl bg-gradient-to-br from-emerald-50/90 via-teal-50/30 to-white border border-emerald-200/80 shadow-3xs">
-                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white flex items-center justify-center shrink-0 shadow-sm shadow-emerald-500/25 mt-0.5">
+                    {/* 2. Lịch học thử đã hẹn trước */}
+                    <div className="flex items-start gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5">
                         <Calendar className="w-4 h-4" />
                       </div>
                       <div className="min-w-0">
-                        <span className="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider block">
-                          Lịch hẹn buổi học thử
-                        </span>
-                        <div className="text-xs text-emerald-950 font-extrabold mt-0.5 truncate">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Lịch hẹn buổi học thử</span>
+                        <div className="text-xs text-emerald-800 font-bold mt-0.5 truncate">
                           {item.slotDay
                             ? `Lịch học thử: ${item.slotDay} ${item.slotTime ? `(${item.slotTime})` : ''}`
                             : 'Lịch học thử: Thống nhất trực tiếp qua Zalo'}
@@ -421,7 +404,7 @@ export function MyTrialsModal({
                           href={`https://zalo.me/${cleanPhone}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="px-4 py-2 bg-[#0068FF] hover:bg-[#0057d6] text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm shadow-blue-500/25 hover:shadow-md hover:shadow-blue-500/35 active:scale-98"
+                          className="px-4 py-2 bg-[#0068FF] hover:bg-[#0056d6] text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs hover:shadow-md active:scale-98"
                           title="Mở Zalo nhắn tin trao đổi"
                         >
                           <MessageCircle className="w-4 h-4" />
@@ -433,7 +416,7 @@ export function MyTrialsModal({
                         <Link
                           to={`/giao-vien/${item.tutorId}`}
                           onClick={onClose}
-                          className="px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-200 hover:border-slate-300 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 shadow-3xs active:scale-98"
+                          className="px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 hover:border-slate-400 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 shadow-3xs"
                           title="Xem trang hồ sơ giáo viên"
                         >
                           <span>Hồ sơ chi tiết</span>
@@ -450,7 +433,7 @@ export function MyTrialsModal({
                             <button
                               type="button"
                               onClick={() => handleMarkTrialCompleted(item)}
-                              className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-sm shadow-emerald-500/25 active:scale-98"
+                              className="px-4 py-2 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-300 rounded-xl text-xs font-bold transition-colors cursor-pointer whitespace-nowrap shadow-3xs"
                               title="Xác nhận đã hoàn thành buổi dạy thử"
                             >
                               ✓ Xác nhận đã dạy thử
@@ -459,7 +442,7 @@ export function MyTrialsModal({
                           <button
                             type="button"
                             onClick={() => handleCancelTrial(item)}
-                            className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
+                            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors cursor-pointer"
                             title="Xóa học viên khỏi danh sách"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -471,7 +454,7 @@ export function MyTrialsModal({
                           <button
                             type="button"
                             onClick={() => handleOpenReview(item, fullTutor)}
-                            className="px-3.5 py-2 bg-gradient-to-r from-amber-50 to-amber-100/70 hover:from-amber-100 hover:to-amber-200/70 text-amber-950 border border-amber-300/80 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 shadow-3xs hover:shadow-xs active:scale-98"
+                            className="px-3.5 py-2 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 rounded-xl text-xs font-bold transition-colors cursor-pointer whitespace-nowrap flex items-center gap-1.5 shadow-3xs"
                             title="Viết nhận xét & đánh giá giáo viên sau học thử"
                           >
                             <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
@@ -483,7 +466,7 @@ export function MyTrialsModal({
                             <button
                               type="button"
                               onClick={() => onOpenEnrollment(fullTutor || item)}
-                              className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:via-indigo-700 hover:to-blue-800 active:scale-98 text-white font-extrabold px-4 py-2 rounded-xl text-xs transition-all shadow-md shadow-blue-500/25 hover:shadow-lg hover:shadow-blue-500/35 cursor-pointer whitespace-nowrap flex items-center gap-1.5"
+                              className="bg-blue-600 hover:bg-blue-700 active:scale-98 text-white font-bold px-4 py-2 rounded-xl text-xs transition-all shadow-sm shadow-blue-500/20 cursor-pointer whitespace-nowrap flex items-center gap-1"
                             >
                               <span>Đăng ký học chính thức</span>
                               <ArrowRight className="w-3.5 h-3.5" />
@@ -495,7 +478,7 @@ export function MyTrialsModal({
                             <button
                               type="button"
                               onClick={() => handleCancelTrial(item)}
-                              className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
+                              className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors cursor-pointer"
                               title="Hủy học thử / Không tiếp tục"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -503,9 +486,8 @@ export function MyTrialsModal({
                           )}
 
                           {item.status === 'enrolled' && (
-                            <span className="text-xs font-bold text-emerald-950 px-3.5 py-2 bg-gradient-to-r from-emerald-50 to-teal-50/70 rounded-xl border border-emerald-300/80 shadow-3xs inline-flex items-center gap-1.5">
-                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                              <span>Đang theo học chính thức</span>
+                            <span className="text-xs font-bold text-emerald-800 px-3 py-1.5 bg-emerald-50 rounded-xl border border-emerald-200">
+                              ✓ Đang theo học chính thức
                             </span>
                           )}
                         </>
