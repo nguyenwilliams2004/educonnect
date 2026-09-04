@@ -73,30 +73,25 @@ export function AiChatLogoIcon({ className = "w-full h-full" }: { className?: st
   );
 }
 
-// Logo Facebook Messenger chính thức chuẩn Meta (2020+ Gradient & Lightning Bolt)
+// Logo Facebook Messenger chuẩn nhận diện hình ảnh người dùng cung cấp
 export function MessengerLogoIcon({ className = "w-full h-full" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-label="Messenger">
+    <svg viewBox="0 0 994 994" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-label="Messenger">
       <defs>
-        {/* Chuẩn Gradient Meta Messenger chính thức: Xanh dương -> Tím -> Hồng cam */}
-        <linearGradient id="metaMessengerGradient" x1="0%" y1="100%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#0078FF" />
-          <stop offset="35%" stopColor="#0084FF" />
-          <stop offset="65%" stopColor="#A033FF" />
-          <stop offset="100%" stopColor="#FF5268" />
+        <linearGradient id="messengerBlueGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#0A7CFF" />
+          <stop offset="100%" stopColor="#0064FF" />
         </linearGradient>
       </defs>
-
-      {/* Khối bong bóng chat Messenger với đuôi bo cong chuẩn nhận diện Meta */}
+      {/* Khối bong bóng chat Messenger màu xanh đặc trưng */}
       <path
-        d="M50 6 C25.7 6 6 24.2 6 46.8 C6 59.8 12.3 71.3 22.3 78.9 V90.8 C22.3 92.4 24.1 93.3 25.4 92.4 L37.6 84.8 C41.6 85.9 45.7 86.5 50 86.5 C74.3 86.5 94 68.3 94 46.8 C94 24.2 74.3 6 50 6 Z"
-        fill="url(#metaMessengerGradient)"
+        fill="url(#messengerBlueGradient)"
+        d="M497 0C217 0 0 205.1 0 482.1C0 627 59.4 752.2 156.1 838.7c8.1 7.3 13 17.4 13.4 28.3l2.7 88.4c0.9 28.2 30 46.5 55.8 35.2l98.6-43.5c8.4-3.7 17.7-4.4 26.5-2c45.3 12.5 93.6 19.1 143.9 19.1c280 0 497-205.1 497-482.1S777 0 497 0z"
       />
-
-      {/* Tia sét Messenger chính thức với góc bo mềm mại */}
+      {/* Biểu tượng tia sét trắng bo góc mềm mại chuẩn xác */}
       <path
-        d="M26.5 58.5 L43.5 40.5 C45.1 38.8 47.7 38.8 49.3 40.5 L59.0 50.8 L78.0 40.5 C80.6 39.1 83.2 42.2 81.4 44.3 L64.4 62.3 C62.8 64.0 60.2 64.0 58.6 62.3 L48.9 52.0 L29.9 62.3 C27.3 63.7 24.7 60.6 26.5 58.5 Z"
         fill="#FFFFFF"
+        d="M198.6 623.1l146-231.6c23.2-36.8 73-46 107.8-19.9l116.1 87.1c10.7 8 25.3 7.9 35.9-0.1l156.8-119c20.9-15.9 48.3 9.2 34.2 31.4L649.5 602.5c-23.2 36.8-73 46-107.8 19.9l-116.1-87.1c-10.7-8-25.3-7.9-35.9 0.1L232.8 654.5C211.9 670.4 184.5 645.3 198.6 623.1z"
       />
     </svg>
   );
