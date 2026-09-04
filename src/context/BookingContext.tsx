@@ -23,6 +23,8 @@ export interface StudentTrialItem {
   zalo?: string;
   hourlyRate?: string;
   date: string;
+  bookingTime?: string;
+  createdAt?: string;
   status: 'trial_in_progress' | 'trial_completed' | 'enrolled' | 'cancelled';
   studentId?: string | number;
   studentPhone?: string;
@@ -35,6 +37,7 @@ export interface StudentTrialItem {
 
 function enrollmentToTrial(row: any, tutors: any[], isTeacher = false): StudentTrialItem {
   const tutor = tutors.find((t) => String(t.id) === String(row.instructor_id));
+  const createdDate = row.created_at ? new Date(row.created_at) : new Date();
   return {
     tutorId: row.instructor_id,
     tutorName: isTeacher ? (row.student_name || 'Học sinh mới') : (tutor?.name || row.class_title || 'Giáo viên'),
@@ -48,7 +51,9 @@ function enrollmentToTrial(row: any, tutors: any[], isTeacher = false): StudentT
     phone: isTeacher ? (row.parent_phone || '0987654321') : tutor?.phone,
     zalo: isTeacher ? (row.parent_phone || '0987654321') : tutor?.zalo,
     hourlyRate: tutor?.hourlyRate,
-    date: new Date(row.created_at || Date.now()).toLocaleDateString('vi-VN'),
+    date: createdDate.toLocaleDateString('vi-VN'),
+    bookingTime: createdDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+    createdAt: row.created_at,
     status:
       row.status === 'enrolled'
         ? 'enrolled'
@@ -151,6 +156,8 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
         })
       );
 
+      const now = new Date();
+      const bookingTime = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
       const newItem: StudentTrialItem = {
         tutorId: tutor.id,
         tutorName: tutor.name,
@@ -162,7 +169,9 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
         phone: tutor.phone,
         zalo: tutor.zalo,
         hourlyRate: tutor.hourlyRate,
-        date: new Date().toLocaleDateString('vi-VN'),
+        date: now.toLocaleDateString('vi-VN'),
+        bookingTime,
+        createdAt: now.toISOString(),
         status: 'trial_in_progress',
         studentId: currentSession.userId || 'anon_stud',
         studentPhone: studentInfo?.phone || currentSession.phone,
@@ -184,6 +193,7 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
                   slotDay: slotDay || i.slotDay,
                   slotTime: slotTime || i.slotTime,
                   slotShift: slotShift || i.slotShift,
+                  bookingTime: i.bookingTime || bookingTime,
                 }
               : i
           );
@@ -217,7 +227,9 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
         headline: slotText || `Hẹn học thử: ${tutor.badgeSubject || '1-1'} • SĐT: ${studentPhone}`,
         phone: studentPhone,
         zalo: studentPhone,
-        date: new Date().toLocaleDateString('vi-VN'),
+        date: now.toLocaleDateString('vi-VN'),
+        bookingTime,
+        createdAt: now.toISOString(),
         status: 'trial_in_progress' as const,
         slotDay,
         slotTime,
