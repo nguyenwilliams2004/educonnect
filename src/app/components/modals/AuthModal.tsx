@@ -507,13 +507,20 @@ export function AuthModal({
                     setPassword('HanTutor2026!@#');
                     setErrorMessage(null);
                   }}
-                  className="p-2.5 bg-white hover:bg-blue-50 hover:border-blue-300 border border-slate-200 rounded-xl text-left transition-all cursor-pointer group shadow-2xs"
-                  title="Điền tài khoản giáo viên demo"
+                  className="p-2.5 bg-white hover:bg-blue-50 hover:border-blue-300 border border-slate-200 rounded-xl text-left transition-all cursor-pointer group shadow-2xs flex items-center gap-2.5"
+                  title="Điền tài khoản Cô Sương Mai"
                 >
-                  <div className="text-[11px] font-bold text-slate-800 group-hover:text-blue-700 flex items-center gap-1">
-                    👨‍🏫 Giáo viên Demo
+                  <img
+                    src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=400&auto=format&fit=crop"
+                    alt="Cô Sương Mai"
+                    className="w-8 h-8 rounded-lg object-cover border border-slate-200 shrink-0"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[11px] font-bold text-slate-800 group-hover:text-blue-700 truncate">
+                      Cô Sương Mai
+                    </div>
+                    <div className="text-[10px] text-slate-500 truncate">GV Ngữ Văn (t1)</div>
                   </div>
-                  <div className="text-[10px] text-slate-500 truncate mt-0.5">Cô Sương Mai</div>
                 </button>
                 <button
                   type="button"
@@ -523,13 +530,20 @@ export function AuthModal({
                     setPassword('HanTutor2026!@#');
                     setErrorMessage(null);
                   }}
-                  className="p-2.5 bg-white hover:bg-emerald-50 hover:border-emerald-300 border border-slate-200 rounded-xl text-left transition-all cursor-pointer group shadow-2xs"
-                  title="Điền tài khoản học sinh demo"
+                  className="p-2.5 bg-white hover:bg-emerald-50 hover:border-emerald-300 border border-slate-200 rounded-xl text-left transition-all cursor-pointer group shadow-2xs flex items-center gap-2.5"
+                  title="Điền tài khoản học sinh Nguyễn Văn An"
                 >
-                  <div className="text-[11px] font-bold text-slate-800 group-hover:text-emerald-700 flex items-center gap-1">
-                    🎓 Học sinh Demo
+                  <img
+                    src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=400&auto=format&fit=crop"
+                    alt="Nguyễn Văn An"
+                    className="w-8 h-8 rounded-lg object-cover border border-slate-200 shrink-0"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[11px] font-bold text-slate-800 group-hover:text-emerald-700 truncate">
+                      Nguyễn Văn An
+                    </div>
+                    <div className="text-[10px] text-slate-500 truncate">Học sinh (Demo)</div>
                   </div>
-                  <div className="text-[10px] text-slate-500 truncate mt-0.5">Nguyễn Văn An</div>
                 </button>
               </div>
             </div>

@@ -68,14 +68,22 @@ export function Navbar() {
     };
   }, [userDropdownOpen]);
 
+  const isCoSuongMaiSession =
+    currentSession.userId === '00000000-0000-0000-0000-000000000001' ||
+    currentSession.email === 'giaovien.demo@gmail.com';
+
   const userAvatar =
     currentSession.avatar ||
-    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400';
+    currentSession.avatarUrl ||
+    (isCoSuongMaiSession
+      ? 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=400&auto=format&fit=crop'
+      : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400');
 
   const displayName =
-    currentSession.name ||
-    currentSession.fullName ||
-    (currentSession.role === 'teacher'
+    (currentSession.name || currentSession.fullName)?.replace(/\s*\(Demo\)/i, '').trim() ||
+    (isCoSuongMaiSession
+      ? 'Cô Sương Mai'
+      : currentSession.role === 'teacher'
       ? 'Giáo viên'
       : currentSession.role === 'admin'
       ? 'Quản trị viên'
@@ -308,7 +316,7 @@ export function Navbar() {
                         </button>
 
                         <Link
-                          to={`/giao-vien/${currentSession.userId || 't1'}`}
+                          to={`/giao-vien/${isCoSuongMaiSession ? 't1' : (currentSession.userId || 't1')}`}
                           onClick={() => setUserDropdownOpen(false)}
                           className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors cursor-pointer text-left group"
                         >

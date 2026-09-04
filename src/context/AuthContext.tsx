@@ -104,13 +104,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.warn('[AuthContext] syncUserFromDb warning:', err);
     }
 
+    // Đặc quyền định danh tài khoản Giáo viên chính quy: Cô Sương Mai (t1)
+    const isCoSuongMai =
+      authUser.id === '00000000-0000-0000-0000-000000000001' ||
+      authUser.email === 'giaovien.demo@gmail.com' ||
+      authUser.email === 'cosuongmai@gmail.com';
+
+    const cleanName = isCoSuongMai
+      ? 'Cô Sương Mai'
+      : resolvedName.replace(/\s*\(Demo\)/i, '').trim();
+
+    const cleanAvatar = isCoSuongMai
+      ? 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=400&auto=format&fit=crop'
+      : (resolvedAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400');
+
+    const cleanPhone = isCoSuongMai ? '0912345678' : (resolvedPhone || '0912345678');
+
     setCurrentSession({
       userId: authUser.id,
       email: authUser.email,
-      fullName: resolvedName,
-      role: resolvedRole,
-      phone: resolvedPhone,
-      avatarUrl: resolvedAvatar,
+      fullName: cleanName,
+      name: cleanName,
+      role: isCoSuongMai ? 'teacher' : resolvedRole,
+      phone: cleanPhone,
+      avatar: cleanAvatar,
+      avatarUrl: cleanAvatar,
       sessionToken: token || currentSession.sessionToken,
     });
   }, [currentSession.sessionToken]);

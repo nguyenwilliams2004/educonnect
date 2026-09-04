@@ -107,20 +107,27 @@ export function TeacherDetailPage() {
   }, []);
 
   const resolvedId = id;
+  const isCoSuongMaiMatch =
+    resolvedId === '00000000-0000-0000-0000-000000000001' ||
+    resolvedId === 't1' ||
+    id === '00000000-0000-0000-0000-000000000001';
+
   const rawTutor =
     tutors.find(
       (t) =>
         String(t.id) === String(resolvedId) ||
         String(t.slug) === String(resolvedId) ||
         String(t.id) === String(id) ||
-        String(t.slug) === String(id)
+        String(t.slug) === String(id) ||
+        (isCoSuongMaiMatch && String(t.id) === 't1')
     ) ||
     mockTutors.find(
       (t) =>
         String(t.id) === String(resolvedId) ||
         String(t.slug) === String(resolvedId) ||
         String(t.id) === String(id) ||
-        String(t.slug) === String(id)
+        String(t.slug) === String(id) ||
+        (isCoSuongMaiMatch && String(t.id) === 't1')
     ) ||
     tutors[0] ||
     mockTutors[0];
