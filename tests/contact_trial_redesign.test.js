@@ -16,13 +16,18 @@ test('CONTACT TRIAL REDESIGN - Loại bỏ hoàn toàn nút premature Đăng ký
   );
 });
 
-test('CONTACT TRIAL REDESIGN - Cung cấp tin nhắn mẫu kết nối kèm ngữ cảnh học sinh', () => {
+test('CONTACT TRIAL REDESIGN - Giao diện tinh gọn, không chứa hộp lời nhắn mẫu rườm rà', () => {
   const modalPath = path.join(rootDir, 'src', 'app', 'components', 'modals', 'ContactZaloModal.tsx');
   const content = fs.readFileSync(modalPath, 'utf8');
 
-  assert.ok(content.includes('prefilledMessage'), 'Modal phải có biến prefilledMessage định dạng lời nhắn');
-  assert.ok(content.includes('handleCopyMessage'), 'Modal phải có hàm handleCopyMessage để sao chép tin nhắn 1-chạm');
-  assert.ok(content.includes('Lời nhắn mẫu cho gia sư'), 'Modal phải hiển thị khu vực Lời nhắn mẫu cho gia sư');
+  assert.ok(
+    !content.includes('Lời nhắn mẫu cho gia sư'),
+    'Phải loại bỏ hộp lời nhắn mẫu theo yêu cầu'
+  );
+  assert.ok(
+    !content.includes('prefilledMessage'),
+    'Không cần lưu biến prefilledMessage'
+  );
 });
 
 test('CONTACT TRIAL REDESIGN - Giữ nguyên tính tương thích ngược và không tự động ghi nhận khi chỉ mở modal', () => {

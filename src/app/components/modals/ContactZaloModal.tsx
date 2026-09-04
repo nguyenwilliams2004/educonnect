@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, ShieldCheck, ExternalLink, LogIn, UserCheck, CheckCircle2, BookOpen, Copy, Check } from 'lucide-react';
+import { X, ShieldCheck, ExternalLink, LogIn, UserCheck, CheckCircle2, BookOpen } from 'lucide-react';
 import { useData } from '../../../context/DataContext';
 import { useUI } from '../../../context/UIContext';
 
@@ -24,7 +24,6 @@ export function ContactZaloModal({
   const onClose = propOnClose || closeContactZaloModal;
 
   const [justSaved, setJustSaved] = useState(false);
-  const [copied, setCopied] = useState(false);
   const isLoggedIn = currentSession && currentSession.role !== 'anonymous' && !!currentSession.userId;
 
   const existingTrial = tutor && myTrials.find(
@@ -57,21 +56,6 @@ export function ContactZaloModal({
   const cleanPhone = rawPhone.replace(/[^0-9]/g, '');
   const zaloUrl = `https://zalo.me/${cleanPhone}`;
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(zaloUrl)}&margin=8`;
-
-  // Mẫu tin nhắn gửi gia sư kèm ngữ cảnh
-  const studentName = currentSession?.fullName || 'Học sinh';
-  const slotDay = tutor.selectedSlot?.day;
-  const slotShift = tutor.selectedSlot?.shift || tutor.selectedSlot?.shiftLabel || tutor.selectedSlot?.time;
-  const slotInfo = slotDay ? `${slotDay} (${slotShift})` : 'lịch hẹn thuận tiện';
-  const prefilledMessage = `Em chào ${tutor.name}, em là ${studentName} trên EduConnect. Em muốn xin phép hẹn Thầy/Cô 01 buổi học thử 1-1 môn ${tutor.badgeSubject || tutor.subjects?.[0] || 'học'} vào ${slotInfo} ạ!`;
-
-  const handleCopyMessage = () => {
-    if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(prefilledMessage);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
@@ -173,24 +157,6 @@ export function ContactZaloModal({
                 <p className="text-[10px] text-slate-500">
                   🔒 Bảo mật thông tin • Học thử 1-1 miễn phí
                 </p>
-              </div>
-
-              {/* Hộp Tin nhắn mẫu sao chép */}
-              <div className="bg-slate-50 border border-slate-200/80 p-2.5 rounded-xl text-left text-xs">
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[11px] font-bold text-slate-700">Lời nhắn mẫu cho gia sư:</span>
-                  <button
-                    type="button"
-                    onClick={handleCopyMessage}
-                    className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-600 hover:text-blue-800 cursor-pointer"
-                  >
-                    {copied ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
-                    <span>{copied ? 'Đã chép!' : 'Sao chép'}</span>
-                  </button>
-                </div>
-                <div className="text-[11px] text-slate-600 italic bg-white p-2 rounded-lg border border-slate-100 line-clamp-2">
-                  "{prefilledMessage}"
-                </div>
               </div>
 
               {/* Nút hành động */}
