@@ -10,6 +10,38 @@ export interface TeacherProfileModalProps {
   tutorId?: string | number;
 }
 
+function parseLevelPrices(levelPrices: any) {
+  const result = {
+    primary: 200000,
+    secondary: 280000,
+    high: 350000,
+    exam: 350000,
+  };
+  if (!levelPrices || typeof levelPrices !== 'object') return result;
+
+  if (levelPrices.primary) result.primary = Number(String(levelPrices.primary).replace(/\D/g, '')) || result.primary;
+  if (levelPrices.secondary) result.secondary = Number(String(levelPrices.secondary).replace(/\D/g, '')) || result.secondary;
+  if (levelPrices.high) result.high = Number(String(levelPrices.high).replace(/\D/g, '')) || result.high;
+  if (levelPrices.exam) result.exam = Number(String(levelPrices.exam).replace(/\D/g, '')) || result.exam;
+
+  for (const [k, v] of Object.entries(levelPrices)) {
+    const kLower = k.toLowerCase();
+    const num = Number(String(v).replace(/\D/g, ''));
+    if (!num || isNaN(num)) continue;
+    if (kLower.includes('tiểu học') || kLower.includes('cấp 1')) {
+      result.primary = num;
+    } else if (kLower.includes('thcs') || kLower.includes('cấp 2') || kLower.includes('lớp 6-9')) {
+      result.secondary = num;
+    } else if (kLower.includes('thpt') || kLower.includes('cấp 3') || kLower.includes('lớp 10-12')) {
+      result.high = num;
+    } else if (kLower.includes('đại học') || kLower.includes('chuyên') || kLower.includes('luyện thi')) {
+      result.exam = num;
+    }
+  }
+
+  return result;
+}
+
 export function TeacherProfileModal({
   isOpen: propIsOpen,
   onClose: propOnClose,
@@ -22,21 +54,45 @@ export function TeacherProfileModal({
   const onClose = propOnClose || closeTeacherProfileModal;
   const tutorId = propTutorId || teacherProfileModalTutorId || 't1';
 
-  const activeTutor = tutors.find((t: any) => String(t.id) === String(tutorId)) || tutors[0];
+  const activeTutor = React.useMemo(() => {
+    const base = tutors.find((t: any) => String(t.id) === String(tutorId)) || tutors[0];
+    try {
+      const raw = localStorage.getItem('hantutor_tutor_profile_overrides');
+      if (!raw) return base;
+      const overrides = JSON.parse(raw);
+      const override =
+        overrides[String(tutorId)] ||
+        (String(tutorId) === 't1' ? overrides['00000000-0000-0000-0000-000000000001'] : null) ||
+        (String(tutorId) === '00000000-0000-0000-0000-000000000001' ? overrides['t1'] : null);
+      if (!override) return base;
+      return {
+        ...base,
+        ...override,
+        levelPrices: {
+          ...(base.levelPrices || {}),
+          ...(override.levelPrices || {}),
+        },
+      };
+    } catch {
+      return base;
+    }
+  }, [tutors, tutorId]);
 
   const [activeTab, setActiveTab] = useState<'info' | 'pricing' | 'bank'>('info');
+
+  const initialPrices = parseLevelPrices(activeTutor?.levelPrices);
 
   const [name, setName] = useState(activeTutor?.name || 'Cô Sương Mai');
   const [headline, setHeadline] = useState(activeTutor?.headline || 'Cử nhân Sư phạm Toán ĐH Sư Phạm Hà Nội, 5 năm kinh nghiệm');
   const [bio, setBio] = useState(activeTutor?.bio || 'Tận tâm, phương pháp giảng dạy dễ hiểu, giúp học sinh nắm vững kiến thức từ cơ bản đến nâng cao.');
   const [phone, setPhone] = useState(activeTutor?.phone || '0912345678');
   const [zalo, setZalo] = useState(activeTutor?.zalo || '0912345678');
-  const [avatar, setAvatar] = useState(activeTutor?.avatar || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=400');
+  const [avatar, setAvatar] = useState(activeTutor?.avatar || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=400');
 
-  const [primaryPrice, setPrimaryPrice] = useState(activeTutor?.levelPrices?.primary || 150000);
-  const [secondaryPrice, setSecondaryPrice] = useState(activeTutor?.levelPrices?.secondary || 200000);
-  const [highSchoolPrice, setHighSchoolPrice] = useState(activeTutor?.levelPrices?.high || 250000);
-  const [examPrepPrice, setExamPrepPrice] = useState(activeTutor?.levelPrices?.exam || 300000);
+  const [primaryPrice, setPrimaryPrice] = useState(initialPrices.primary);
+  const [secondaryPrice, setSecondaryPrice] = useState(initialPrices.secondary);
+  const [highSchoolPrice, setHighSchoolPrice] = useState(initialPrices.high);
+  const [examPrepPrice, setExamPrepPrice] = useState(initialPrices.exam);
 
   const [bankName, setBankName] = useState(activeTutor?.bankName || 'MB Bank');
   const [bankAccountNumber, setBankAccountNumber] = useState(activeTutor?.bankAccountNumber || '0987654321');
@@ -46,19 +102,18 @@ export function TeacherProfileModal({
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   useEffect(() => {
-    if (activeTutor) {
+    if (activeTutor && isOpen) {
       setName(activeTutor.name || '');
       setHeadline(activeTutor.headline || '');
       setBio(activeTutor.bio || '');
       setPhone(activeTutor.phone || '');
       setZalo(activeTutor.zalo || '');
       setAvatar(activeTutor.avatar || '');
-      if (activeTutor.levelPrices) {
-        setPrimaryPrice(activeTutor.levelPrices.primary || 150000);
-        setSecondaryPrice(activeTutor.levelPrices.secondary || 200000);
-        setHighSchoolPrice(activeTutor.levelPrices.high || 250000);
-        setExamPrepPrice(activeTutor.levelPrices.exam || 300000);
-      }
+      const parsed = parseLevelPrices(activeTutor.levelPrices);
+      setPrimaryPrice(parsed.primary);
+      setSecondaryPrice(parsed.secondary);
+      setHighSchoolPrice(parsed.high);
+      setExamPrepPrice(parsed.exam);
       if (activeTutor.bankName) setBankName(activeTutor.bankName);
       if (activeTutor.bankAccountNumber) setBankAccountNumber(activeTutor.bankAccountNumber);
       if (activeTutor.bankAccountName) setBankAccountName(activeTutor.bankAccountName);
@@ -74,6 +129,15 @@ export function TeacherProfileModal({
     setSaveSuccess(false);
 
     try {
+      const pPrice = Number(primaryPrice) || 200000;
+      const sPrice = Number(secondaryPrice) || 280000;
+      const hPrice = Number(highSchoolPrice) || 350000;
+      const ePrice = Number(examPrepPrice) || 350000;
+
+      const minPrice = Math.min(pPrice, sPrice, hPrice, ePrice);
+      const maxPrice = Math.max(pPrice, sPrice, hPrice, ePrice);
+      const newHourlyRate = `${minPrice.toLocaleString('vi-VN')} - ${maxPrice.toLocaleString('vi-VN')}`;
+
       const updated = {
         name: name.trim(),
         headline: headline.trim(),
@@ -81,15 +145,21 @@ export function TeacherProfileModal({
         phone: phone.trim(),
         zalo: zalo.trim(),
         avatar,
-        pricePerSession: secondaryPrice || 200000,
+        hourlyRate: newHourlyRate,
+        pricePerSession: sPrice,
+        price: sPrice,
         bankName,
         bankAccountNumber,
         bankAccountName,
         levelPrices: {
-          primary: Number(primaryPrice),
-          secondary: Number(secondaryPrice),
-          high: Number(highSchoolPrice),
-          exam: Number(examPrepPrice)
+          "Tiểu học & Cảm thụ": `${pPrice.toLocaleString('vi-VN')}`,
+          "THCS (Lớp 6-9) & Vào 10": `${sPrice.toLocaleString('vi-VN')}`,
+          "THPT (Lớp 10-12) & Đại học": `${hPrice.toLocaleString('vi-VN')}`,
+          "Luyện thi ĐH / Chuyên": `${ePrice.toLocaleString('vi-VN')}`,
+          primary: pPrice,
+          secondary: sPrice,
+          high: hPrice,
+          exam: ePrice,
         }
       };
 
@@ -109,7 +179,7 @@ export function TeacherProfileModal({
           phone: phone.trim(),
           zalo: zalo.trim(),
           avatar_url: avatar,
-          hourly_rate: Number(secondaryPrice || 200000)
+          hourly_rate: Number(sPrice)
         }).eq('id', activeTutor.id).catch(() => {});
       }
 
@@ -126,10 +196,10 @@ export function TeacherProfileModal({
   };
 
   const sampleAvatars = [
+    'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=400',
     'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=400',
     'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400',
-    'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=400',
-    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400'
+    'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=400'
   ];
 
   return (
@@ -195,7 +265,7 @@ export function TeacherProfileModal({
           {saveSuccess && (
             <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2 animate-in fade-in">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>Đã lưu và đồng bộ hồ sơ giáo viên lên cơ sở dữ liệu Supabase thành công!</span>
+              <span>Lưu thông tin hồ sơ thành công!</span>
             </div>
           )}
 

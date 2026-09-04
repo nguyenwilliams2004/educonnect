@@ -90,6 +90,32 @@ export interface TutorContextType {
   fetchTutorsPage: (pageNumber: number, filters?: TutorFilters) => Promise<void>;
 }
 
+const applyTutorOverrides = (tutorList: any[]) => {
+  try {
+    const raw = typeof window !== 'undefined' ? localStorage.getItem('hantutor_tutor_profile_overrides') : null;
+    if (!raw) return tutorList;
+    const overrides = JSON.parse(raw);
+    return tutorList.map((t) => {
+      const idStr = String(t.id);
+      const override =
+        overrides[idStr] ||
+        (idStr === 't1' ? overrides['00000000-0000-0000-0000-000000000001'] : null) ||
+        (idStr === '00000000-0000-0000-0000-000000000001' ? overrides['t1'] : null);
+      if (!override) return t;
+      return {
+        ...t,
+        ...override,
+        levelPrices: {
+          ...(t.levelPrices || {}),
+          ...(override.levelPrices || {}),
+        },
+      };
+    });
+  } catch {
+    return tutorList;
+  }
+};
+
 export const TutorContext = createContext<TutorContextType | null>(null);
 
 export function useTutors(): TutorContextType {
@@ -101,7 +127,7 @@ export function useTutors(): TutorContextType {
 export function TutorProvider({ children }: { children: React.ReactNode }) {
   const { currentSession } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
-  const [tutors, setTutors] = useState<any[]>(mockTutors);
+  const [tutors, setTutors] = useState<any[]>(() => applyTutorOverrides(mockTutors));
   const [pendingTutors, setPendingTutors] = useState<any[]>(mockPendingTutors);
   const [reviews, setReviews] = useState<TutorReviewItem[]>(defaultTutorReviews);
 
@@ -145,16 +171,16 @@ export function TutorProvider({ children }: { children: React.ReactNode }) {
           const loadedTutors = data.map((row) =>
             profileToTutor({ ...row, full_name: row.users?.full_name ?? row.full_name })
           );
-          setTutors(loadedTutors);
+          setTutors(applyTutorOverrides(loadedTutors));
           if (count !== null) setTotalCount(count);
           setCurrentPage(pageNumber);
         } else {
           // Fallback to in-memory mock slice if DB is empty or during offline dev
           const slice = mockTutors.slice(from, to + 1);
           if (slice.length > 0) {
-            setTutors(slice);
+            setTutors(applyTutorOverrides(slice));
           } else {
-            setTutors(mockTutors.slice(0, pageSize));
+            setTutors(applyTutorOverrides(mockTutors.slice(0, pageSize)));
           }
           setTotalCount(mockTutors.length);
           setCurrentPage(pageNumber);
@@ -210,7 +236,6 @@ export function TutorProvider({ children }: { children: React.ReactNode }) {
           };
         });
 
-        // Hợp nhất dữ liệu live từ DB lên đầu, giữ mock data phía sau nếu cần fallback
         setPendingTutors((prevMock) => {
           const liveIds = new Set(livePending.map((p) => String(p.id)));
           const filteredMock = prevMock.filter((m) => !liveIds.has(String(m.id)));
@@ -244,28 +269,82 @@ export function TutorProvider({ children }: { children: React.ReactNode }) {
 
   const updateTutorProfile = useCallback(
     async (tutorId: string | number, updatedData: Partial<any>) => {
+      const idStr = String(tutorId);
+
+      // 1. Lưu vào localStorage để persist vĩnh viễn qua mọi lần refresh
+      try {
+        const raw = localStorage.getItem('hantutor_tutor_profile_overrides');
+        const overrides = raw ? JSON.parse(raw) : {};
+        const existing = overrides[idStr] || {};
+        const merged = {
+          ...existing,
+          ...updatedData,
+          levelPrices: {
+            ...(existing.levelPrices || {}),
+            ...(updatedData.levelPrices || {}),
+          },
+        };
+        overrides[idStr] = merged;
+        if (idStr === 't1') {
+          overrides['00000000-0000-0000-0000-000000000001'] = merged;
+        } else if (idStr === '00000000-0000-0000-0000-000000000001') {
+          overrides['t1'] = merged;
+        }
+        localStorage.setItem('hantutor_tutor_profile_overrides', JSON.stringify(overrides));
+      } catch (e) {
+        console.warn('[TutorContext] Không thể lưu overrides vào localStorage:', e);
+      }
+
+      // 2. Cập nhật state in-memory ngay lập tức
       setTutors((prev) =>
-        prev.map((t) => (String(t.id) === String(tutorId) ? { ...t, ...updatedData } : t))
-      );
-      if (!isUUID(tutorId)) return;
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          bio: updatedData.bio,
-          intro: updatedData.intro,
-          price: updatedData.price,
-          location: updatedData.location,
-          district: updatedData.district,
-          online: updatedData.online,
-          subjects: updatedData.subjects,
-          levels: updatedData.levels,
-          schedule: updatedData.schedule,
-          bank_name: updatedData.bankName,
-          bank_account_number: updatedData.bankAccountNumber,
-          bank_account_name: updatedData.bankAccountName,
+        prev.map((t) => {
+          const tid = String(t.id);
+          const isTarget =
+            tid === idStr ||
+            (idStr === 't1' && tid === '00000000-0000-0000-0000-000000000001') ||
+            (idStr === '00000000-0000-0000-0000-000000000001' && tid === 't1');
+          if (!isTarget) return t;
+          return {
+            ...t,
+            ...updatedData,
+            levelPrices: {
+              ...(t.levelPrices || {}),
+              ...(updatedData.levelPrices || {}),
+            },
+          };
         })
-        .eq('id', String(tutorId));
-      if (error) console.error('[Supabase] updateTutorProfile error:', error.message);
+      );
+
+      // 3. Đồng bộ Supabase nếu là UUID
+      const targetDbId = isUUID(tutorId)
+        ? String(tutorId)
+        : idStr === 't1'
+        ? '00000000-0000-0000-0000-000000000001'
+        : null;
+
+      if (!targetDbId) return;
+      try {
+        const { error } = await supabase
+          .from('profiles')
+          .update({
+            bio: updatedData.bio,
+            intro: updatedData.intro,
+            price: updatedData.price || updatedData.pricePerSession,
+            location: updatedData.location,
+            district: updatedData.district,
+            online: updatedData.online,
+            subjects: updatedData.subjects,
+            levels: updatedData.levels,
+            schedule: updatedData.schedule,
+            bank_name: updatedData.bankName,
+            bank_account_number: updatedData.bankAccountNumber,
+            bank_account_name: updatedData.bankAccountName,
+          })
+          .eq('id', targetDbId);
+        if (error) console.error('[Supabase] updateTutorProfile error:', error.message);
+      } catch (dbErr) {
+        console.warn('[Supabase] updateTutorProfile exception:', dbErr);
+      }
     },
     []
   );

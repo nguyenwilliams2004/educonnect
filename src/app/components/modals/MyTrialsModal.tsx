@@ -81,6 +81,15 @@ export function MyTrialsModal({
     },
   ];
 
+  const [deletedIds, setDeletedIds] = useState<Set<string>>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('hantutor_deleted_trial_ids') || '[]');
+      return new Set(Array.isArray(stored) ? stored.map(String) : []);
+    } catch {
+      return new Set();
+    }
+  });
+
   let rawList: StudentTrialItem[] = [];
   if (isTeacher) {
     let localTeacherTrials: StudentTrialItem[] = [];
@@ -104,12 +113,22 @@ export function MyTrialsModal({
     const seen = new Set<string>();
     rawList = combined.filter((item) => {
       const id = String(item.enrollmentId || item.tutorId);
+      const tutorIdStr = String(item.tutorId);
+      const enrIdStr = item.enrollmentId ? String(item.enrollmentId) : '';
+      if (deletedIds.has(id) || deletedIds.has(tutorIdStr) || (enrIdStr && deletedIds.has(enrIdStr))) {
+        return false;
+      }
       if (seen.has(id)) return false;
       seen.add(id);
       return true;
     });
   } else {
-    rawList = (myTrials || []).filter((item) => item.rolePrefix !== 'Học sinh');
+    rawList = (myTrials || []).filter((item) => {
+      if (item.rolePrefix === 'Học sinh') return false;
+      const id = String(item.enrollmentId || item.tutorId);
+      if (deletedIds.has(id) || deletedIds.has(String(item.tutorId))) return false;
+      return true;
+    });
   }
 
   const displayedList = rawList.filter((item) => {
@@ -121,14 +140,47 @@ export function MyTrialsModal({
   });
 
   const handleCancelTrial = (item: StudentTrialItem) => {
+    const targetName = isTeacher
+      ? item.studentName || item.tutorName
+      : item.tutorName;
+
     if (
       window.confirm(
-        `Bạn có chắc muốn hủy / xóa ${
+        `Bạn có chắc muốn xóa ${
           isTeacher ? 'học viên' : 'lớp học thử cùng'
-        } "${item.tutorName}" khỏi danh sách?`
+        } "${targetName}" khỏi danh sách?`
       )
     ) {
-      cancelTrialEnrollment(item.tutorId);
+      const targetId = String(item.enrollmentId || item.tutorId);
+      const tutorIdStr = String(item.tutorId);
+      const enrIdStr = item.enrollmentId ? String(item.enrollmentId) : '';
+
+      setDeletedIds((prev) => {
+        const next = new Set(prev);
+        next.add(targetId);
+        next.add(tutorIdStr);
+        if (enrIdStr) next.add(enrIdStr);
+        try {
+          localStorage.setItem('hantutor_deleted_trial_ids', JSON.stringify(Array.from(next)));
+        } catch {}
+        return next;
+      });
+
+      try {
+        const stored = JSON.parse(localStorage.getItem('hantutor_teacher_student_trials') || '[]');
+        if (Array.isArray(stored)) {
+          const filtered = stored.filter(
+            (it: any) =>
+              String(it.tutorId) !== targetId &&
+              String(it.tutorId) !== tutorIdStr &&
+              String(it.enrollmentId) !== targetId &&
+              String(it.enrollmentId) !== enrIdStr
+          );
+          localStorage.setItem('hantutor_teacher_student_trials', JSON.stringify(filtered));
+        }
+      } catch {}
+
+      cancelTrialEnrollment(item.enrollmentId || item.tutorId);
     }
   };
 

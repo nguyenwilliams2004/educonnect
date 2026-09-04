@@ -132,7 +132,30 @@ export function TeacherDetailPage() {
     tutors[0] ||
     mockTutors[0];
 
-  const tutor = getMaskedTutor(rawTutor);
+  const tutorWithOverrides = useMemo(() => {
+    try {
+      const raw = localStorage.getItem('hantutor_tutor_profile_overrides');
+      if (!raw) return rawTutor;
+      const overrides = JSON.parse(raw);
+      const override =
+        overrides[String(resolvedId)] ||
+        overrides[String(rawTutor?.id)] ||
+        (isCoSuongMaiMatch ? overrides['t1'] || overrides['00000000-0000-0000-0000-000000000001'] : null);
+      if (!override) return rawTutor;
+      return {
+        ...rawTutor,
+        ...override,
+        levelPrices: {
+          ...(rawTutor.levelPrices || {}),
+          ...(override.levelPrices || {}),
+        },
+      };
+    } catch {
+      return rawTutor;
+    }
+  }, [rawTutor, resolvedId, isCoSuongMaiMatch]);
+
+  const tutor = getMaskedTutor(tutorWithOverrides);
 
   // 1. Tải danh sách availability_slots thực từ Supabase
   useEffect(() => {
@@ -1193,6 +1216,30 @@ export function TeacherDetailPage() {
                     <span className="text-stone-500 text-xs font-bold">VNĐ / giờ</span>
                   </div>
                 </div>
+
+                {/* Bảng giá theo cấp học chi tiết */}
+                {tutor.levelPrices && Object.keys(tutor.levelPrices).length > 0 && (
+                  <div className="p-3.5 rounded-2xl bg-stone-50 border border-stone-200/70 space-y-2 text-xs">
+                    <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">
+                      Bảng giá theo cấp học
+                    </span>
+                    {Object.entries(tutor.levelPrices)
+                      .filter(([lvl]) => !['primary', 'secondary', 'high', 'exam'].includes(lvl))
+                      .map(([lvl, prc]) => (
+                        <div key={lvl} className="flex justify-between items-center text-stone-700">
+                          <span className="font-medium text-stone-600">{lvl}:</span>
+                          <strong className="text-stone-900 font-bold tabular-nums">
+                            {typeof prc === 'number'
+                              ? `${prc.toLocaleString('vi-VN')}đ`
+                              : String(prc).includes('đ')
+                              ? prc
+                              : `${prc}đ`}
+                            /buổi
+                          </strong>
+                        </div>
+                      ))}
+                  </div>
+                )}
 
                 {/* Ưu đãi gói học */}
                 <div className="p-3.5 rounded-2xl bg-stone-50 border border-stone-200/70 space-y-2 text-xs">

@@ -431,9 +431,31 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
 
   const cancelTrialEnrollment = useCallback(
     async (tutorId: any) => {
-      const trial = myTrials.find((i) => String(i.tutorId) === String(tutorId));
+      const idStr = String(tutorId);
+      const trial = myTrials.find((i) => String(i.tutorId) === idStr || String(i.enrollmentId) === idStr);
+
+      // 1. Lưu danh sách ID đã xóa vào localStorage để ngăn chặn mọi nguồn mock/cache nạp lại
+      try {
+        const deletedRaw = localStorage.getItem('hantutor_deleted_trial_ids');
+        const deletedArr: string[] = deletedRaw ? JSON.parse(deletedRaw) : [];
+        if (!deletedArr.includes(idStr)) deletedArr.push(idStr);
+        if (trial?.enrollmentId && !deletedArr.includes(String(trial.enrollmentId))) {
+          deletedArr.push(String(trial.enrollmentId));
+        }
+        if (trial?.tutorId && !deletedArr.includes(String(trial.tutorId))) {
+          deletedArr.push(String(trial.tutorId));
+        }
+        localStorage.setItem('hantutor_deleted_trial_ids', JSON.stringify(deletedArr));
+      } catch (e) {}
+
+      // 2. Cập nhật state myTrials
       setMyTrials((prev) => {
-        const updated = prev.filter((i) => String(i.tutorId) !== String(tutorId));
+        const updated = prev.filter(
+          (i) =>
+            String(i.tutorId) !== idStr &&
+            String(i.enrollmentId) !== idStr &&
+            String(i.studentId) !== idStr
+        );
         const storageKey = currentSession.userId
           ? `hantutor_trials_${currentSession.userId}`
           : 'hantutor_trials_guest';
@@ -443,22 +465,34 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
         return updated;
       });
 
+      // 3. Xóa khỏi kho lưu trữ học viên của giáo viên
       try {
         const stored = JSON.parse(localStorage.getItem('hantutor_teacher_student_trials') || '[]');
         if (Array.isArray(stored)) {
           const filtered = stored.filter(
-            (item: any) => String(item.tutorId) !== String(tutorId) && String(item.teacherTutorId) !== String(tutorId)
+            (item: any) =>
+              String(item.tutorId) !== idStr &&
+              String(item.enrollmentId) !== idStr &&
+              String(item.teacherTutorId) !== idStr &&
+              String(item.studentId) !== idStr
           );
           localStorage.setItem('hantutor_teacher_student_trials', JSON.stringify(filtered));
         }
       } catch (e) {}
 
-      if (trial?.enrollmentId && isUUID(trial.enrollmentId)) {
-        const { error } = await supabase
-          .from('enrollments')
-          .update({ status: 'not_enrolled' })
-          .eq('id', trial.enrollmentId);
-        if (error) console.error('[Supabase] cancelTrialEnrollment error:', error.message);
+      // 4. Đồng bộ Supabase nếu là UUID
+      const targetDbId = trial?.enrollmentId && isUUID(trial.enrollmentId)
+        ? trial.enrollmentId
+        : isUUID(tutorId)
+        ? tutorId
+        : null;
+
+      if (targetDbId) {
+        try {
+          await supabase.from('enrollments').delete().eq('id', targetDbId);
+        } catch (e) {
+          console.error('[Supabase] cancelTrialEnrollment error:', e);
+        }
       }
     },
     [myTrials, currentSession.userId]
