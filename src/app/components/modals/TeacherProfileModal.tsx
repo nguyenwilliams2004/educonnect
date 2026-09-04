@@ -165,22 +165,29 @@ export function TeacherProfileModal({
 
       await updateTutorProfile(activeTutor?.id || 't1', updated);
 
-      if (activeTutor?.id && !String(activeTutor.id).startsWith('t')) {
+      const targetDbId =
+        activeTutor?.id && !String(activeTutor.id).startsWith('t')
+          ? String(activeTutor.id)
+          : String(activeTutor?.id) === 't1'
+          ? '00000000-0000-0000-0000-000000000001'
+          : null;
+
+      if (targetDbId) {
         await supabase.from('users').update({
           full_name: name.trim(),
           phone: phone.trim(),
-          avatar_url: avatar
-        }).eq('id', activeTutor.id).catch(() => {});
+          avatar_url: avatar,
+        }).eq('id', targetDbId).catch(() => {});
 
         await supabase.from('profiles').update({
-          name: name.trim(),
-          headline: headline.trim(),
           bio: bio.trim(),
-          phone: phone.trim(),
-          zalo: zalo.trim(),
+          intro: headline.trim(),
+          price: Number(sPrice),
           avatar_url: avatar,
-          hourly_rate: Number(sPrice)
-        }).eq('id', activeTutor.id).catch(() => {});
+          bank_name: bankName,
+          bank_account_number: bankAccountNumber,
+          bank_account_name: bankAccountName,
+        }).eq('id', targetDbId).catch(() => {});
       }
 
       setSaveSuccess(true);
