@@ -37,3 +37,17 @@ test('AUTH EMAIL VERIFICATION - vite.config.ts cấu hình cổng 3000 cho dev s
 
   assert.ok(viteCode.includes('port: 3000'), 'vite.config.ts phải cấu hình cổng server: { port: 3000 }');
 });
+
+test('AUTH EMAIL VERIFICATION - AuthModal hỗ trợ Auto-Login ngay sau khi Đăng ký', () => {
+  const modalPath = path.resolve('src/app/components/modals/AuthModal.tsx');
+  const modalCode = fs.readFileSync(modalPath, 'utf8');
+
+  assert.ok(
+    modalCode.includes('signInWithPassword'),
+    'AuthModal phải gọi signInWithPassword tự động nếu signUp chưa có session'
+  );
+  assert.ok(
+    modalCode.includes('Đang tự động đăng nhập...'),
+    'AuthModal phải thông báo đang tự động đăng nhập cho người dùng'
+  );
+});

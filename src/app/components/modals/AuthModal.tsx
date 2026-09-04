@@ -253,16 +253,33 @@ export function AuthModal({
           console.warn('[Register] Upsert public.users:', dbErr);
         }
 
-        if (data.session) {
+        let activeSession = data.session;
+
+        // Nếu signUp chưa trả về session ngay, tự động đăng nhập ngầm để người dùng không phải chuyển tab nhập lại
+        if (!activeSession) {
+          try {
+            const { data: signInData } = await supabase.auth.signInWithPassword({
+              email: cleanEmail,
+              password: cleanPass,
+            });
+            if (signInData?.session) {
+              activeSession = signInData.session;
+            }
+          } catch (autoLoginErr) {
+            console.warn('[Register] Auto sign-in fallback:', autoLoginErr);
+          }
+        }
+
+        if (activeSession) {
           setCurrentSession({
             userId: data.user.id,
             role: 'student',
             email: cleanEmail,
             fullName: cleanName,
             phone: cleanPhone,
-            sessionToken: data.session.access_token,
+            sessionToken: activeSession.access_token,
           });
-          setSuccessMessage('Đăng ký tài khoản thành công!');
+          setSuccessMessage('Đăng ký tài khoản thành công! Đang tự động đăng nhập...');
           setTimeout(() => {
             handlePostAuthSuccess('student');
           }, 600);
