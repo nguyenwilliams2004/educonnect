@@ -16,33 +16,42 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from './AuthContext';
 
 function profileToTutor(row: any): any {
+  const baseMock = mockTutors.find(
+    (m) =>
+      String(m.id) === String(row.id) ||
+      (String(row.id) === '00000000-0000-0000-0000-000000000001' && m.id === 't1') ||
+      (row.full_name && m.name.toLowerCase().trim() === String(row.full_name).toLowerCase().trim())
+  );
+
   return {
+    ...(baseMock || {}),
     id: row.id,
-    name: row.full_name || row.name,
-    avatar: row.avatar_url || row.avatar,
-    subjects: row.subjects || [],
-    skills: row.skills || [],
-    category: row.category_type,
-    levels: row.levels || [],
-    hourlyRate: row.price ? `${row.price.toLocaleString('vi-VN')}đ/giờ` : '',
-    price: row.price,
-    location: row.location,
-    district: row.district,
-    online: row.online,
-    rating: row.rating ?? 5.0,
-    reviews: row.reviews_count ?? 0,
-    experience: row.experience,
-    education: row.education,
-    bio: row.bio,
-    intro: row.intro,
-    schedule: row.schedule || [],
-    certificates: row.certificates || [],
-    verified: row.verified,
+    name: row.full_name || row.name || baseMock?.name,
+    avatar: row.avatar_url || row.avatar || baseMock?.avatar,
+    subjects: row.subjects && row.subjects.length > 0 ? row.subjects : (baseMock?.subjects || []),
+    skills: row.skills && row.skills.length > 0 ? row.skills : (baseMock?.skills || []),
+    category: row.category_type || baseMock?.type,
+    levels: row.levels && row.levels.length > 0 ? row.levels : (baseMock?.levels || []),
+    hourlyRate: baseMock?.hourlyRate || (row.price ? `${row.price.toLocaleString('vi-VN')}đ/giờ` : ''),
+    price: row.price || baseMock?.price,
+    levelPrices: baseMock?.levelPrices,
+    location: row.location || baseMock?.location,
+    district: row.district || baseMock?.location,
+    online: row.online ?? baseMock?.isOnline ?? true,
+    rating: row.rating ?? baseMock?.rating ?? 5.0,
+    reviews: row.reviews_count ?? baseMock?.reviews ?? 0,
+    experience: row.experience ?? baseMock?.experience,
+    education: row.education || baseMock?.education,
+    bio: row.bio || baseMock?.philosophy || baseMock?.teachingMethod,
+    intro: row.intro || baseMock?.headline || baseMock?.shortBio,
+    schedule: row.schedule && row.schedule.length > 0 ? row.schedule : (baseMock?.schedule || []),
+    certificates: row.certificates && row.certificates.length > 0 ? row.certificates : (baseMock?.certificates || []),
+    verified: row.verified ?? true,
     kycStatus: row.verified ? 'approved' : 'pending',
     status: 'active',
-    bankName: row.bank_name,
-    bankAccountNumber: row.bank_account_number,
-    bankAccountName: row.bank_account_name,
+    bankName: row.bank_name || baseMock?.bankName,
+    bankAccountNumber: row.bank_account_number || baseMock?.bankAccountNumber,
+    bankAccountName: row.bank_account_name || baseMock?.bankAccountHolder,
   };
 }
 
