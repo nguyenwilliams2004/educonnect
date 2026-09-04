@@ -167,24 +167,52 @@ export function TutorProvider({ children }: { children: React.ReactNode }) {
           .order('rating', { ascending: false })
           .range(from, to);
 
+        let liveTutors: any[] = [];
         if (!error && data && data.length > 0) {
-          const loadedTutors = data.map((row) =>
+          liveTutors = data.map((row) =>
             profileToTutor({ ...row, full_name: row.users?.full_name ?? row.full_name })
           );
-          setTutors(applyTutorOverrides(loadedTutors));
-          if (count !== null) setTotalCount(count);
-          setCurrentPage(pageNumber);
-        } else {
-          // Fallback to in-memory mock slice if DB is empty or during offline dev
-          const slice = mockTutors.slice(from, to + 1);
-          if (slice.length > 0) {
-            setTutors(applyTutorOverrides(slice));
-          } else {
-            setTutors(applyTutorOverrides(mockTutors.slice(0, pageSize)));
-          }
-          setTotalCount(mockTutors.length);
-          setCurrentPage(pageNumber);
         }
+
+        // HỢP NHẤT TOÀN DIỆN:
+        // Kết hợp giữa giáo viên trên Supabase và danh mục đội ngũ giáo viên chuẩn (mockTutors)
+        // Đảm bảo toàn bộ giáo viên luôn hiển thị đầy đủ và không bao giờ bị biến mất
+        const liveIds = new Set(liveTutors.map((t) => String(t.id)));
+        const liveNames = new Set(liveTutors.map((t) => (t.name || '').toLowerCase().trim()));
+
+        const remainingMock = mockTutors.filter((m) => {
+          const mId = String(m.id);
+          const mName = (m.name || '').toLowerCase().trim();
+          if (
+            mId === 't1' &&
+            (liveIds.has('00000000-0000-0000-0000-000000000001') || liveNames.has('cô sương mai'))
+          ) {
+            return false;
+          }
+          return !liveIds.has(mId) && !liveNames.has(mName);
+        });
+
+        let allTutors = [...liveTutors, ...remainingMock];
+
+        if (filters?.subject) {
+          allTutors = allTutors.filter((t) =>
+            t.badgeSubject?.toLowerCase().includes(filters.subject!.toLowerCase()) ||
+            t.subjects?.some((s: string) => s.toLowerCase().includes(filters.subject!.toLowerCase()))
+          );
+        }
+        if (filters?.district) {
+          allTutors = allTutors.filter((t) =>
+            t.district?.toLowerCase().includes(filters.district!.toLowerCase()) ||
+            t.location?.toLowerCase().includes(filters.district!.toLowerCase())
+          );
+        }
+        if (filters?.isOnline !== undefined) {
+          allTutors = allTutors.filter((t) => t.online === filters.isOnline || t.isOnline === filters.isOnline);
+        }
+
+        setTutors(applyTutorOverrides(allTutors));
+        setTotalCount(allTutors.length);
+        setCurrentPage(pageNumber);
       } catch (err) {
         console.error('[TutorContext] pagination error:', err);
       } finally {
