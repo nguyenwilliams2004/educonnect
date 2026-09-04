@@ -42,16 +42,26 @@ export function AuthModal({
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [resendLoading, setResendLoading] = useState(false);
 
   useEffect(() => {
     setView(initialView);
     setRole(defaultRole);
-    setErrorMessage(null);
+    setErrorMessage(authModalState.initialErrorMessage || null);
+    if (authModalState.initialEmail) {
+      setEmail(authModalState.initialEmail);
+    }
     setSuccessMessage(null);
     setConfirmPassword('');
     setShowPassword(false);
     setShowConfirmPassword(false);
-  }, [initialView, defaultRole, isOpen]);
+  }, [
+    initialView,
+    defaultRole,
+    isOpen,
+    authModalState.initialErrorMessage,
+    authModalState.initialEmail,
+  ]);
 
   if (!isOpen) return null;
 
@@ -93,7 +103,7 @@ export function AuthModal({
         if (error.message.includes('Invalid login credentials')) {
           setErrorMessage('Email hoặc mật khẩu không chính xác.');
         } else if (error.message.includes('Email not confirmed')) {
-          setErrorMessage('Tài khoản chưa xác nhận email. Vui lòng kiểm tra hộp thư của bạn.');
+          setErrorMessage('Tài khoản chưa xác nhận email. Bạn có thể nhấn nút "Gửi lại link xác nhận email" bên dưới.');
         } else {
           setErrorMessage(error.message);
         }
@@ -139,6 +149,35 @@ export function AuthModal({
       setErrorMessage('Lỗi hệ thống: ' + (err.message || 'Không thể kết nối.'));
     } finally {
       setLoading(false);
+    }
+  };
+
+  // GỬI LẠI LINK XÁC NHẬN EMAIL QUA SUPABASE AUTH
+  const handleResendConfirmEmail = async () => {
+    const cleanEmail = email.trim();
+    if (!cleanEmail) {
+      setErrorMessage('Vui lòng nhập địa chỉ email vào ô bên dưới để nhận link xác nhận mới.');
+      return;
+    }
+    setResendLoading(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: cleanEmail,
+        options: {
+          emailRedirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
+        },
+      });
+      if (error) {
+        setErrorMessage('Không thể gửi lại email: ' + error.message);
+      } else {
+        setSuccessMessage(`Đã gửi lại link xác nhận tới ${cleanEmail}. Vui lòng kiểm tra hòm thư đến (và mục Spam)!`);
+        setErrorMessage(null);
+      }
+    } catch (err: any) {
+      setErrorMessage('Lỗi hệ thống: ' + (err.message || 'Không thể gửi lại email.'));
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -323,7 +362,29 @@ export function AuthModal({
         {errorMessage && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2.5 text-xs text-red-700">
             <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
-            <div className="leading-relaxed font-medium">{errorMessage}</div>
+            <div className="leading-relaxed font-medium flex-1">
+              <div>{errorMessage}</div>
+              {(errorMessage.toLowerCase().includes('xác nhận') ||
+                errorMessage.toLowerCase().includes('xác thực') ||
+                errorMessage.toLowerCase().includes('not confirmed') ||
+                errorMessage.toLowerCase().includes('expired') ||
+                errorMessage.toLowerCase().includes('hết hạn') ||
+                errorMessage.toLowerCase().includes('invalid')) && (
+                <div className="mt-2.5 pt-2 border-t border-red-200/80 flex flex-col gap-1.5">
+                  <p className="text-[11px] text-red-600 font-normal">
+                    Link xác nhận hết hạn hoặc chưa nhận được email? Bấm nút bên dưới để nhận link mới:
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleResendConfirmEmail}
+                    disabled={resendLoading || !email.trim()}
+                    className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg transition-colors shadow-2xs cursor-pointer disabled:opacity-50"
+                  >
+                    {resendLoading ? 'Đang gửi link...' : 'Gửi lại link xác nhận email'}
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         )}
         {successMessage && (

@@ -113,6 +113,50 @@ function RouteChangeTracker() {
 }
 
 // ==========================================
+// SUPABASE AUTH ERROR & HASH URL HANDLER
+// ==========================================
+export function AuthUrlHandler() {
+  const { openAuthModal } = useUI();
+
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const hash = window.location.hash;
+    if (!hash) return;
+
+    // Check if URL hash contains Supabase Auth error (e.g. #error=access_denied&error_code=otp_expired...)
+    if (hash.includes('error=') || hash.includes('error_code=')) {
+      const hashParams = new URLSearchParams(hash.replace(/^#/, ''));
+      const errorCode = hashParams.get('error_code');
+      const errorDesc = hashParams.get('error_description');
+
+      // Clear the ugly error hash from address bar immediately
+      try {
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      } catch {}
+
+      if (
+        errorCode === 'otp_expired' ||
+        errorDesc?.toLowerCase().includes('expired') ||
+        errorDesc?.toLowerCase().includes('invalid')
+      ) {
+        openAuthModal('login', 'student', {
+          initialErrorMessage:
+            'Link xác thực email đã hết hạn hoặc đã được sử dụng (do bộ lọc Gmail/Outlook tự động quét link trước). Bạn có thể nhập email bên dưới và nhấn "Gửi lại link xác nhận email" để nhận link mới, hoặc đăng nhập nếu tài khoản đã kích hoạt.',
+        });
+      } else if (errorDesc) {
+        const decoded = decodeURIComponent(errorDesc.replace(/\+/g, ' '));
+        openAuthModal('login', 'student', {
+          initialErrorMessage: `Xác thực email không thành công: ${decoded}`,
+        });
+      }
+    }
+  }, [openAuthModal]);
+
+  return null;
+}
+
+// ==========================================
 // ROOT APP LAYOUT & ROUTING
 // ==========================================
 export function AppLayout() {
@@ -122,6 +166,7 @@ export function AppLayout() {
   return (
     <div className="min-h-screen bg-slate-50 font-sans flex flex-col relative">
       <RouteChangeTracker />
+      <AuthUrlHandler />
       {!isAdmin && <Navbar />}
 
       <main className="flex-1">

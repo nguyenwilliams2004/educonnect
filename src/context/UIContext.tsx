@@ -4,6 +4,8 @@ export interface AuthModalState {
   isOpen: boolean;
   view: 'login' | 'register';
   defaultRole: 'student' | 'teacher';
+  initialErrorMessage?: string | null;
+  initialEmail?: string;
 }
 
 export interface CheckoutModalState {
@@ -23,7 +25,11 @@ export interface UIContextType {
   // Auth Modal
   authModalState: AuthModalState;
   setAuthModalState: React.Dispatch<React.SetStateAction<AuthModalState>>;
-  openAuthModal: (view?: 'login' | 'register', defaultRole?: 'student' | 'teacher') => void;
+  openAuthModal: (
+    view?: 'login' | 'register',
+    defaultRole?: 'student' | 'teacher',
+    options?: { initialErrorMessage?: string | null; initialEmail?: string }
+  ) => void;
   closeAuthModal: () => void;
 
   // Contact Zalo Modal
@@ -126,12 +132,30 @@ export function UIProvider({ children }: { children: React.ReactNode }) {
   const [isUserProfileModalOpen, setIsUserProfileModalOpen] = useState(false);
 
   // Callbacks memoized for maximum performance
-  const openAuthModal = useCallback((view: 'login' | 'register' = 'login', defaultRole: 'student' | 'teacher' = 'student') => {
-    setAuthModalState({ isOpen: true, view, defaultRole });
-  }, []);
+  const openAuthModal = useCallback(
+    (
+      view: 'login' | 'register' = 'login',
+      defaultRole: 'student' | 'teacher' = 'student',
+      options?: { initialErrorMessage?: string | null; initialEmail?: string }
+    ) => {
+      setAuthModalState({
+        isOpen: true,
+        view,
+        defaultRole,
+        initialErrorMessage: options?.initialErrorMessage || null,
+        initialEmail: options?.initialEmail || '',
+      });
+    },
+    []
+  );
 
   const closeAuthModal = useCallback(() => {
-    setAuthModalState(prev => ({ ...prev, isOpen: false }));
+    setAuthModalState(prev => ({
+      ...prev,
+      isOpen: false,
+      initialErrorMessage: null,
+      initialEmail: '',
+    }));
   }, []);
 
   const openContactZaloModal = useCallback((tutor: any) => {
