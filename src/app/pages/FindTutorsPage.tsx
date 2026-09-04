@@ -57,10 +57,11 @@ export function FindTutorsPage() {
 
   const formatsList = [
     { label: 'Học trực tuyến (Online)', value: 'online' },
-    { label: 'Gia sư tại nhà (Offline)', value: 'offline' }
+    { label: 'Gia sư đến nhà học sinh', value: 'offline_student_home' },
+    { label: 'Học tại nhà / Lớp của giáo viên', value: 'offline_tutor_home' }
   ];
 
-  // Danh sách các Quận/Huyện tại Hà Nội
+  // Danh sách các Quận trung tâm tại Hà Nội
   const hanoiDistrictsList = [
     'Cầu Giấy',
     'Đống Đa',
@@ -72,13 +73,8 @@ export function FindTutorsPage() {
     'Bắc Từ Liêm',
     'Hà Đông',
     'Hoàng Mai',
-    'Long Biên',
     'Tây Hồ',
-    'Gia Lâm',
-    'Thanh Trì',
-    'Đông Anh',
-    'Hoài Đức',
-    'Online toàn Hà Nội'
+    'Online toàn Hà Nội & Toàn quốc'
   ];
 
   const handleSearchSubmit = (e?: React.FormEvent) => {
@@ -151,18 +147,33 @@ export function FindTutorsPage() {
       if (!selectedTypes.includes(t.type)) return false;
     }
 
-    // Formats filter
+    // Formats filter (Online, Đến nhà học sinh, Tại nhà/lớp của giáo viên)
     if (selectedFormats.length > 0) {
-      const matchesOnline = selectedFormats.includes('online') && t.isOnline;
-      const matchesOffline = selectedFormats.includes('offline') && !t.isOnline;
-      if (!matchesOnline && !matchesOffline) return false;
+      const match = selectedFormats.some(fmt => {
+        if (fmt === 'online') {
+          return t.isOnline || (t.teachingFormats && t.teachingFormats.includes('online'));
+        }
+        if (fmt === 'offline_student_home') {
+          return (t.teachingFormats && t.teachingFormats.includes('offline_student_home')) ||
+            (t.teachingFormatsOffline && !t.teachingFormatsOffline.includes('chỉ online')) ||
+            !t.isOnline;
+        }
+        if (fmt === 'offline_tutor_home') {
+          return (t.teachingFormats && t.teachingFormats.includes('offline_tutor_home')) ||
+            (t.teachingFormatsOffline && (t.teachingFormatsOffline.toLowerCase().includes('lớp') || t.teachingFormatsOffline.toLowerCase().includes('nhà riêng') || t.teachingFormatsOffline.toLowerCase().includes('phòng học'))) ||
+            t.type === 'Giáo viên';
+        }
+        return false;
+      });
+      if (!match) return false;
     }
 
     // Hanoi Districts Filter
     if (selectedDistricts.length > 0) {
       const matchDistrict = selectedDistricts.some(d => {
-        if (d === 'online' || d === 'Online toàn Hà Nội') return t.isOnline;
-        return t.location?.toLowerCase().includes(d.toLowerCase());
+        if (d === 'online' || d.includes('Online toàn')) return t.isOnline;
+        const locStr = `${t.location || ''} ${t.teachingFormatsOffline || ''} ${(t.districts || []).join(' ')}`.toLowerCase();
+        return locStr.includes(d.toLowerCase());
       });
       if (!matchDistrict) return false;
     }

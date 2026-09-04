@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { X, Star } from 'lucide-react';
+import { X, Star, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { useData } from '../../../context/DataContext';
 import { useUI } from '../../../context/UIContext';
+import { useAuth } from '../../../context/AuthContext';
 
 export interface ReviewModalProps {
   tutor?: any;
@@ -20,6 +21,7 @@ export function ReviewModal({
 }: ReviewModalProps = {}) {
   const { reviewModalState, closeReviewModal } = useUI();
   const { addTutorReview } = useData();
+  const { currentSession } = useAuth();
 
   const tutor = propTutor !== undefined ? propTutor : reviewModalState.tutor;
   const isOpen = propIsOpen !== undefined ? propIsOpen : (reviewModalState.isOpen && !!reviewModalState.tutor);
@@ -29,20 +31,29 @@ export function ReviewModal({
   const [rating, setRating] = useState(5);
   const [hoverRating, setHoverRating] = useState(0);
   const [stage, setStage] = useState<'trial' | 'official'>(defaultStage);
-  const [studentName, setStudentName] = useState('');
+  const [studentName, setStudentName] = useState(currentSession.fullName || '');
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       setStage(defaultStage);
+      if (currentSession.fullName) {
+        setStudentName(currentSession.fullName);
+      }
     }
-  }, [isOpen, defaultStage]);
+  }, [isOpen, defaultStage, currentSession.fullName]);
 
   if (!isOpen || !tutor) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const finalAuthor = (currentSession.fullName || studentName).trim();
+    if (!finalAuthor) {
+      alert("Vui lòng cung cấp họ tên của bạn để gửi đánh giá. Hệ thống HanTutor nghiêm cấm đánh giá ẩn danh!");
+      return;
+    }
+
     if (!comment.trim()) {
       alert("Vui lòng nhập nội dung nhận xét của bạn!");
       return;
@@ -51,7 +62,7 @@ export function ReviewModal({
     setIsSubmitting(true);
     addTutorReview({
       tutorId: tutor.id,
-      studentName: studentName.trim() || 'Học viên ẩn danh',
+      studentName: finalAuthor,
       rating,
       stage,
       stageText: stage === 'trial' ? 'Sau buổi học thử 1-1' : 'Sau thời gian học chính thức',
@@ -61,7 +72,7 @@ export function ReviewModal({
     });
 
     setIsSubmitting(false);
-    alert(`Cảm ơn bạn đã đánh giá ${rating} sao cho ${tutor.name}! Nhận xét của bạn đã được cập nhật trực tiếp.`);
+    alert(`Cảm ơn bạn đã đánh giá ${rating} sao cho ${tutor.name}! Nhận xét đã được cập nhật trực tiếp.`);
     if (onSuccess) onSuccess();
     onClose();
   };
@@ -147,14 +158,30 @@ export function ReviewModal({
 
           {/* Tên học sinh / Phụ huynh */}
           <div>
-            <label className="block font-bold text-slate-800 mb-1">Họ tên của bạn hoặc Phụ huynh:</label>
-            <input
-              type="text"
-              placeholder="VD: Phụ huynh em Tuấn Anh, hoặc Em Minh Đức (Lớp 12)..."
-              value={studentName}
-              onChange={(e) => setStudentName(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-hidden focus:border-blue-600 focus:bg-white"
-            />
+            <div className="flex items-center justify-between mb-1">
+              <label className="block font-bold text-slate-800">Họ tên người đánh giá:</label>
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600">
+                <ShieldCheck className="w-3.5 h-3.5" /> Không thể ẩn danh
+              </span>
+            </div>
+            {currentSession.fullName ? (
+              <div className="flex items-center gap-2 p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span className="font-bold text-slate-900 text-xs">{currentSession.fullName}</span>
+                <span className="text-[10px] text-slate-500 bg-white px-2 py-0.5 rounded-full border border-slate-200 ml-auto font-medium">
+                  Học viên chính thức
+                </span>
+              </div>
+            ) : (
+              <input
+                type="text"
+                placeholder="VD: Phụ huynh em Tuấn Anh, hoặc Em Minh Đức (Lớp 12)..."
+                value={studentName}
+                onChange={(e) => setStudentName(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-hidden focus:border-blue-600 focus:bg-white"
+                required
+              />
+            )}
           </div>
 
           {/* Nội dung nhận xét */}

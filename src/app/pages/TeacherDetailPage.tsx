@@ -358,6 +358,31 @@ export function TeacherDetailPage() {
 
   const trialItem = myTrials.find((t) => String(t.tutorId) === String(tutor.id));
 
+  // Kiểm tra điều kiện học viên đã tham gia học thử hoặc chính thức cùng giáo viên (Mục I.5)
+  const studentHasLearned = myTrials.some(
+    (trial) =>
+      String(trial.tutorId) === String(tutor?.id) &&
+      (trial.status === 'trial_completed' || trial.status === 'enrolled' || trial.status === 'trial_in_progress')
+  );
+
+  const handleOpenReview = () => {
+    if (!currentSession?.userId) {
+      alert("Vui lòng đăng nhập tài khoản học sinh để gửi đánh giá.");
+      openAuthModal('login', 'student');
+      return;
+    }
+    if (!studentHasLearned) {
+      alert(
+        "Chính sách bảo vệ chất lượng HanTutor: Bạn chỉ có thể viết nhận xét sau khi đã đăng ký học thử 1-1 hoặc tham gia khóa học cùng giáo viên này để đảm bảo đánh giá khách quan, trung thực và phòng ngừa nhận xét rác."
+      );
+      return;
+    }
+    const isEnrolled = myTrials.some(
+      (t) => String(t.tutorId) === String(tutor?.id) && t.status === 'enrolled'
+    );
+    openReviewModal(tutor, isEnrolled ? 'official' : 'trial');
+  };
+
   const totalTrials = tutor.trialStats?.totalTrials || 0;
   const officialEnrolled = tutor.trialStats?.officialEnrolled || 0;
   const successRate =
@@ -648,6 +673,18 @@ export function TeacherDetailPage() {
                   ))}
                 </div>
 
+                {/* Khu vực nhận dạy & Hình thức - Item I.9 */}
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-1 text-xs">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-800 font-semibold border border-blue-100">
+                    <MapPin className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                    <span><strong>Khu vực dạy:</strong> {tutor.teachingFormatsOffline || tutor.location || 'Hà Nội & Toàn quốc'}</span>
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 font-semibold border border-emerald-100">
+                    <Laptop className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <span>{tutor.isOnline ? 'Học Online & Gia sư tại nhà' : 'Gia sư tại nhà học sinh'}</span>
+                  </div>
+                </div>
+
                 {/* Micro Meta Grid */}
                 <div className="pt-3 border-t border-stone-100 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs text-left">
                   <div className="p-3 rounded-2xl bg-stone-50 border border-stone-100">
@@ -758,6 +795,54 @@ export function TeacherDetailPage() {
                     </div>
                   </div>
                 )}
+              </div>
+            </div>
+
+            {/* KHU VỰC GIẢNG DẠY & HÌNH THỨC HỌC - Item I.9 */}
+            <div className="p-2 rounded-[2.25rem] bg-stone-900/[0.03] border border-stone-900/[0.05] shadow-[0_15px_40px_-20px_rgba(0,0,0,0.04)]">
+              <div className="rounded-[calc(2.25rem-0.5rem)] bg-white p-6 sm:p-8 space-y-4">
+                <div className="flex items-center gap-3 pb-3 border-b border-stone-100">
+                  <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+                    <MapPin className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-black text-stone-900 tracking-tight">
+                      Khu Vực Nhận Dạy & Hình Thức Học
+                    </h2>
+                    <p className="text-xs text-stone-400">Phạm vi hỗ trợ gia sư tại nhà và trực tuyến</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                  <div className="p-4 rounded-2xl bg-stone-50 border border-stone-100 space-y-2">
+                    <span className="font-bold text-stone-800 flex items-center gap-1.5 text-[13px]">
+                      <MapPin className="w-4 h-4 text-blue-600" /> Khu vực giảng dạy (Hà Nội):
+                    </span>
+                    <p className="text-stone-600 leading-relaxed font-medium">
+                      {tutor.teachingFormatsOffline || tutor.location || 'Nhận dạy tại các quận trung tâm Hà Nội (Cầu Giấy, Đống Đa, Ba Đình, Thanh Xuân, Nam Từ Liêm, Hoàn Kiếm...)'}
+                    </p>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-stone-50 border border-stone-100 space-y-2">
+                    <span className="font-bold text-stone-800 flex items-center gap-1.5 text-[13px]">
+                      <Laptop className="w-4 h-4 text-emerald-600" /> Các hình thức đào tạo hỗ trợ:
+                    </span>
+                    <ul className="space-y-1.5 text-stone-600">
+                      <li className="flex items-center gap-2 font-medium">
+                        <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        <span>Học trực tuyến (Online qua Google Meet / Zoom PRO)</span>
+                      </li>
+                      <li className="flex items-center gap-2 font-medium">
+                        <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        <span>Gia sư trực tiếp đến nhà học sinh</span>
+                      </li>
+                      <li className="flex items-center gap-2 font-medium">
+                        <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        <span>Học tại nhà riêng / Lớp chuyên đề của giáo viên</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -997,10 +1082,12 @@ export function TeacherDetailPage() {
 
                   <button
                     type="button"
-                    onClick={() => openReviewModal(tutor, 'trial')}
-                    className="px-4 py-2 rounded-full bg-stone-900 text-white text-xs font-bold hover:bg-stone-800 transition-colors cursor-pointer shrink-0"
+                    onClick={handleOpenReview}
+                    className="px-4 py-2 rounded-full bg-stone-900 text-white text-xs font-bold hover:bg-stone-800 transition-colors cursor-pointer shrink-0 flex items-center gap-1.5"
+                    title={!studentHasLearned ? "Yêu cầu trải nghiệm học thử hoặc chính thức để đánh giá" : "Gửi đánh giá cho giáo viên"}
                   >
-                    + Viết đánh giá
+                    <span>+ Viết đánh giá</span>
+                    {!studentHasLearned && <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />}
                   </button>
                 </div>
 

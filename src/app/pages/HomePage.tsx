@@ -228,6 +228,14 @@ export function TutorCard({ tutor }: { tutor: any }) {
             </span>
             <span className="tabular-nums">{tutor.reviews || 0} nhận xét</span>
           </div>
+
+          {/* Khu vực giảng dạy & Hình thức - Item I.9 */}
+          <div className="flex items-center gap-1.5 text-[11px] text-slate-600 bg-slate-50 px-2.5 py-1.5 rounded-md border border-slate-200/70">
+            <MapPin className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+            <span className="truncate font-medium">
+              {tutor.teachingFormatsOffline || tutor.location || 'Hà Nội & Toàn quốc (Online)'}
+            </span>
+          </div>
         </div>
 
         {/* Bảng giá học phí */}

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { X, Users, Briefcase, GraduationCap, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { X, Users, Briefcase, GraduationCap, AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { useData } from '../../../context/DataContext';
 import { useUI } from '../../../context/UIContext';
 import { supabase } from '../../../lib/supabase';
@@ -33,6 +33,9 @@ export function AuthModal({
   // Form fields
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   
@@ -45,6 +48,9 @@ export function AuthModal({
     setRole(defaultRole);
     setErrorMessage(null);
     setSuccessMessage(null);
+    setConfirmPassword('');
+    setShowPassword(false);
+    setShowConfirmPassword(false);
   }, [initialView, defaultRole, isOpen]);
 
   if (!isOpen) return null;
@@ -152,6 +158,7 @@ export function AuthModal({
     const cleanEmail = email.trim();
     const cleanPhone = phone.trim();
     const cleanPass = password.trim();
+    const cleanConfirmPass = confirmPassword.trim();
 
     if (!cleanName || !cleanEmail || !cleanPass) {
       setErrorMessage('Vui lòng điền đầy đủ Họ tên, Email và Mật khẩu.');
@@ -163,6 +170,11 @@ export function AuthModal({
       return;
     }
 
+    if (cleanPass !== cleanConfirmPass) {
+      setErrorMessage('Mật khẩu xác nhận không trùng khớp. Vui lòng kiểm tra lại!');
+      return;
+    }
+
     setLoading(true);
     try {
       const dbRole = 'student';
@@ -170,6 +182,7 @@ export function AuthModal({
         email: cleanEmail,
         password: cleanPass,
         options: {
+          emailRedirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
           data: {
             full_name: cleanName,
             phone: cleanPhone || null,
@@ -396,14 +409,24 @@ export function AuthModal({
                     Quên mật khẩu?
                   </button>
                 </div>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  placeholder="Nhập mật khẩu..."
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none text-sm"
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    placeholder="Nhập mật khẩu..."
+                    className="w-full px-4 py-3 pr-11 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none text-sm"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(prev => !prev)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer transition-colors"
+                    title={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
 
               <button
@@ -518,15 +541,48 @@ export function AuthModal({
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">Mật khẩu (Tối thiểu 6 ký tự)</label>
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    minLength={6}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none text-sm"
-                    required
-                  />
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      minLength={6}
+                      className="w-full px-4 py-2.5 pr-11 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none text-sm"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(prev => !prev)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer transition-colors"
+                      title={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Nhập lại mật khẩu</label>
+                  <div className="relative">
+                    <input
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      value={confirmPassword}
+                      onChange={e => setConfirmPassword(e.target.value)}
+                      placeholder="••••••••"
+                      minLength={6}
+                      className="w-full px-4 py-2.5 pr-11 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none text-sm"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(prev => !prev)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer transition-colors"
+                      title={showConfirmPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                    >
+                      {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
 
                 <button

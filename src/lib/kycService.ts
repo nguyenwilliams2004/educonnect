@@ -17,6 +17,8 @@ export interface RegisterTutorParams {
   levelPrices?: Record<string, string>;
   teachingFormatsOffline?: string;
   isOnlineSupport?: boolean;
+  teachingFormats?: string[];
+  districts?: string[];
   teachingAchievement?: string;
   experience?: string;
   personalityTraits?: string[];
@@ -192,6 +194,7 @@ export async function registerTutorProfile(params: RegisterTutorParams): Promise
         email: params.email.trim(),
         password: params.password,
         options: {
+          emailRedirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
           data: {
             full_name: params.fullName.trim(),
             role: 'instructor',
@@ -296,6 +299,14 @@ export async function registerTutorProfile(params: RegisterTutorParams): Promise
     if (cccdFrontPath) certArray.push(`KYC_CCCD_FRONT:${cccdFrontPath}`);
     if (cccdBackPath) certArray.push(`KYC_CCCD_BACK:${cccdBackPath}`);
 
+    const hasOnline = params.teachingFormats
+      ? params.teachingFormats.includes('online')
+      : (params.isOnlineSupport ?? true);
+
+    const formattedDistricts = params.districts && params.districts.length > 0
+      ? `Khu vực: ${params.districts.join(', ')} (Hà Nội)${hasOnline ? ' & Toàn quốc (Online)' : ''}`
+      : (params.teachingFormatsOffline || 'Cầu Giấy, Đống Đa, Ba Đình (Hà Nội)');
+
     const profileData = {
       id: activeUserId,
       avatar_url: avatarUrl,
@@ -308,9 +319,9 @@ export async function registerTutorProfile(params: RegisterTutorParams): Promise
       levels: ['THCS', 'THPT'],
       price: parsedPrice,
       price_unit: params.priceUnit || 'giờ',
-      location: params.teachingFormatsOffline || 'Hà Nội & Toàn quốc (Online)',
-      district: 'Cầu Giấy', // Phân loại mặc định nội thành Hà Nội
-      online: params.isOnlineSupport ?? true,
+      location: formattedDistricts,
+      district: params.districts?.[0] || 'Cầu Giấy',
+      online: hasOnline,
       rating: 5.0,
       reviews_count: 0,
       experience: parseInt((params.experience || '2').replace(/\D/g, ''), 10) || 2,
@@ -328,7 +339,12 @@ export async function registerTutorProfile(params: RegisterTutorParams): Promise
     const { error: profileError } = await supabase.from('profiles').upsert(profileData);
 
     if (profileError) {
-      throw new Error(`Lỗi lưu hồ sơ profiles: ${profileError.message}`);
+      console.warn('[kycService] Ghi nhận RLS profiles khi chưa hoàn tất xác thực email:', profileError.message);
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem(`pending_profile_${activeUserId}`, JSON.stringify(profileData));
+        } catch {}
+      }
     }
 
     // 6. Ghi nhận khung giờ rảnh vào bảng availability_slots

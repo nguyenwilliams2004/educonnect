@@ -9,3 +9,4 @@ export * from './MyTrialsModal';
 export * from './StudentProfileModal';
 export * from './UserProfileModal';
 export * from './ModalContainer';
+export * from './TutorTermsModal';

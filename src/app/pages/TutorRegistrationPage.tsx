@@ -8,12 +8,16 @@ import {
   UploadCloud,
   Users,
   Eye,
-  X
+  X,
+  MapPin,
+  Laptop,
+  Check
 } from 'lucide-react';
 import { Tutor as TutorType } from '../data';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import { registerTutorProfile } from '../../lib/kycService';
+import { TutorTermsModal } from '../components/modals';
 
 export function TutorRegistrationPage() {
   const { addMockTutor } = useData();
@@ -88,11 +92,22 @@ export function TutorRegistrationPage() {
   // 9. Cấp học & Đối tượng nhận dạy
   const [targetAudience, setTargetAudience] = useState('');
 
-  // 10. Hình thức giảng dạy
-  const [teachingFormatsOnline] = useState('Google Meet, Zoom PRO, MS Teams');
-  const [teachingFormatsOffline] = useState('');
-  const [isOnlineSupport] = useState(true);
-  const [isOfflineSupport] = useState(true);
+  // 10. Hình thức giảng dạy (Chọn nhiều) - Item II.5
+  const [teachingFormats, setTeachingFormats] = useState<string[]>([
+    'online',
+    'offline_student_home'
+  ]);
+  // Khu vực nhận dạy tại các Quận trung tâm Hà Nội (Chọn nhiều) - Item II.5
+  const [selectedDistricts, setSelectedDistricts] = useState<string[]>([
+    'Cầu Giấy',
+    'Đống Đa'
+  ]);
+
+  // Modal điều khoản hợp tác đối tác giảng dạy - Item II.2
+  const [showTermsModal, setShowTermsModal] = useState(false);
+
+  // 1 Cam kết duy nhất - Item II.1
+  const [agreeAllTerms, setAgreeAllTerms] = useState(false);
 
   // 11. Tài liệu đào tạo (Optional)
   const [trainingMaterials] = useState('');
@@ -110,9 +125,32 @@ export function TutorRegistrationPage() {
   // 13. Lịch học & Cam kết vận hành
   const [scheduleSlots, setScheduleSlots] = useState<string[]>(['Thứ 2_Tối', 'Thứ 4_Tối', 'Thứ 6_Tối', 'Chủ Nhật_Sáng']);
   const [responseTime] = useState<'Dưới 30 phút' | 'Dưới 1 giờ' | 'Dưới 3 giờ'>('Dưới 30 phút');
-  const [commitAccurate, setCommitAccurate] = useState(false);
-  const [commitConduct, setCommitConduct] = useState(false);
-  const [commitTerms, setCommitTerms] = useState(false);
+
+  const centralDistricts = [
+    'Cầu Giấy',
+    'Đống Đa',
+    'Hai Bà Trưng',
+    'Ba Đình',
+    'Thanh Xuân',
+    'Hoàn Kiếm',
+    'Nam Từ Liêm',
+    'Bắc Từ Liêm',
+    'Hà Đông',
+    'Hoàng Mai',
+    'Tây Hồ'
+  ];
+
+  const toggleDistrict = (district: string) => {
+    setSelectedDistricts(prev =>
+      prev.includes(district) ? prev.filter(d => d !== district) : [...prev, district]
+    );
+  };
+
+  const toggleTeachingFormat = (fmt: string) => {
+    setTeachingFormats(prev =>
+      prev.includes(fmt) ? prev.filter(f => f !== fmt) : [...prev, fmt]
+    );
+  };
 
   // AI Image Validation Status Tracker
   const [imageValidations, setImageValidations] = useState<{
@@ -227,11 +265,16 @@ export function TutorRegistrationPage() {
     if (!avatarPreview) return "Vui lòng tải lên Ảnh đại diện (Avatar).";
     if (!educationLevel) return "Vui lòng chọn Trình độ học vấn.";
     if (!major.trim()) return "Vui lòng nhập Chuyên ngành học.";
+    if (!credentialPreview && !credentialFile) return "Vui lòng tải lên ảnh chụp Bằng tốt nghiệp hoặc Thẻ sinh viên để xác thực chuyên môn (Mục 5).";
     if (selectedSubjects.length === 0 && !customSubject.trim()) return "Vui lòng chọn hoặc nhập ít nhất 1 Môn học tiếp nhận.";
+    if (teachingFormats.length === 0) return "Vui lòng chọn ít nhất 1 Hình thức giảng dạy (Mục 10).";
+    if (teachingFormats.some(f => f.startsWith('offline')) && selectedDistricts.length === 0) {
+      return "Vui lòng chọn ít nhất 1 Quận trung tâm Hà Nội nhận dạy trực tiếp (Mục 10).";
+    }
     if (!targetAudience.trim()) return "Vui lòng điền Cấp học & Đối tượng nhận dạy (mục 9).";
     if (!hourlyRate.trim()) return "Vui lòng điền Bảng giá dịch vụ học phí (mục 12).";
     if (scheduleSlots.length === 0) return "Vui lòng chọn ít nhất 1 ca rảnh trong tuần (mục 13).";
-    if (!commitAccurate || !commitConduct || !commitTerms) return "Vui lòng tích chọn đầy đủ 3 cam kết tiêu chuẩn cộng đồng.";
+    if (!agreeAllTerms) return "Vui lòng tích chọn đồng ý cam kết điều khoản hợp tác đối tác giảng dạy.";
     return null;
   };
 
@@ -277,6 +320,10 @@ export function TutorRegistrationPage() {
     if (pedagogicalCertificates.trim()) certList.push(pedagogicalCertificates.trim());
 
     const isTeacherRole = roleType === 'teacher';
+    const hasOnline = teachingFormats.includes('online');
+    const districtsFormatted = selectedDistricts.length > 0
+      ? `Khu vực: ${selectedDistricts.join(', ')} (Hà Nội)${hasOnline ? ' & Toàn quốc (Online)' : ''}`
+      : 'Hà Nội & Toàn quốc (Online)';
 
     // GỌI THỰC TẾ LÊN SUPABASE (AUTH -> STORAGE BUCKETS -> PROFILES & SLOTS)
     const result = await registerTutorProfile({
@@ -294,8 +341,10 @@ export function TutorRegistrationPage() {
       hourlyRate,
       priceUnit,
       levelPrices,
-      teachingFormatsOffline,
-      isOnlineSupport,
+      teachingFormatsOffline: districtsFormatted,
+      isOnlineSupport: hasOnline,
+      teachingFormats,
+      districts: selectedDistricts,
       teachingAchievement,
       experience: experience || (isTeacherRole ? '5 năm' : '2 năm'),
       personalityTraits,
@@ -337,13 +386,13 @@ export function TutorRegistrationPage() {
       reviews: 0,
       subjects: allSubjects,
       targetAudience: targetAudience,
-      location: teachingFormatsOffline || 'Hà Nội & Toàn quốc (Online)',
+      location: districtsFormatted,
       hourlyRate: hourlyRate,
       priceUnit: priceUnit,
       levelPrices: levelPrices,
-      isOnline: isOnlineSupport,
-      teachingFormatsOnline: isOnlineSupport ? teachingFormatsOnline : 'Không dạy online',
-      teachingFormatsOffline: isOfflineSupport ? (teachingFormatsOffline || 'Khu vực nội thành') : 'Chỉ dạy online',
+      isOnline: hasOnline,
+      teachingFormatsOnline: hasOnline ? 'Google Meet, Zoom PRO Bản quyền' : 'Không dạy online',
+      teachingFormatsOffline: districtsFormatted,
       type: isTeacherRole ? 'Giáo viên' : 'Gia sư',
       providerType: isTeacherRole ? 'teacher' : 'tutor',
       targetTags: allSubjects.slice(0, 3),
@@ -893,7 +942,9 @@ export function TutorRegistrationPage() {
 
                 <div className="pt-2">
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-[11px] font-semibold text-slate-700 block">Tệp chứng thực văn bằng / Thẻ sinh viên</span>
+                    <span className="text-[11px] font-bold text-slate-800 block">
+                      Tệp chứng thực văn bằng / Thẻ sinh viên <span className="text-red-500">* (Bắt buộc)</span>
+                    </span>
                     {imageValidations.credential && (
                       <span className="text-[10px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 flex items-center gap-1">
                         <CheckCircle className="w-3 h-3 text-emerald-600" /> Đã nhận tệp văn bằng
@@ -960,6 +1011,85 @@ export function TutorRegistrationPage() {
               />
             </div>
 
+            {/* Mục 10: Hình thức giảng dạy & Khu vực nhận dạy (Hà Nội) - Item II.5 */}
+            <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-2xs space-y-5">
+              <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
+                <span className="w-6 h-6 rounded-md bg-blue-50 text-blue-700 font-bold text-xs flex items-center justify-center">10</span>
+                <h3 className="text-sm font-bold text-slate-900">Hình thức giảng dạy & Khu vực nhận dạy <span className="text-red-500">*</span></h3>
+              </div>
+
+              {/* 10.1 Hình thức học (Chọn nhiều) */}
+              <div className="space-y-2">
+                <label className="block text-xs font-semibold text-slate-700">
+                  Các hình thức bạn nhận dạy (Có thể tích chọn nhiều hình thức) <span className="text-red-500">*</span>
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {[
+                    { id: 'online', label: 'Học trực tuyến (Online)', desc: 'Qua Google Meet / Zoom PRO', icon: Laptop },
+                    { id: 'offline_student_home', label: 'Gia sư đến nhà học sinh', desc: 'Dạy trực tiếp 1 kèm 1 tại nhà', icon: Users },
+                    { id: 'offline_tutor_home', label: 'Tại nhà / Lớp riêng giáo viên', desc: 'Có phòng học hoặc lớp cá nhân', icon: GraduationCap },
+                  ].map((fmt) => {
+                    const isSelected = teachingFormats.includes(fmt.id);
+                    const IconComponent = fmt.icon;
+                    return (
+                      <div
+                        key={fmt.id}
+                        onClick={() => toggleTeachingFormat(fmt.id)}
+                        className={`p-3.5 rounded-xl border transition-all cursor-pointer flex flex-col justify-between select-none ${
+                          isSelected
+                            ? 'border-blue-600 bg-blue-50/70 text-blue-900 ring-1 ring-blue-500/20 shadow-xs'
+                            : 'border-slate-200 hover:border-slate-300 bg-white text-slate-700'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <IconComponent className={`w-5 h-5 ${isSelected ? 'text-blue-600' : 'text-slate-400'}`} />
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => {}}
+                            className="rounded text-blue-600 focus:ring-blue-500 pointer-events-none"
+                          />
+                        </div>
+                        <span className="font-bold text-xs">{fmt.label}</span>
+                        <span className="text-[10px] text-slate-500 mt-0.5">{fmt.desc}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* 10.2 Khu vực nhận dạy trực tiếp (Các quận trung tâm Hà Nội) */}
+              {teachingFormats.some(f => f.startsWith('offline')) && (
+                <div className="pt-3 border-t border-slate-100 space-y-2.5 animate-in fade-in">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-semibold text-slate-700">
+                      Các Quận trung tâm Hà Nội nhận dạy trực tiếp <span className="text-red-500">*</span>
+                    </label>
+                    <span className="text-[11px] text-slate-500 font-medium">Đã chọn: {selectedDistricts.length} quận</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {centralDistricts.map(district => {
+                      const isChecked = selectedDistricts.includes(district);
+                      return (
+                        <button
+                          key={district}
+                          type="button"
+                          onClick={() => toggleDistrict(district)}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer border ${
+                            isChecked
+                              ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                              : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200'
+                          }`}
+                        >
+                          {isChecked ? `✓ ${district}` : `+ ${district}`}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Mục 13: Lịch học rảnh trong tuần */}
             <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-2xs space-y-5">
               <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
@@ -1006,36 +1136,30 @@ export function TutorRegistrationPage() {
                 </div>
               </div>
 
-              {/* Cam kết trách nhiệm */}
+              {/* Cam kết trách nhiệm - 1 nút tick duy nhất (Item II.1) & Link đọc điều khoản (Item II.2) */}
               <div className="pt-3 border-t border-slate-100 space-y-2.5">
-                <label className="flex items-start gap-2.5 cursor-pointer text-xs text-slate-700 p-2.5 bg-slate-50/50 rounded-xl border border-slate-200/80 hover:bg-blue-50/30 transition-colors">
+                <label className="flex items-start gap-3 cursor-pointer text-xs text-slate-700 p-3.5 bg-blue-50/40 rounded-xl border border-blue-200/80 hover:bg-blue-50/70 transition-colors">
                   <input
                     type="checkbox"
-                    checked={commitAccurate}
-                    onChange={e => setCommitAccurate(e.target.checked)}
-                    className="mt-0.5 rounded text-blue-600 focus:ring-blue-500 shrink-0"
+                    checked={agreeAllTerms}
+                    onChange={e => setAgreeAllTerms(e.target.checked)}
+                    className="mt-0.5 rounded text-blue-600 focus:ring-blue-500 shrink-0 w-4 h-4 cursor-pointer"
                   />
-                  <span>1. Cam kết toàn bộ thông tin bằng cấp, thẻ sinh viên và hồ sơ tải lên là hoàn toàn chính xác.</span>
-                </label>
-
-                <label className="flex items-start gap-2.5 cursor-pointer text-xs text-slate-700 p-2.5 bg-slate-50/50 rounded-xl border border-slate-200/80 hover:bg-blue-50/30 transition-colors">
-                  <input
-                    type="checkbox"
-                    checked={commitConduct}
-                    onChange={e => setCommitConduct(e.target.checked)}
-                    className="mt-0.5 rounded text-blue-600 focus:ring-blue-500 shrink-0"
-                  />
-                  <span>2. Cam kết giữ vững chuẩn mực sư phạm, đúng giờ và nhiệt tình đồng hành cùng học sinh.</span>
-                </label>
-
-                <label className="flex items-start gap-2.5 cursor-pointer text-xs text-slate-700 p-2.5 bg-slate-50/50 rounded-xl border border-slate-200/80 hover:bg-blue-50/30 transition-colors">
-                  <input
-                    type="checkbox"
-                    checked={commitTerms}
-                    onChange={e => setCommitTerms(e.target.checked)}
-                    className="mt-0.5 rounded text-blue-600 focus:ring-blue-500 shrink-0"
-                  />
-                  <span>3. Đã đọc kỹ và đồng ý với điều khoản hợp tác đối tác giảng dạy của HanTutor.</span>
+                  <div className="leading-relaxed font-medium">
+                    Tôi cam kết toàn bộ thông tin bằng cấp, thẻ sinh viên và hồ sơ tải lên là hoàn toàn chính xác; giữ vững chuẩn mực sư phạm và đồng ý với{' '}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setShowTermsModal(true);
+                      }}
+                      className="text-blue-700 font-bold underline hover:text-blue-900 cursor-pointer inline-flex items-center gap-0.5"
+                    >
+                      Điều khoản hợp tác đối tác giảng dạy của HanTutor
+                    </button>
+                    .
+                  </div>
                 </label>
               </div>
             </div>
@@ -1118,6 +1242,12 @@ export function TutorRegistrationPage() {
           </div>
         </div>
       )}
+      {/* Modal Điều khoản hợp tác đối tác giảng dạy HanTutor - Item II.2 */}
+      <TutorTermsModal
+        isOpen={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+        onAgree={() => setAgreeAllTerms(true)}
+      />
     </div>
   );
 }
