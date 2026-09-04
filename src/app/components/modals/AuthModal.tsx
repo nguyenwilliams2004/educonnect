@@ -12,6 +12,7 @@ import {
   Mail,
   ExternalLink,
   RefreshCw,
+  Sparkles,
 } from 'lucide-react';
 import { useData } from '../../../context/DataContext';
 import { useUI } from '../../../context/UIContext';
@@ -472,7 +473,7 @@ export function AuthModal({
             </div>
 
             {/* Role Switcher */}
-            <div className="grid grid-cols-2 gap-2.5 mb-4">
+            <div className="grid grid-cols-2 gap-2.5 mb-3.5">
               <button
                 type="button"
                 onClick={() => setRole('student')}
@@ -487,6 +488,50 @@ export function AuthModal({
               >
                 <Briefcase className="w-4 h-4" /> Tôi là giáo viên
               </button>
+            </div>
+
+            {/* Quick Fill Test Accounts (Dành cho kiểm thử nghiệm thu nhanh) */}
+            <div className="mb-4 p-3 bg-gradient-to-r from-blue-50/70 to-slate-50 border border-blue-100 rounded-2xl space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-extrabold text-blue-900 uppercase tracking-wider flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-500" /> Tài khoản Test nghiệm thu
+                </span>
+                <span className="text-[10px] text-slate-400 font-medium">Bấm để điền nhanh</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRole('teacher');
+                    setEmail('giaovien.demo@gmail.com');
+                    setPassword('HanTutor2026!@#');
+                    setErrorMessage(null);
+                  }}
+                  className="p-2.5 bg-white hover:bg-blue-50 hover:border-blue-300 border border-slate-200 rounded-xl text-left transition-all cursor-pointer group shadow-2xs"
+                  title="Điền tài khoản giáo viên demo"
+                >
+                  <div className="text-[11px] font-bold text-slate-800 group-hover:text-blue-700 flex items-center gap-1">
+                    👨‍🏫 Giáo viên Demo
+                  </div>
+                  <div className="text-[10px] text-slate-500 truncate mt-0.5">Cô Sương Mai</div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRole('student');
+                    setEmail('hocsinh.demo@gmail.com');
+                    setPassword('HanTutor2026!@#');
+                    setErrorMessage(null);
+                  }}
+                  className="p-2.5 bg-white hover:bg-emerald-50 hover:border-emerald-300 border border-slate-200 rounded-xl text-left transition-all cursor-pointer group shadow-2xs"
+                  title="Điền tài khoản học sinh demo"
+                >
+                  <div className="text-[11px] font-bold text-slate-800 group-hover:text-emerald-700 flex items-center gap-1">
+                    🎓 Học sinh Demo
+                  </div>
+                  <div className="text-[10px] text-slate-500 truncate mt-0.5">Nguyễn Văn An</div>
+                </button>
+              </div>
             </div>
 
             <form onSubmit={handleLogin} className="space-y-4">

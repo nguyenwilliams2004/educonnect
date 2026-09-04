@@ -90,7 +90,17 @@ export function MyTrialsModal({
       );
     } catch (e) {}
 
-    const combined = [...(myTrials || []), ...localTeacherTrials, ...defaultTeacherTrials];
+    // Danh sách tên gia sư để loại bỏ các record bookmark từ góc nhìn học sinh
+    const tutorNames = new Set(tutors.map((t) => t.name.toLowerCase()));
+
+    // Lọc các bản ghi thực sự dành cho Giáo viên (học sinh đặt hẹn)
+    const teacherMyTrials = (myTrials || []).filter((item) => {
+      if (item.rolePrefix === 'Học sinh' || item.studentName) return true;
+      if (tutorNames.has(item.tutorName?.toLowerCase())) return false;
+      return true;
+    });
+
+    const combined = [...localTeacherTrials, ...teacherMyTrials, ...defaultTeacherTrials];
     const seen = new Set<string>();
     rawList = combined.filter((item) => {
       const id = String(item.enrollmentId || item.tutorId);
@@ -99,7 +109,7 @@ export function MyTrialsModal({
       return true;
     });
   } else {
-    rawList = myTrials || [];
+    rawList = (myTrials || []).filter((item) => item.rolePrefix !== 'Học sinh');
   }
 
   const displayedList = rawList.filter((item) => {
@@ -274,9 +284,28 @@ export function MyTrialsModal({
         ) : (
           <div className="flex-1 overflow-y-auto space-y-3.5 pr-1">
             {displayedList.map((item) => {
-              const fullTutor = tutors.find((t) => String(t.id) === String(item.tutorId));
-              const cleanPhone = (item.zalo || item.phone || '').replace(/[^0-9]/g, '');
+              const fullTutor = tutors.find((t) => String(t.id) === String(item.teacherTutorId || item.tutorId));
               const bookingTimeStr = getBookingTimeString(item);
+
+              // Tên hiển thị: Nếu là giáo viên xem, bắt buộc hiển thị tên HỌC SINH
+              const cardTitle = isTeacher
+                ? (item.studentName
+                    ? (item.studentName.startsWith('Học sinh') ? item.studentName : `Học sinh: ${item.studentName}`)
+                    : (item.tutorName.startsWith('Học sinh') ? item.tutorName : `Học sinh: ${item.tutorName}`))
+                : item.tutorName;
+
+              // Avatar hiển thị: Nếu là giáo viên xem, hiển thị avatar học sinh
+              const cardAvatar = isTeacher
+                ? (item.avatar && !item.avatar.includes('photo-1544005313-94ddf0286df2')
+                    ? item.avatar
+                    : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400')
+                : item.avatar;
+
+              // Số điện thoại liên hệ
+              const contactPhone = isTeacher
+                ? (item.studentPhone || item.phone || item.zalo || '0987654321')
+                : (item.zalo || item.phone || '');
+              const cleanPhone = contactPhone.replace(/[^0-9]/g, '');
 
               return (
                 <div
@@ -287,15 +316,15 @@ export function MyTrialsModal({
                   <div className="flex items-start justify-between gap-3 flex-wrap sm:flex-nowrap">
                     <div className="flex items-start gap-3.5 min-w-0 flex-1">
                       <img
-                        src={item.avatar}
-                        alt={item.tutorName}
+                        src={cardAvatar}
+                        alt={cardTitle}
                         className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl object-cover shrink-0 shadow-2xs border border-slate-200"
                       />
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap mb-1">
                           {/* TÊN HIỂN THỊ TRỌN VẸN - TRIỆT TIÊU LỖI TRUNCATE CẮT CHỮ */}
                           <h4 className="font-bold text-base text-slate-900 leading-snug">
-                            {item.tutorName}
+                            {cardTitle}
                           </h4>
                           <span className="bg-slate-900 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-md shrink-0">
                             {item.badgeSubject}

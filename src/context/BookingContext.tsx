@@ -38,14 +38,21 @@ export interface StudentTrialItem {
 function enrollmentToTrial(row: any, tutors: any[], isTeacher = false): StudentTrialItem {
   const tutor = tutors.find((t) => String(t.id) === String(row.instructor_id));
   const createdDate = row.created_at ? new Date(row.created_at) : new Date();
+  const rawStudentName = row.student_name || 'Học sinh mới';
+  const displayStudentTitle = rawStudentName.startsWith('Học sinh')
+    ? rawStudentName
+    : `Học sinh: ${rawStudentName}`;
+
   return {
-    tutorId: row.instructor_id,
-    tutorName: isTeacher ? (row.student_name || 'Học sinh mới') : (tutor?.name || row.class_title || 'Giáo viên'),
+    tutorId: isTeacher ? (row.student_id || row.id) : row.instructor_id,
+    teacherTutorId: String(row.instructor_id),
+    tutorName: isTeacher ? displayStudentTitle : (tutor?.name || row.class_title || 'Giáo viên'),
+    studentName: row.student_name || 'Học sinh mới',
     avatar: isTeacher
-      ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400'
+      ? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400'
       : (tutor?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400'),
     badgeSubject: tutor?.badgeSubject || tutor?.subjects?.[0] || row.class_title || 'Môn học',
-    headline: row.note || row.notes || tutor?.headline,
+    headline: row.note || row.notes || (isTeacher ? `Hẹn học thử: ${tutor?.badgeSubject || '1-1'} • SĐT: ${row.parent_phone || '0987.654.321'}` : tutor?.headline),
     rolePrefix: isTeacher ? 'Học sinh' : tutor?.rolePrefix,
     displayName: isTeacher ? row.student_name : (tutor?.displayName || tutor?.name),
     phone: isTeacher ? (row.parent_phone || '0987654321') : tutor?.phone,
@@ -64,7 +71,6 @@ function enrollmentToTrial(row: any, tutors: any[], isTeacher = false): StudentT
         : 'trial_in_progress',
     studentId: row.student_id,
     studentPhone: row.parent_phone,
-    studentName: row.student_name,
     enrollmentId: row.id,
     slotDay: row.slot_day || ((row.note || row.notes) && (row.note || row.notes).includes('Khung giờ:') ? (row.note || row.notes).replace('Khung giờ:', '').trim() : undefined),
     slotTime: row.slot_time,
@@ -102,24 +108,41 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const loadTrials = async () => {
       const isTeacher = currentSession.role === 'teacher';
-      const storageKey = currentSession.userId
-        ? `hantutor_trials_${currentSession.userId}`
-        : 'hantutor_trials_guest';
+      const teacherId = String(currentSession.userId || '00000000-0000-0000-0000-000000000001');
 
-      // 1. LocalStorage fast hydrate
-      try {
-        const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
-        if (Array.isArray(saved) && saved.length > 0) {
-          setMyTrials(saved);
+      if (isTeacher) {
+        // Fast hydrate cho Giáo viên: đọc từ storage các đơn học thử của giáo viên
+        let localTeacherTrials: StudentTrialItem[] = [];
+        try {
+          localTeacherTrials = JSON.parse(
+            localStorage.getItem('hantutor_teacher_student_trials') || '[]'
+          );
+        } catch (e) {}
+
+        if (Array.isArray(localTeacherTrials) && localTeacherTrials.length > 0) {
+          setMyTrials(localTeacherTrials);
+        } else {
+          setMyTrials([]);
         }
-      } catch (e) {}
+      } else {
+        // Fast hydrate cho Học sinh: đọc từ storage cá nhân của học sinh
+        const storageKey = currentSession.userId
+          ? `hantutor_trials_${currentSession.userId}`
+          : 'hantutor_trials_guest';
+        try {
+          const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
+          if (Array.isArray(saved)) {
+            setMyTrials(saved);
+          }
+        } catch (e) {}
+      }
 
-      // 2. Supabase backend sync
+      // Supabase backend sync
       if (!currentSession.userId) return;
       try {
         const query = supabase.from('enrollments').select('*');
         if (isTeacher) {
-          query.eq('instructor_id', currentSession.userId);
+          query.or(`instructor_id.eq.${currentSession.userId},instructor_id.eq.00000000-0000-0000-0000-000000000001`);
         } else {
           query.eq('student_id', currentSession.userId);
         }
@@ -127,10 +150,16 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
 
         if (!error && data && data.length > 0) {
           const mapped = data.map((row) => enrollmentToTrial(row, tutors, isTeacher));
-          setMyTrials(mapped);
-          try {
-            localStorage.setItem(storageKey, JSON.stringify(mapped));
-          } catch (e) {}
+          setMyTrials((prev) => {
+            const combined = isTeacher ? [...mapped, ...prev] : mapped;
+            const seen = new Set<string>();
+            return combined.filter((item) => {
+              const id = String(item.enrollmentId || item.tutorId);
+              if (seen.has(id)) return false;
+              seen.add(id);
+              return true;
+            });
+          });
         }
       } catch (err) {
         console.error('[BookingContext] load error:', err);
@@ -158,14 +187,41 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
 
       const now = new Date();
       const bookingTime = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+
+      // LẤY TÊN HỌC SINH CHÍNH XÁC:
+      let cachedProfile: any = null;
+      try {
+        cachedProfile = JSON.parse(localStorage.getItem('hantutor_student_profile') || '{}');
+      } catch {}
+
+      const studentName =
+        studentInfo?.name ||
+        currentSession.fullName ||
+        (currentSession as any).name ||
+        cachedProfile?.name ||
+        (currentSession.phone
+          ? `Học sinh (SĐT: ${currentSession.phone})`
+          : currentSession.email
+          ? `Học sinh (${currentSession.email.split('@')[0]})`
+          : 'Học sinh mới đăng ký');
+
+      const studentPhone =
+        studentInfo?.phone ||
+        currentSession.phone ||
+        cachedProfile?.phone ||
+        '0987.654.321';
+
+      // 1. Bản ghi góc nhìn HỌC SINH (Student Trial Bookmark)
       const newItem: StudentTrialItem = {
         tutorId: tutor.id,
+        teacherTutorId: String(tutor.id),
         tutorName: tutor.name,
+        studentName: studentName,
         avatar: tutor.avatar,
         badgeSubject: tutor.badgeSubject || tutor.subjects?.[0] || 'Môn học',
         headline: slotText || tutor.headline || 'Đã đăng ký học thử 1-1',
         rolePrefix: tutor.rolePrefix,
-        displayName: tutor.displayName,
+        displayName: tutor.displayName || tutor.name,
         phone: tutor.phone,
         zalo: tutor.zalo,
         hourlyRate: tutor.hourlyRate,
@@ -174,59 +230,57 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
         createdAt: now.toISOString(),
         status: 'trial_in_progress',
         studentId: currentSession.userId || 'anon_stud',
-        studentPhone: studentInfo?.phone || currentSession.phone,
+        studentPhone,
         slotDay,
         slotTime,
         slotShift,
       };
 
-      setMyTrials((prev) => {
-        const existing = prev.find((i) => String(i.tutorId) === String(tutor.id));
-        let updated: StudentTrialItem[];
-        if (existing) {
-          updated = prev.map((i) =>
-            String(i.tutorId) === String(tutor.id)
-              ? {
-                  ...i,
-                  status: 'trial_in_progress' as const,
-                  headline: slotText || i.headline,
-                  slotDay: slotDay || i.slotDay,
-                  slotTime: slotTime || i.slotTime,
-                  slotShift: slotShift || i.slotShift,
-                  bookingTime: i.bookingTime || bookingTime,
-                }
-              : i
-          );
-        } else {
-          updated = [newItem, ...prev];
-        }
-        const storageKey = currentSession.userId
-          ? `hantutor_trials_${currentSession.userId}`
-          : 'hantutor_trials_guest';
-        try {
-          localStorage.setItem(storageKey, JSON.stringify(updated));
-        } catch (e) {}
-        return updated;
-      });
+      if (currentSession.role !== 'teacher') {
+        setMyTrials((prev) => {
+          const existing = prev.find((i) => String(i.tutorId) === String(tutor.id));
+          let updated: StudentTrialItem[];
+          if (existing) {
+            updated = prev.map((i) =>
+              String(i.tutorId) === String(tutor.id)
+                ? {
+                    ...i,
+                    status: 'trial_in_progress' as const,
+                    headline: slotText || i.headline,
+                    slotDay: slotDay || i.slotDay,
+                    slotTime: slotTime || i.slotTime,
+                    slotShift: slotShift || i.slotShift,
+                    bookingTime: i.bookingTime || bookingTime,
+                  }
+                : i
+            );
+          } else {
+            updated = [newItem, ...prev];
+          }
+          const storageKey = currentSession.userId
+            ? `hantutor_trials_${currentSession.userId}`
+            : 'hantutor_trials_guest';
+          try {
+            localStorage.setItem(storageKey, JSON.stringify(updated));
+          } catch (e) {}
+          return updated;
+        });
+      }
 
-      const studentName =
-        studentInfo?.name ||
-        (currentSession.phone
-          ? `Học sinh (SĐT: ${currentSession.phone})`
-          : currentSession.email
-          ? `Học sinh (${currentSession.email})`
-          : 'Học sinh mới đăng ký');
-      const studentPhone = studentInfo?.phone || currentSession.phone || '0987.654.321';
-
-      const teacherTrialRecord = {
+      // 2. Bản ghi góc nhìn GIÁO VIÊN (Teacher view: hiển thị rõ tên học sinh)
+      const teacherTrialRecord: StudentTrialItem = {
         tutorId: `stud_${Date.now()}`,
         teacherTutorId: String(tutor.id),
-        tutorName: `${studentName}`,
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400',
+        tutorName: `Học sinh: ${studentName}`,
+        studentName: studentName,
+        displayName: studentName,
+        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400',
         badgeSubject: tutor.badgeSubject || tutor.subjects?.[0] || 'Môn học',
         headline: slotText || `Hẹn học thử: ${tutor.badgeSubject || '1-1'} • SĐT: ${studentPhone}`,
         phone: studentPhone,
         zalo: studentPhone,
+        studentPhone: studentPhone,
+        rolePrefix: 'Học sinh',
         date: now.toLocaleDateString('vi-VN'),
         bookingTime,
         createdAt: now.toISOString(),
@@ -234,6 +288,7 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
         slotDay,
         slotTime,
         slotShift,
+        studentId: currentSession.userId || 'anon_stud',
       };
 
       try {
@@ -260,33 +315,42 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
         ],
       }));
 
-      if (!isUUID(tutor.id)) return;
-      const { data: insertedRow, error } = await supabase
-        .from('enrollments')
-        .insert({
-          instructor_id: String(tutor.id),
-          student_id: currentSession.userId || null,
-          class_title: tutor.badgeSubject || tutor.subjects?.[0],
-          student_name: studentName,
-          parent_phone: studentPhone,
-          status: 'trial_booked',
-          source_type: 'platform',
-          note: slotText,
-        })
-        .select()
-        .single();
+      // 3. ĐỒNG BỘ VÀO SUPABASE ENROLLMENTS TABLE
+      const instructorUuid = isUUID(tutor.id)
+        ? String(tutor.id)
+        : '00000000-0000-0000-0000-000000000001';
 
-      if (error) {
-        console.error('[Supabase] recordTrialContact error:', error.message);
-      } else if (insertedRow) {
-        setMyTrials((prev) =>
-          prev.map((i) =>
-            String(i.tutorId) === String(tutor.id) ? { ...i, enrollmentId: insertedRow.id } : i
-          )
-        );
+      const studentUuid = currentSession.userId && isUUID(currentSession.userId)
+        ? currentSession.userId
+        : null;
+
+      try {
+        const { data: insertedRow, error } = await supabase
+          .from('enrollments')
+          .insert({
+            instructor_id: instructorUuid,
+            student_id: studentUuid,
+            class_title: tutor.badgeSubject || tutor.subjects?.[0] || 'Lớp học thử 1-1',
+            student_name: studentName,
+            parent_phone: studentPhone,
+            status: 'trial_booked',
+            source_type: 'platform',
+            note: slotText,
+          })
+          .select()
+          .single();
+
+        if (error) {
+          console.warn('[Supabase] recordTrialContact error:', error.message);
+        } else if (insertedRow) {
+          teacherTrialRecord.enrollmentId = insertedRow.id;
+          newItem.enrollmentId = insertedRow.id;
+        }
+      } catch (dbErr) {
+        console.warn('[Supabase] recordTrialContact exception:', dbErr);
       }
     },
-    [currentSession.userId, currentSession.phone, currentSession.email, setTutors]
+    [currentSession.userId, currentSession.phone, currentSession.email, currentSession.fullName, currentSession.role, setTutors]
   );
 
   const recordOfficialEnrollment = useCallback(
