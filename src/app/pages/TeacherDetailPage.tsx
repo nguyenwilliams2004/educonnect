@@ -206,9 +206,39 @@ export function TeacherDetailPage() {
 
   const isLoggedIn = Boolean(currentSession && currentSession.role !== 'anonymous' && currentSession.userId);
 
+  const isCoSuongMaiSession =
+    currentSession.email === 'giaovien.demo@gmail.com' ||
+    currentSession.email === 'cosuongmai@gmail.com' ||
+    currentSession.userId === '00000000-0000-0000-0000-000000000001' ||
+    currentSession.userId === 't1';
+
+  const isTutorSuongMai =
+    String(tutor?.id) === 't1' ||
+    String(tutor?.id) === '00000000-0000-0000-0000-000000000001' ||
+    String(resolvedId) === 't1' ||
+    String(resolvedId) === '00000000-0000-0000-0000-000000000001';
+
+  const isOwnProfile =
+    currentSession.role === 'teacher' &&
+    (String(currentSession.userId) === String(tutor?.id) ||
+      (isCoSuongMaiSession && isTutorSuongMai));
+
   // 3. Đặt lịch hẹn học thử 1-1 tinh gọn (Zero-Friction: mở thẳng modal Zalo với ca học đã chọn, không đếm ngược áp lực)
   const handleSelectTrialSlot = (day: string, shiftObj: { label: string; key: string }) => {
     if (!tutor) return;
+    if (isOwnProfile) {
+      alert(
+        `Bạn đang xem ca dạy (${day} • ${shiftObj.label}) trên hồ sơ của chính mình. Vui lòng bấm 'Chỉnh sửa hồ sơ' để quản lý thời gian nhận lớp.`
+      );
+      return;
+    }
+    if (currentSession.role === 'teacher') {
+      alert(
+        'Tài khoản Giáo viên không thể đặt lịch học thử. Tính năng học thử 1-1 miễn phí chỉ dành riêng cho Học sinh & Phụ huynh tìm gia sư.'
+      );
+      return;
+    }
+
     const times = shiftTimeMap[shiftObj.key];
     const slotInfo = {
       day,
@@ -404,6 +434,16 @@ export function TeacherDetailPage() {
   }
 
   const handleTrialContactClick = () => {
+    if (isOwnProfile) {
+      openTeacherProfileModal(tutor.id);
+      return;
+    }
+    if (currentSession.role === 'teacher') {
+      alert(
+        'Tài khoản Giáo viên không thể đăng ký học thử. Tính năng học thử 1-1 miễn phí chỉ dành riêng cho Học sinh & Phụ huynh tìm gia sư.'
+      );
+      return;
+    }
     if (!isLoggedIn) {
       setPendingTrialTutor(tutor);
       alert(
@@ -548,12 +588,6 @@ export function TeacherDetailPage() {
       alert('Đã sao chép liên kết hồ sơ!');
     }
   };
-
-  const isOwnProfile =
-    currentSession.role === 'teacher' &&
-    (String(currentSession.userId) === String(tutor.id) ||
-      currentSession.userId === 't1' ||
-      String(tutor.id) === '1');
 
   return (
     <div className="bg-[#FBFBFA] min-h-screen text-stone-900 selection:bg-stone-900 selection:text-white relative overflow-hidden">
@@ -995,10 +1029,28 @@ export function TeacherDetailPage() {
                                     <button
                                       type="button"
                                       onClick={() => handleSelectTrialSlot(day, shiftObj)}
-                                      className="w-full py-2 px-2 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-800 font-bold rounded-xl text-[11px] border border-emerald-200/80 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] cursor-pointer hover:scale-105 active:scale-95 flex items-center justify-center gap-1 shadow-2xs group"
-                                      title={`Chọn ${day} (${shiftObj.label}) để hẹn học thử 1-1`}
+                                      className={`w-full py-2 px-2 font-bold rounded-xl text-[11px] border transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] cursor-pointer flex items-center justify-center gap-1 shadow-2xs group ${
+                                        isOwnProfile
+                                          ? 'bg-blue-50 text-blue-800 border-blue-200 hover:bg-blue-100'
+                                          : currentSession.role === 'teacher'
+                                          ? 'bg-stone-50 text-stone-600 border-stone-200 hover:bg-stone-100'
+                                          : 'bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-800 border-emerald-200/80 hover:scale-105 active:scale-95'
+                                      }`}
+                                      title={
+                                        isOwnProfile
+                                          ? `Ca dạy của bạn: ${day} (${shiftObj.label})`
+                                          : currentSession.role === 'teacher'
+                                          ? `Lịch dạy của đồng nghiệp: ${day} (${shiftObj.label})`
+                                          : `Chọn ${day} (${shiftObj.label}) để hẹn học thử 1-1`
+                                      }
                                     >
-                                      <span>✓ Hẹn ca này</span>
+                                      <span>
+                                        {isOwnProfile
+                                          ? '✓ Lịch của bạn'
+                                          : currentSession.role === 'teacher'
+                                          ? 'Ca nhận lớp'
+                                          : '✓ Hẹn ca này'}
+                                      </span>
                                     </button>
                                   ) : (
                                     <span className="block py-2 text-stone-300 text-xs">—</span>
@@ -1279,7 +1331,39 @@ export function TeacherDetailPage() {
 
                 {/* Primary Action Button (Button-in-Button Architecture) */}
                 <div className="space-y-3 pt-2">
-                  {trialItem?.status === 'trial_in_progress' ? (
+                  {isOwnProfile ? (
+                    <button
+                      type="button"
+                      onClick={() => openTeacherProfileModal(tutor.id)}
+                      className="group w-full bg-stone-950 hover:bg-stone-800 text-white font-bold py-4 px-6 rounded-full transition-all duration-300 shadow-xl shadow-stone-950/20 active:scale-[0.98] cursor-pointer flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Edit3 className="w-4 h-4 text-emerald-400" />
+                        <span className="text-sm font-black tracking-tight">Chỉnh sửa hồ sơ của bạn</span>
+                      </div>
+                      <span className="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center transition-transform group-hover:translate-x-1">
+                        <ArrowUpRight className="w-4 h-4 text-white" />
+                      </span>
+                    </button>
+                  ) : currentSession.role === 'teacher' ? (
+                    <div className="space-y-2.5">
+                      <div className="w-full bg-amber-50 border border-amber-200/80 text-amber-900 rounded-2xl p-3.5 text-center space-y-1">
+                        <p className="text-xs font-bold">Chế độ xem đồng nghiệp</p>
+                        <p className="text-[11px] text-amber-800/90 leading-relaxed">
+                          Tài khoản Giáo viên không thể đăng ký học thử. Đăng ký học thử 0đ chỉ dành cho Học sinh & Phụ huynh.
+                        </p>
+                      </div>
+                      <a
+                        href={`https://zalo.me/${(tutor.zalo || tutor.phone || '0912345678').replace(/[^0-9]/g, '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-bold py-3.5 px-5 rounded-full transition-all text-xs flex items-center justify-center gap-2 shadow-xs cursor-pointer"
+                      >
+                        <MessageCircle className="w-4 h-4 text-blue-600" />
+                        <span>Nhắn Zalo đồng nghiệp</span>
+                      </a>
+                    </div>
+                  ) : trialItem?.status === 'trial_in_progress' ? (
                     <a
                       href={`https://zalo.me/${(tutor.zalo || tutor.phone || '0912345678').replace(/[^0-9]/g, '')}`}
                       target="_blank"
@@ -1305,7 +1389,11 @@ export function TeacherDetailPage() {
                   )}
 
                   <p className="text-[11px] text-center text-stone-500 font-medium">
-                    ⚡ Không mất phí • Giáo viên phản hồi trong 30 phút
+                    {isOwnProfile
+                      ? '⚡ Hồ sơ công khai đang được phụ huynh & học sinh tìm kiếm'
+                      : currentSession.role === 'teacher'
+                      ? '⚡ Đang xem với tư cách Giáo viên đối tác HanTutor'
+                      : '⚡ Không mất phí • Giáo viên phản hồi trong 30 phút'}
                   </p>
                 </div>
               </div>

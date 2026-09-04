@@ -1,5 +1,5 @@
 ---
-trigger: model_decision
+trigger: manual
 description: Khi bắt đầu làm 1 task mớ
 ---
 

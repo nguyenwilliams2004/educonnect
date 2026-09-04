@@ -171,6 +171,12 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
 
   const recordTrialContact = useCallback(
     async (tutor: any, studentInfo?: { name?: string; phone?: string; slot?: any }) => {
+      // Chặn tài khoản giáo viên tự ghi nhận hoặc đặt học thử
+      if (currentSession.role === 'teacher') {
+        console.warn('[BookingContext] Chặn: Tài khoản Giáo viên không thể đăng ký học thử.');
+        return;
+      }
+
       const selectedSlot = studentInfo?.slot || tutor.selectedSlot;
       const slotDay = selectedSlot?.day;
       const slotTime = selectedSlot?.time || selectedSlot?.shift || selectedSlot?.shiftLabel;

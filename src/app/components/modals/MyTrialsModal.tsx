@@ -33,6 +33,15 @@ export function MyTrialsModal({
 
   const [activeTab, setActiveTab] = useState<'all' | 'in_progress' | 'enrolled'>('all');
 
+  const [deletedIds, setDeletedIds] = useState<Set<string>>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('hantutor_deleted_trial_ids') || '[]');
+      return new Set(Array.isArray(stored) ? stored.map(String) : []);
+    } catch {
+      return new Set();
+    }
+  });
+
   const isOpen = propIsOpen !== undefined ? propIsOpen : isMyTrialsOpen;
   const onClose = propOnClose || closeMyTrialsModal;
   const onOpenEnrollment =
@@ -81,15 +90,6 @@ export function MyTrialsModal({
     },
   ];
 
-  const [deletedIds, setDeletedIds] = useState<Set<string>>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('hantutor_deleted_trial_ids') || '[]');
-      return new Set(Array.isArray(stored) ? stored.map(String) : []);
-    } catch {
-      return new Set();
-    }
-  });
-
   let rawList: StudentTrialItem[] = [];
   if (isTeacher) {
     let localTeacherTrials: StudentTrialItem[] = [];
@@ -100,12 +100,13 @@ export function MyTrialsModal({
     } catch (e) {}
 
     // Danh sách tên gia sư để loại bỏ các record bookmark từ góc nhìn học sinh
-    const tutorNames = new Set(tutors.map((t) => t.name.toLowerCase()));
+    const tutorNames = new Set((tutors || []).map((t) => (t?.name || '').toLowerCase()).filter(Boolean));
 
     // Lọc các bản ghi thực sự dành cho Giáo viên (học sinh đặt hẹn)
     const teacherMyTrials = (myTrials || []).filter((item) => {
+      if (!item) return false;
       if (item.rolePrefix === 'Học sinh' || item.studentName) return true;
-      if (tutorNames.has(item.tutorName?.toLowerCase())) return false;
+      if (item.tutorName && tutorNames.has(item.tutorName.toLowerCase())) return false;
       return true;
     });
 

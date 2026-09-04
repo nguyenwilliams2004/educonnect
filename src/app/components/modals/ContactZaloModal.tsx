@@ -33,7 +33,13 @@ export function ContactZaloModal({
 
   if (!isOpen || !tutor) return null;
 
+  const isTeacher = currentSession.role === 'teacher';
+
   const handleConfirmTrial = async () => {
+    if (isTeacher) {
+      alert('Tài khoản Giáo viên không thể đăng ký học thử. Tính năng này chỉ dành cho Học sinh & Phụ huynh.');
+      return;
+    }
     if (!isLoggedIn) {
       onClose();
       openAuthModal('login', 'student');
@@ -44,7 +50,7 @@ export function ContactZaloModal({
   };
 
   const handleOpenZalo = async () => {
-    if (isLoggedIn && !isRegistered) {
+    if (isLoggedIn && !isRegistered && !isTeacher) {
       await recordTrialContact(tutor);
       setJustSaved(true);
     }
@@ -161,7 +167,24 @@ export function ContactZaloModal({
 
               {/* Nút hành động */}
               <div className="space-y-2 pt-0.5">
-                {isRegistered ? (
+                {isTeacher ? (
+                  <div className="space-y-2">
+                    <div className="bg-amber-50 border border-amber-200/90 text-amber-900 rounded-xl p-2.5 text-xs text-center space-y-1">
+                      <p className="font-bold">Chế độ xem đồng nghiệp</p>
+                      <p className="text-[11px] text-amber-800 leading-relaxed">
+                        Tài khoản Giáo viên không thể đăng ký học thử. Bạn có thể mở Zalo để kết nối trực tiếp với đồng nghiệp.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleOpenZalo}
+                      className="w-full py-3 bg-[#0068FF] hover:bg-[#0056d6] text-white font-extrabold text-xs sm:text-sm rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+                    >
+                      <span>Mở Zalo kết nối đồng nghiệp</span>
+                      <ExternalLink className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : isRegistered ? (
                   <div className="bg-emerald-50 border border-emerald-200 p-2.5 rounded-xl text-xs text-emerald-800 flex items-center justify-between">
                     <span className="flex items-center gap-1.5 font-bold text-[11px]">
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
@@ -179,25 +202,25 @@ export function ContactZaloModal({
                     </button>
                   </div>
                 ) : (
-                  <button
-                    type="button"
-                    onClick={handleConfirmTrial}
-                    className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-1.5"
-                  >
-                    <BookOpen className="w-3.5 h-3.5 text-slate-500" />
-                    <span>Lưu vào "Lớp học thử của tôi"</span>
-                  </button>
+                  <>
+                    <button
+                      type="button"
+                      onClick={handleConfirmTrial}
+                      className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      <BookOpen className="w-3.5 h-3.5 text-slate-500" />
+                      <span>Lưu vào "Lớp học thử của tôi"</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleOpenZalo}
+                      className="w-full py-3 bg-[#0068FF] hover:bg-[#0056d6] text-white font-extrabold text-xs sm:text-sm rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+                    >
+                      <span>Mở Zalo & Đăng ký học thử 1-1</span>
+                      <ExternalLink className="w-4 h-4" />
+                    </button>
+                  </>
                 )}
-
-                {/* Nút chính: Mở Zalo */}
-                <button
-                  type="button"
-                  onClick={handleOpenZalo}
-                  className="w-full py-3 bg-[#0068FF] hover:bg-[#0056d6] text-white font-extrabold text-xs sm:text-sm rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer active:scale-98"
-                >
-                  <span>Mở Zalo & Đăng ký học thử 1-1</span>
-                  <ExternalLink className="w-4 h-4" />
-                </button>
               </div>
 
               {/* Ghi chú chân modal */}
