@@ -266,6 +266,15 @@ export function AuthModal({
       }
 
       if (data.user) {
+        // Kiểm tra cơ chế bảo mật Supabase: Nếu email đã đăng ký từ trước, identities sẽ là mảng rỗng []
+        const isExistingUser = data.user.identities && data.user.identities.length === 0;
+        if (isExistingUser) {
+          setErrorMessage(
+            'Email này đã được đăng ký tài khoản từ trước. Vui lòng bấm "Chuyển sang Đăng nhập" bên dưới (hoặc bấm "Quên mật khẩu" nếu không nhớ mật khẩu).'
+          );
+          return;
+        }
+
         // Ghi trực tiếp vào bảng public.users trên PostgreSQL
         try {
           await supabase.from('users').upsert({
