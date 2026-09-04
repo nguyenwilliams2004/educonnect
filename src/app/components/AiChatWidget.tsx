@@ -14,32 +14,89 @@ export type { ChatMessage };
  * contrast: pass (WCAG AA 4.5:1 on text-slate-900 / white / blue-600)
  */
 
-// Logo icon tròn thương hiệu HanTutor
+// Logo AI HanTutor chuẩn nhận diện thương hiệu (Royal Blue & Amber Spark)
 export function AiChatLogoIcon({ className = "w-full h-full" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-      <circle cx="50" cy="50" r="50" fill="#f0551c" />
-      <rect x="22" y="28" width="56" height="34" rx="17" fill="#ffffff" />
-      <path d="M48 60 L54 74 L54 60 Z" fill="#ffffff" />
-      <circle cx="38" cy="45" r="4" fill="#f0551c" />
-      <circle cx="50" cy="45" r="4" fill="#f0551c" />
-      <circle cx="62" cy="45" r="4" fill="#f0551c" />
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-label="HanTutor AI">
+      <defs>
+        {/* Gradient nền thông minh: Deep Indigo -> Royal Blue -> Azure Cyan */}
+        <linearGradient id="hantutorAiBg" x1="10%" y1="90%" x2="90%" y2="10%">
+          <stop offset="0%" stopColor="#1E3A8A" />
+          <stop offset="45%" stopColor="#2563EB" />
+          <stop offset="100%" stopColor="#0284C7" />
+        </linearGradient>
+
+        {/* Gradient điểm nhấn Amber đặc trưng của HanTutor */}
+        <linearGradient id="hantutorAmberSpark" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#FDE047" />
+          <stop offset="50%" stopColor="#FF9000" />
+          <stop offset="100%" stopColor="#EA580C" />
+        </linearGradient>
+
+        {/* Gradient ánh sáng viền nổi 3D */}
+        <radialGradient id="hantutorAiGlow" cx="50%" cy="38%" r="48%">
+          <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.25" />
+          <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+
+      {/* Nền tròn phong cách HanTutor với viền ánh sáng tinh tế */}
+      <circle cx="50" cy="50" r="48" fill="url(#hantutorAiBg)" />
+      <circle cx="50" cy="50" r="47" stroke="#FFFFFF" strokeOpacity="0.25" strokeWidth="1.5" />
+      <circle cx="50" cy="38" r="36" fill="url(#hantutorAiGlow)" />
+
+      {/* Biểu tượng hội thoại trí tuệ nhân tạo (Speech bubble bo tròn tinh tế) */}
+      <path
+        d="M50 21 C33.5 21 20 33.2 20 48 C20 54.6 22.8 60.6 27.4 65.2 L24.5 75.5 C24.1 76.8 25.4 78 26.7 77.3 L36.8 72.2 C40.8 74.1 45.3 75 50 75 C66.5 75 80 62.8 80 48 C80 33.2 66.5 21 50 21 Z"
+        fill="#FFFFFF"
+        fillOpacity="0.14"
+        stroke="#FFFFFF"
+        strokeOpacity="0.4"
+        strokeWidth="1.5"
+      />
+
+      {/* Ngôi sao AI Sparkle 4 cánh sắc sảo (Generative AI Core) */}
+      <path
+        d="M50 28 C50 38 42 46 32 46 C42 46 50 54 50 64 C50 54 58 46 68 46 C58 46 50 38 50 28 Z"
+        fill="#FFFFFF"
+      />
+
+      {/* Ngôi sao phụ HanTutor Amber Sparkle tượng trưng cho con người & tri thức */}
+      <path
+        d="M66 26 C66 30 62.5 33.5 58.5 33.5 C62.5 33.5 66 37 66 41 C66 37 69.5 33.5 73.5 33.5 C69.5 33.5 66 30 66 26 Z"
+        fill="url(#hantutorAmberSpark)"
+      />
+
+      {/* Vi hạt trí tuệ xanh ngọc */}
+      <circle cx="33" cy="57" r="2.5" fill="#BAE6FD" />
     </svg>
   );
 }
 
-// Logo Facebook Messenger chính thức
+// Logo Facebook Messenger chính thức chuẩn Meta (2020+ Gradient & Lightning Bolt)
 export function MessengerLogoIcon({ className = "w-full h-full" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-      <circle cx="50" cy="50" r="50" fill="#0064FF" />
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-label="Messenger">
+      <defs>
+        {/* Chuẩn Gradient Meta Messenger chính thức: Xanh dương -> Tím -> Hồng cam */}
+        <linearGradient id="metaMessengerGradient" x1="0%" y1="100%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#0078FF" />
+          <stop offset="35%" stopColor="#0084FF" />
+          <stop offset="65%" stopColor="#A033FF" />
+          <stop offset="100%" stopColor="#FF5268" />
+        </linearGradient>
+      </defs>
+
+      {/* Khối bong bóng chat Messenger với đuôi bo cong chuẩn nhận diện Meta */}
       <path
-        d="M50 16 C30.67 16 15 30.5 15 48.4 C15 58.6 19.8 67.6 27.5 73.5 L27.5 84 L38.2 78 C41.9 79 45.8 79.6 50 79.6 C69.33 79.6 85 65.1 85 47.2 C85 29.3 69.33 16 50 16 Z"
-        fill="#0064FF"
+        d="M50 6 C25.7 6 6 24.2 6 46.8 C6 59.8 12.3 71.3 22.3 78.9 V90.8 C22.3 92.4 24.1 93.3 25.4 92.4 L37.6 84.8 C41.6 85.9 45.7 86.5 50 86.5 C74.3 86.5 94 68.3 94 46.8 C94 24.2 74.3 6 50 6 Z"
+        fill="url(#metaMessengerGradient)"
       />
+
+      {/* Tia sét Messenger chính thức với góc bo mềm mại */}
       <path
-        d="M32 57.5 L46 42.5 L53.5 50.5 L68 42.5 L54 57.5 L46.5 49.5 Z"
-        fill="#ffffff"
+        d="M26.5 58.5 L43.5 40.5 C45.1 38.8 47.7 38.8 49.3 40.5 L59.0 50.8 L78.0 40.5 C80.6 39.1 83.2 42.2 81.4 44.3 L64.4 62.3 C62.8 64.0 60.2 64.0 58.6 62.3 L48.9 52.0 L29.9 62.3 C27.3 63.7 24.7 60.6 26.5 58.5 Z"
+        fill="#FFFFFF"
       />
     </svg>
   );
@@ -130,7 +187,7 @@ export default function AiChatWidget({ isOpen, onClose }: { isOpen: boolean; onC
       {/* Header Hallmark Editorial: Nền sáng tinh tế, ăn khớp 100% theme website HanTutor */}
       <div className="bg-white/95 backdrop-blur-md px-4 py-3.5 border-b border-slate-100 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-9 h-9 rounded-2xl bg-orange-50 border border-orange-100/80 flex items-center justify-center p-1.5 shadow-2xs shrink-0">
+          <div className="w-9 h-9 rounded-2xl bg-blue-50/80 border border-blue-100/80 flex items-center justify-center p-1.5 shadow-2xs shrink-0">
             <AiChatLogoIcon className="w-full h-full" />
           </div>
           <div className="min-w-0">
