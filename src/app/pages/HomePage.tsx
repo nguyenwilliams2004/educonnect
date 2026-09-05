@@ -525,8 +525,8 @@ export function HomePage() {
       <section className="py-16 md:py-24 bg-[#FAF9F6] border-t border-slate-200/60">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <div className="p-2 rounded-3xl bg-slate-900/[0.03] border border-slate-900/[0.06] shadow-xl">
-            <div className="rounded-[calc(1.5rem-0.25rem)] bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white p-8 sm:p-14 text-center relative overflow-hidden">
-              <div className="absolute -top-24 -left-24 w-80 h-80 bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
+            <div className="rounded-[calc(1.5rem-0.25rem)] bg-gradient-to-br from-[#0B132B] via-[#101F42] to-[#0B132B] border border-white/10 text-white p-8 sm:p-14 text-center relative overflow-hidden">
+              <div className="absolute -top-24 -left-24 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl pointer-events-none" />
               <div className="relative z-10 max-w-3xl mx-auto space-y-4">
                 <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-white">
                   Kết nối với giáo viên và gia sư uy tín
