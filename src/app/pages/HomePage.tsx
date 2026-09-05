@@ -178,7 +178,7 @@ export function TutorCard({ tutor }: { tutor: any }) {
 
       {/* Thân thẻ thông tin: Editorial Typographic Layout */}
       <div className="p-3.5 pt-3 flex-1 flex flex-col justify-between space-y-3">
-        {/* DÒNG TIÊU ĐỀ MÔN HỌC CHUYÊN SÂU */}
+        {/* DÒNG TIÊU ĐỀ MÔN HỌC CHUYÊN SÂU & VAI TRÒ */}
         <div>
           <div className="flex items-center justify-between gap-2 mb-1.5 pb-2 border-b border-slate-100">
             <div className="min-w-0 flex-1">
@@ -191,25 +191,23 @@ export function TutorCard({ tutor }: { tutor: any }) {
                 </div>
               )}
             </div>
-          </div>
-
-          {/* Tên Giáo Viên & Vai Trò (Giáo viên vs Gia sư) */}
-          <div className="flex items-center justify-between gap-2">
-            <Link
-              to={`/giao-vien/${tutor.id}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block group-hover:text-blue-600 transition-colors min-w-0"
-            >
-              <h3 className="text-base sm:text-lg font-black text-slate-900 leading-snug tracking-tight group-hover:text-blue-600 transition-colors truncate">
-                {tutor.displayName || tutor.name}
-              </h3>
-            </Link>
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-bold text-[11px] bg-slate-100 text-slate-700 border border-slate-200/80 shadow-2xs shrink-0">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-bold text-[10px] bg-slate-100 text-slate-700 border border-slate-200/80 shadow-2xs shrink-0">
               {isTeacher ? <Briefcase className="w-3 h-3 text-blue-600" /> : <GraduationCap className="w-3 h-3 text-indigo-600" />}
               <span>{isTeacher ? 'Giáo viên' : 'Gia sư'}</span>
             </span>
           </div>
+
+          {/* Tên Giáo Viên: Hiển thị trọn vẹn đầy đủ, không bị cắt ngắn */}
+          <Link
+            to={`/giao-vien/${tutor.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block group-hover:text-blue-600 transition-colors"
+          >
+            <h3 className="text-base sm:text-lg font-black text-slate-900 leading-snug tracking-tight group-hover:text-blue-600 transition-colors">
+              {tutor.displayName || tutor.name}
+            </h3>
+          </Link>
         </div>
 
         {/* Châm ngôn sư phạm: Editorial Quote */}
