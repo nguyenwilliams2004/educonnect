@@ -590,16 +590,16 @@ export function TeacherDetailPage() {
   };
 
   return (
-    <div className="bg-[#FBFBFA] min-h-screen text-stone-900 selection:bg-stone-900 selection:text-white relative overflow-hidden">
-      {/* Ambient background glow orbs (Soft Structuralism / Editorial Luxury) */}
+    <div className="bg-[#FAF9F6] min-h-screen text-slate-900 selection:bg-blue-600 selection:text-white relative overflow-hidden">
+      {/* Ambient background glow orbs (Soft Structuralism / Clean Luxury) */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden z-0">
-        <div className="absolute -top-32 -left-32 w-[650px] h-[650px] rounded-full bg-gradient-to-br from-emerald-100/30 via-teal-50/20 to-transparent blur-[120px] opacity-60" />
-        <div className="absolute top-1/3 -right-40 w-[600px] h-[600px] rounded-full bg-gradient-to-bl from-amber-100/25 via-stone-100/20 to-transparent blur-[140px] opacity-50" />
+        <div className="absolute -top-32 -left-32 w-[650px] h-[650px] rounded-full bg-gradient-to-br from-blue-100/30 via-slate-100/20 to-transparent blur-[120px] opacity-60" />
+        <div className="absolute top-1/3 -right-40 w-[600px] h-[600px] rounded-full bg-gradient-to-bl from-emerald-100/20 via-slate-100/20 to-transparent blur-[140px] opacity-40" />
       </div>
 
       {/* Toast thông báo sao chép */}
       {shareToast && (
-        <div className="fixed bottom-8 right-8 z-50 bg-stone-950 text-white text-xs font-semibold px-5 py-3.5 rounded-2xl shadow-2xl border border-stone-800 animate-in fade-in slide-in-from-bottom-3 duration-300 flex items-center gap-2.5">
+        <div className="fixed bottom-8 right-8 z-50 bg-slate-950 text-white text-xs font-semibold px-5 py-3.5 rounded-2xl shadow-2xl border border-slate-800 animate-in fade-in slide-in-from-bottom-3 duration-300 flex items-center gap-2.5">
           <Check className="w-4 h-4 text-emerald-400" />
           <span>Đã sao chép liên kết hồ sơ vào khay nhớ tạm</span>
         </div>
@@ -608,16 +608,16 @@ export function TeacherDetailPage() {
       {/* TOP BREADCRUMB - Floating Pill Architecture */}
       <div className="relative z-10 pt-6 pb-2">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/70 backdrop-blur-md border border-stone-200/60 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.04)] text-xs text-stone-500 font-medium">
-            <Link to="/" className="hover:text-stone-950 transition-colors">
+          <nav className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/85 backdrop-blur-md border border-slate-200/70 shadow-[0_2px_10px_-4px_rgba(15,23,42,0.04)] text-xs text-slate-500 font-medium">
+            <Link to="/" className="hover:text-blue-600 transition-colors">
               Trang chủ
             </Link>
-            <span className="text-stone-300">/</span>
-            <Link to="/tim-gia-su" className="hover:text-stone-950 transition-colors">
+            <span className="text-slate-300">/</span>
+            <Link to="/tim-gia-su" className="hover:text-blue-600 transition-colors">
               Đội ngũ Giáo viên
             </Link>
-            <span className="text-stone-300">/</span>
-            <span className="text-stone-900 font-semibold truncate max-w-[200px]">
+            <span className="text-slate-300">/</span>
+            <span className="text-slate-900 font-bold truncate max-w-[200px]">
               {tutor.displayName || tutor.name}
             </span>
           </nav>
@@ -1225,23 +1225,23 @@ export function TeacherDetailPage() {
                     <Link
                       key={rel.id}
                       to={`/giao-vien/${rel.id}`}
-                      className="group block p-1.5 rounded-3xl bg-white border border-stone-200/80 hover:border-stone-400 transition-all duration-300 hover:shadow-md"
+                      className="group block p-1.5 rounded-2xl bg-white border border-slate-200/80 hover:border-slate-300 transition-all duration-300 hover:shadow-[0_12px_28px_-6px_rgba(15,23,42,0.08)] shadow-[0_2px_8px_-2px_rgba(15,23,42,0.04)]"
                     >
-                      <div className="aspect-square rounded-2xl overflow-hidden relative bg-stone-100">
+                      <div className="aspect-square rounded-xl overflow-hidden relative bg-slate-100 ring-1 ring-black/5">
                         <img
                           src={rel.avatar}
                           alt={rel.displayName || rel.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
                         />
                       </div>
-                      <div className="p-2 space-y-1">
-                        <div className="font-bold text-xs text-stone-900 truncate">
+                      <div className="p-2.5 space-y-1">
+                        <div className="font-bold text-xs text-slate-900 truncate group-hover:text-blue-600 transition-colors">
                           {rel.displayName || rel.name}
                         </div>
                         <div className="text-[11px] text-amber-600 font-bold flex items-center gap-1">
-                          ★ 5.0 <span className="text-stone-400 font-normal">({rel.reviews || 2})</span>
+                          ★ 5.0 <span className="text-slate-400 font-normal">({rel.reviews || 2})</span>
                         </div>
-                        <div className="text-xs font-black text-stone-900 tabular-nums">
+                        <div className="text-xs font-black text-slate-900 tabular-nums">
                           {rel.hourlyRate} đ/h
                         </div>
                       </div>
@@ -1377,12 +1377,12 @@ export function TeacherDetailPage() {
                     <button
                       type="button"
                       onClick={handleTrialContactClick}
-                      className="group w-full bg-stone-950 hover:bg-stone-800 text-white font-bold py-4 px-6 rounded-full transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] shadow-xl shadow-stone-950/20 active:scale-[0.98] cursor-pointer flex items-center justify-between"
+                      className="group w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-full transition-all duration-300 shadow-lg shadow-blue-600/25 active:scale-[0.98] cursor-pointer flex items-center justify-between"
                     >
                       <span className="text-sm font-black tracking-tight">
                         Đăng ký học thử 1-1
                       </span>
-                      <span className="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1 group-hover:-translate-y-0.5">
+                      <span className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-0.5">
                         <ArrowUpRight className="w-4 h-4 text-white" />
                       </span>
                     </button>

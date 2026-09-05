@@ -172,7 +172,7 @@ export function AppLayout() {
   const isAdmin = location.pathname.startsWith('/admin');
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans flex flex-col relative">
+    <div className="min-h-screen bg-[#FAF9F6] font-sans flex flex-col relative selection:bg-blue-600 selection:text-white">
       <RouteChangeTracker />
       <AuthUrlHandler />
       {!isAdmin && <Navbar />}

@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
-import { Search, MapPin, ChevronDown, Briefcase, GraduationCap, Star, ArrowRight, Award, BookOpen } from 'lucide-react';
+import { Search, MapPin, ChevronDown, Briefcase, GraduationCap, Star, ArrowRight, Award, BookOpen, ShieldCheck } from 'lucide-react';
 import { HeroLeftIllustration, HeroRightIllustration } from '../components/HeroIllustrations';
 import { useData } from '../../context/DataContext';
 import { useUI } from '../../context/UIContext';
 
-/* Hallmark · genre: editorial · macrostructure: Broadsheet Roster · theme: Newsprint/Atelier · pre-emit critique: P5 H5 E5 S5 R5 V5 */
+/* High-End Visual Design & Design-Taste-Frontend Architecture · Clean Luxury Atelier */
 
 export function Hero() {
   const [searchText, setSearchText] = useState('');
@@ -21,71 +21,83 @@ export function Hero() {
   };
 
   return (
-    <div className="relative bg-gradient-to-b from-blue-50/60 via-slate-50 to-white pt-10 pb-16 md:pt-16 md:pb-24 overflow-hidden">
-      <div className="hidden lg:block absolute left-8 xl:left-24 top-20">
+    <div className="relative bg-[#FAF9F6] pt-10 pb-16 md:pt-16 md:pb-24 overflow-hidden border-b border-slate-200/60">
+      {/* Ambient background glow orbs for soft structural depth */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden z-0">
+        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[850px] h-[450px] bg-gradient-to-b from-blue-100/35 via-slate-100/20 to-transparent blur-3xl opacity-70" />
+        <div className="absolute top-1/4 -right-24 w-96 h-96 bg-gradient-to-br from-emerald-100/20 to-transparent blur-3xl opacity-40" />
+      </div>
+
+      <div className="hidden lg:block absolute left-8 xl:left-24 top-20 z-10 opacity-90 transition-transform duration-700 hover:scale-102">
         <HeroLeftIllustration />
       </div>
-      <div className="hidden lg:block absolute right-8 xl:right-24 top-20">
+      <div className="hidden lg:block absolute right-8 xl:right-24 top-20 z-10 opacity-90 transition-transform duration-700 hover:scale-102">
         <HeroRightIllustration />
       </div>
 
-      <div className="relative max-w-5xl mx-auto px-4 sm:px-6 text-center">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white text-blue-700 font-bold text-xs md:text-sm mb-6 border border-blue-100 shadow-sm">
-          <span className="w-2 h-2 rounded-full bg-blue-600"></span>
+      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 text-center">
+        {/* Eyebrow Pill Badge */}
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/90 backdrop-blur-md text-blue-700 font-bold text-xs md:text-sm mb-6 border border-slate-200/80 shadow-[0_2px_8px_-2px_rgba(15,23,42,0.04)]">
+          <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
           100% Giáo viên/Gia sư được kiểm duyệt KYC & Năng lực giảng dạy
         </div>
 
-        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[52px] font-extrabold text-slate-900 tracking-tight leading-tight mb-4">
+        {/* Master Headline */}
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-black text-slate-900 tracking-tight leading-[1.12] mb-4">
           Tìm kiếm <span className="text-blue-600">Giáo viên & Gia sư</span> <br className="hidden sm:inline" /> hoàn hảo cho bạn
         </h1>
 
-        <p className="max-w-2xl mx-auto text-sm sm:text-base text-slate-500 mb-8 md:mb-10 px-2 leading-relaxed font-normal">
+        <p className="max-w-2xl mx-auto text-sm sm:text-base text-slate-600 mb-8 md:mb-10 px-2 leading-relaxed font-normal">
           Nền tảng kết nối trực tiếp học sinh và giáo viên tại Hà Nội: Trao đổi Zalo 1-1, học thử miễn phí và đăng ký học chính thức minh bạch.
         </p>
 
-        <div className="max-w-3xl mx-auto bg-white rounded-3xl shadow-xl shadow-blue-900/5 border border-slate-100 p-4 sm:p-5 relative z-10 text-left">
-          <form onSubmit={handleHeroSearch} className="flex flex-col md:flex-row gap-2.5">
-            <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-              <input
-                type="text"
-                value={searchText}
-                onChange={e => setSearchText(e.target.value)}
-                placeholder="Môn học, lớp, kỹ năng (VD: Toán 10, Tiếng Anh, Piano, Bơi lội...)"
-                className="w-full pl-11 pr-4 py-3 rounded-2xl bg-slate-100/70 border border-transparent focus:border-blue-200 focus:bg-white transition-all text-slate-800 placeholder:text-slate-400 text-sm outline-none font-medium"
-              />
-            </div>
-            <div className="flex-1 relative">
-              <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-              <select
-                value={selectedLoc}
-                onChange={e => setSelectedLoc(e.target.value)}
-                className="w-full pl-11 pr-9 py-3 rounded-2xl bg-slate-100/70 border border-transparent focus:border-blue-200 focus:bg-white transition-all text-slate-800 appearance-none text-sm outline-none cursor-pointer font-medium"
+        {/* Double-Bezel Glass Search Dock */}
+        <div className="max-w-3xl mx-auto p-1.5 sm:p-2 rounded-3xl bg-slate-900/[0.03] border border-slate-900/[0.06] shadow-[0_20px_50px_-15px_rgba(15,23,42,0.07)] relative z-10 text-left">
+          <div className="rounded-[calc(1.5rem-0.25rem)] bg-white p-3 sm:p-3.5 shadow-[inset_0_1px_1px_rgba(255,255,255,1)]">
+            <form onSubmit={handleHeroSearch} className="flex flex-col md:flex-row gap-2.5">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+                <input
+                  type="text"
+                  value={searchText}
+                  onChange={e => setSearchText(e.target.value)}
+                  placeholder="Môn học, lớp, kỹ năng (Toán 10, Tiếng Anh, Piano, Bơi lội...)"
+                  className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50/80 hover:bg-slate-50 focus:bg-white border border-slate-200/80 focus:border-blue-500 transition-all text-slate-900 placeholder:text-slate-400 text-sm outline-none font-medium"
+                />
+              </div>
+              <div className="flex-1 relative">
+                <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+                <select
+                  value={selectedLoc}
+                  onChange={e => setSelectedLoc(e.target.value)}
+                  className="w-full pl-10 pr-9 py-3 rounded-xl bg-slate-50/80 hover:bg-slate-50 focus:bg-white border border-slate-200/80 focus:border-blue-500 transition-all text-slate-900 appearance-none text-sm outline-none cursor-pointer font-medium"
+                >
+                  <option value="">Tất cả quận Hà Nội / Online</option>
+                  <option value="Cầu Giấy">Quận Cầu Giấy</option>
+                  <option value="Đống Đa">Quận Đống Đa</option>
+                  <option value="Hai Bà Trưng">Quận Hai Bà Trưng</option>
+                  <option value="Thanh Xuân">Quận Thanh Xuân</option>
+                  <option value="Ba Đình">Quận Ba Đình</option>
+                  <option value="Hoàn Kiếm">Quận Hoàn Kiếm</option>
+                  <option value="Nam Từ Liêm">Quận Nam Từ Liêm</option>
+                  <option value="Bắc Từ Liêm">Quận Bắc Từ Liêm</option>
+                  <option value="Hà Đông">Quận Hà Đông</option>
+                  <option value="Hoàng Mai">Quận Hoàng Mai</option>
+                  <option value="Long Biên">Quận Long Biên</option>
+                  <option value="Tây Hồ">Quận Tây Hồ</option>
+                  <option value="online">Học trực tuyến (Online)</option>
+                </select>
+                <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 pointer-events-none" />
+              </div>
+              <button
+                type="submit"
+                className="bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white px-8 py-3 rounded-xl font-bold transition-all shadow-sm hover:shadow-md md:w-auto w-full flex justify-center items-center gap-2 text-sm cursor-pointer"
               >
-                <option value="">Tất cả quận Hà Nội / Online</option>
-                <option value="Cầu Giấy">Quận Cầu Giấy</option>
-                <option value="Đống Đa">Quận Đống Đa</option>
-                <option value="Hai Bà Trưng">Quận Hai Bà Trưng</option>
-                <option value="Thanh Xuân">Quận Thanh Xuân</option>
-                <option value="Ba Đình">Quận Ba Đình</option>
-                <option value="Hoàn Kiếm">Quận Hoàn Kiếm</option>
-                <option value="Nam Từ Liêm">Quận Nam Từ Liêm</option>
-                <option value="Bắc Từ Liêm">Quận Bắc Từ Liêm</option>
-                <option value="Hà Đông">Quận Hà Đông</option>
-                <option value="Hoàng Mai">Quận Hoàng Mai</option>
-                <option value="Long Biên">Quận Long Biên</option>
-                <option value="Tây Hồ">Quận Tây Hồ</option>
-                <option value="online">Học trực tuyến (Online)</option>
-              </select>
-              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 pointer-events-none" />
-            </div>
-            <button
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-2xl font-bold transition-all shadow-md shadow-blue-200 md:w-auto w-full flex justify-center items-center gap-1.5 text-sm cursor-pointer"
-            >
-              Tìm kiếm
-            </button>
-          </form>
+                <span>Tìm kiếm</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </form>
+          </div>
         </div>
       </div>
     </div>
@@ -127,24 +139,24 @@ export function TutorCard({ tutor }: { tutor: any }) {
   };
 
   return (
-    <div className="group relative bg-white rounded-xl border border-slate-200/90 hover:border-slate-400/90 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-md transition-all duration-200 flex flex-col justify-between overflow-hidden">
-      {/* Banner ảnh giáo viên: Editorial Framing */}
-      <div className="relative p-2.5 pb-0">
+    <div className="group relative p-1.5 rounded-2xl bg-white border border-slate-200/80 shadow-[0_2px_12px_-2px_rgba(15,23,42,0.04),0_1px_3px_rgba(15,23,42,0.02)] hover:border-slate-300 hover:shadow-[0_16px_36px_-8px_rgba(15,23,42,0.08),0_4px_12px_-2px_rgba(15,23,42,0.03)] transition-all duration-300 flex flex-col justify-between overflow-hidden">
+      {/* Banner ảnh giáo viên: Editorial Double-Bezel Framing */}
+      <div className="relative">
         <Link
           to={`/giao-vien/${tutor.id}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="block relative aspect-4/3 rounded-lg overflow-hidden bg-slate-100 group/banner"
+          className="block relative aspect-[4/3] rounded-xl overflow-hidden bg-slate-100 group/banner ring-1 ring-black/5"
         >
           <img
             src={tutor.avatar}
             alt={tutor.displayName || tutor.name}
-            className="w-full h-full object-cover object-center group-hover/banner:scale-103 transition-transform duration-500"
+            className="w-full h-full object-cover object-center group-hover/banner:scale-105 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
           />
 
           {/* TÊN MÔN HỌC RÕ NÉT: Anchor Badge nổi bật ở góc trên bên trái */}
           <div className="absolute top-2.5 left-2.5 z-10">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md font-black text-xs uppercase tracking-wider bg-slate-950 text-white shadow-sm border border-white/20">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-black text-xs uppercase tracking-wider bg-slate-950/85 backdrop-blur-md text-white shadow-sm border border-white/20">
               <BookOpen className="w-3.5 h-3.5 text-amber-400 shrink-0" />
               <span>{primarySubject}</span>
             </span>
@@ -152,17 +164,29 @@ export function TutorCard({ tutor }: { tutor: any }) {
 
           {/* Huy hiệu vai trò: Giáo viên vs Gia sư */}
           <div className="absolute top-2.5 right-2.5 z-10">
-            <span className="px-2 py-1 rounded-md font-semibold text-[11px] bg-white/95 text-slate-800 backdrop-blur-xs border border-slate-200 shadow-xs flex items-center gap-1">
+            <span className="px-2.5 py-1 rounded-full font-bold text-[11px] bg-white/95 text-slate-800 backdrop-blur-md border border-slate-200/80 shadow-xs flex items-center gap-1">
               {isTeacher ? <Briefcase className="w-3 h-3 text-blue-600" /> : <GraduationCap className="w-3 h-3 text-indigo-600" />}
               <span>{isTeacher ? 'Giáo viên' : 'Gia sư'}</span>
             </span>
+          </div>
+
+          {/* Đánh giá sao nổi bật dưới góc ảnh */}
+          <div className="absolute bottom-2.5 right-2.5 z-10 inline-flex items-center gap-1 bg-slate-950/80 backdrop-blur-md border border-white/20 px-2 py-0.5 rounded-full text-[11px] font-bold text-amber-300 shadow-sm">
+            <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+            <span className="tabular-nums font-black text-white">{tutor.rating}</span>
+          </div>
+
+          {/* Huy hiệu KYC Đã kiểm định */}
+          <div className="absolute bottom-2.5 left-2.5 z-10 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-600/90 backdrop-blur-md text-white border border-emerald-400/30 shadow-xs">
+            <ShieldCheck className="w-3 h-3 text-white" />
+            <span>KYC Đã duyệt</span>
           </div>
         </Link>
       </div>
 
       {/* Thân thẻ thông tin: Editorial Typographic Layout */}
-      <div className="p-4 pt-3 flex-1 flex flex-col justify-between space-y-3">
-        {/* DÒNG TIÊU ĐỀ MÔN HỌC CHUYÊN SÂU & ĐÁNH GIÁ */}
+      <div className="p-3.5 pt-3 flex-1 flex flex-col justify-between space-y-3">
+        {/* DÒNG TIÊU ĐỀ MÔN HỌC CHUYÊN SÂU */}
         <div>
           <div className="flex items-center justify-between gap-2 mb-1.5 pb-2 border-b border-slate-100">
             <div className="min-w-0 flex-1">
@@ -175,11 +199,6 @@ export function TutorCard({ tutor }: { tutor: any }) {
                 </div>
               )}
             </div>
-
-            <div className="flex items-center gap-1 bg-amber-50/90 border border-amber-200/70 px-2 py-0.5 rounded text-xs font-bold text-amber-900 shrink-0 shadow-2xs">
-              <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-              <span className="tabular-nums">{tutor.rating}</span>
-            </div>
           </div>
 
           {/* Tên Giáo Viên */}
@@ -187,9 +206,9 @@ export function TutorCard({ tutor }: { tutor: any }) {
             to={`/giao-vien/${tutor.id}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="block"
+            className="block group-hover:text-blue-600 transition-colors"
           >
-            <h3 className="text-base sm:text-lg font-bold text-slate-900 leading-snug tracking-tight group-hover:text-blue-700 transition-colors">
+            <h3 className="text-base sm:text-lg font-black text-slate-900 leading-snug tracking-tight group-hover:text-blue-600 transition-colors">
               {tutor.displayName || tutor.name}
             </h3>
           </Link>
@@ -202,7 +221,7 @@ export function TutorCard({ tutor }: { tutor: any }) {
           rel="noopener noreferrer"
           className="block"
         >
-          <div className="text-xs text-slate-600 leading-relaxed font-normal line-clamp-2 pl-2.5 border-l-2 border-slate-200 hover:border-slate-400 transition-colors">
+          <div className="text-xs text-slate-600 leading-relaxed font-normal line-clamp-2 pl-2.5 border-l-2 border-blue-600/40 italic bg-slate-50/60 py-1 rounded-r-md hover:text-slate-900 transition-colors">
             “{tutor.headline || tutor.title}”
           </div>
         </Link>
@@ -211,26 +230,26 @@ export function TutorCard({ tutor }: { tutor: any }) {
         <div className="space-y-1.5 text-xs text-slate-600 pt-0.5">
           {educationBullet && (
             <div className="flex items-start gap-1.5 leading-snug">
-              <GraduationCap className="w-3.5 h-3.5 text-slate-500 shrink-0 mt-0.5" />
+              <GraduationCap className="w-3.5 h-3.5 text-blue-600 shrink-0 mt-0.5" />
               <span className="text-slate-700 font-medium line-clamp-1">{educationBullet}</span>
             </div>
           )}
           {achievementBullet && (
             <div className="flex items-start gap-1.5 leading-snug">
-              <Award className="w-3.5 h-3.5 text-slate-500 shrink-0 mt-0.5" />
+              <Award className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
               <span className="text-slate-600 font-normal line-clamp-1">{achievementBullet}</span>
             </div>
           )}
           <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1.5 border-t border-slate-100">
-            <span className="flex items-center gap-1 text-emerald-700 font-semibold">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            <span className="flex items-center gap-1.5 text-emerald-700 font-bold">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 ring-2 ring-emerald-200" />
               {successRate}% nhận lớp thành công
             </span>
-            <span className="tabular-nums">{tutor.reviews || 0} nhận xét</span>
+            <span className="tabular-nums font-medium text-slate-500">{tutor.reviews || 0} nhận xét</span>
           </div>
 
           {/* Khu vực giảng dạy & Hình thức - Item I.9 */}
-          <div className="flex items-center gap-1.5 text-[11px] text-slate-600 bg-slate-50 px-2.5 py-1.5 rounded-md border border-slate-200/70">
+          <div className="flex items-center gap-1.5 text-[11px] text-slate-600 bg-slate-50/80 px-2.5 py-1.5 rounded-lg border border-slate-200/70">
             <MapPin className="w-3.5 h-3.5 text-blue-600 shrink-0" />
             <span className="truncate font-medium">
               {tutor.teachingFormatsOffline || tutor.location || 'Hà Nội & Toàn quốc (Online)'}
@@ -243,7 +262,7 @@ export function TutorCard({ tutor }: { tutor: any }) {
           <div className="flex items-baseline justify-between mb-1">
             <span className="text-xs text-slate-500 font-medium">Học phí kèm 1-1:</span>
             <div className="text-right">
-              <span className="text-base font-extrabold text-slate-900 tabular-nums">
+              <span className="text-base font-black text-slate-900 tabular-nums tracking-tight">
                 {tutor.hourlyRate}đ
               </span>
               <span className="text-xs font-normal text-slate-400">/{tutor.priceUnit || 'buổi'}</span>
@@ -255,23 +274,23 @@ export function TutorCard({ tutor }: { tutor: any }) {
               {Object.entries(tutor.levelPrices).slice(0, 3).map(([lvl, prc]) => (
                 <span
                   key={lvl}
-                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-50 border border-slate-200 text-[10px] text-slate-600 tabular-nums"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-50 border border-slate-200/80 text-[10px] text-slate-600 tabular-nums font-medium"
                 >
                   <span className="text-slate-400">{lvl}:</span>
-                  <strong className="text-slate-700 font-semibold">{prc}đ</strong>
+                  <strong className="text-slate-800 font-bold">{prc}đ</strong>
                 </span>
               ))}
             </div>
           )}
         </div>
 
-        {/* Action Row */}
+        {/* Action Row - Dual CTAs */}
         <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2 mt-auto">
           <Link
             to={`/giao-vien/${tutor.id}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors inline-flex items-center justify-center cursor-pointer"
+            className="px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-bold text-slate-700 hover:text-slate-900 transition-all shadow-2xs inline-flex items-center justify-center cursor-pointer active:scale-98"
           >
             Hồ sơ
           </Link>
@@ -279,7 +298,7 @@ export function TutorCard({ tutor }: { tutor: any }) {
           <button
             type="button"
             onClick={handleTrialClick}
-            className="px-3.5 py-1.5 rounded-lg bg-slate-900 hover:bg-blue-600 active:scale-98 text-white font-bold text-xs transition-colors shadow-xs inline-flex items-center justify-center gap-1 cursor-pointer"
+            className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-extrabold text-xs transition-all shadow-xs hover:shadow-sm inline-flex items-center justify-center gap-1.5 cursor-pointer"
           >
             Đăng ký học thử 1-1
           </button>
@@ -324,11 +343,11 @@ export function HomePage() {
         {/* Editorial Broadsheet Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 md:mb-10 gap-4 border-b border-slate-200/80 pb-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-600">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-800 text-[11px] font-extrabold uppercase tracking-widest border border-blue-100/80">
               <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
               DANH MỤC HỒ SƠ GIẢNG DẠY TIÊU BIỂU · HÀ NỘI
             </div>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">
               Giáo viên & Gia sư Chuyên môn cao
             </h2>
             <p className="text-slate-600 text-xs sm:text-sm md:text-base max-w-2xl font-normal leading-relaxed">
@@ -338,15 +357,15 @@ export function HomePage() {
 
           <Link
             to="/tim-gia-su"
-            className="group inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-slate-300 hover:border-slate-800 bg-white hover:bg-slate-50 text-slate-900 font-bold text-xs sm:text-sm transition-all whitespace-nowrap shadow-2xs"
+            className="group inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-900 font-bold text-xs sm:text-sm transition-all whitespace-nowrap shadow-2xs active:scale-98"
           >
             <span>Tất cả {tutors.length}+ hồ sơ</span>
-            <ArrowRight className="w-4 h-4 text-slate-600 group-hover:text-slate-900 group-hover:translate-x-0.5 transition-transform" />
+            <ArrowRight className="w-4 h-4 text-slate-500 group-hover:text-blue-600 group-hover:translate-x-0.5 transition-all" />
           </Link>
         </div>
 
-        {/* Dynamic Category / Filter Tabs (Editorial Segmented Bar) */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-8 no-scrollbar">
+        {/* Dynamic Category / Filter Tabs (Architectural Segmented Bar) */}
+        <div className="p-1.5 rounded-2xl bg-slate-900/[0.03] border border-slate-900/[0.06] flex items-center gap-1.5 overflow-x-auto pb-1.5 mb-8 no-scrollbar">
           {filterTabs.map((tab) => {
             const isActive = selectedTab === tab.id;
             return (
@@ -354,15 +373,15 @@ export function HomePage() {
                 key={tab.id}
                 type="button"
                 onClick={() => setSelectedTab(tab.id as any)}
-                className={`px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+                className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-2 active:scale-98 ${
                   isActive
-                    ? 'bg-slate-900 text-white shadow-xs'
-                    : 'bg-white text-slate-700 hover:text-slate-900 hover:bg-slate-50 border border-slate-200'
+                    ? 'bg-slate-950 text-white shadow-xs ring-1 ring-slate-900'
+                    : 'bg-white/80 hover:bg-white text-slate-600 hover:text-slate-900 border border-slate-200/80'
                 }`}
               >
                 <span>{tab.label}</span>
                 {tab.count !== undefined && (
-                  <span className={`text-[10px] px-1.5 py-0.2 rounded font-bold tabular-nums ${
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-extrabold tabular-nums ${
                     isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
                   }`}>
                     {tab.count}
@@ -380,30 +399,37 @@ export function HomePage() {
           ))}
         </div>
 
-        {/* Bottom Explorer Banner (Editorial Bento Box) */}
-        <div className="mt-12 bg-slate-900 rounded-2xl p-6 sm:p-8 text-white flex flex-col sm:flex-row items-center justify-between gap-6 border border-slate-800 shadow-sm">
-          <div className="space-y-1.5 text-center sm:text-left">
-            <h3 className="text-lg sm:text-xl font-bold tracking-tight text-white">
-              Bạn đang cần tìm gia sư cho môn học hoặc lớp khác?
-            </h3>
-            <p className="text-xs sm:text-sm text-slate-300 max-w-xl font-normal leading-relaxed">
-              Bộ lọc chuyên sâu với hơn 20+ môn học từ Toán, Ngữ văn, Ngoại ngữ IELTS, Năng khiếu đến Luyện thi THPT Quốc Gia & Chuyên cấp 3.
-            </p>
+        {/* Bottom Explorer Banner (Double-Bezel Bento Box) */}
+        <div className="mt-14 p-1.5 rounded-3xl bg-slate-900/[0.03] border border-slate-900/[0.06]">
+          <div className="rounded-[calc(1.5rem-0.375rem)] bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-6 sm:p-8 text-white flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-80 h-80 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="relative z-10 space-y-1.5 text-center sm:text-left">
+              <h3 className="text-lg sm:text-xl font-black tracking-tight text-white">
+                Bạn đang cần tìm gia sư cho môn học hoặc lớp khác?
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-300 max-w-xl font-normal leading-relaxed">
+                Bộ lọc chuyên sâu với hơn 20+ môn học từ Toán, Ngữ văn, Ngoại ngữ IELTS, Năng khiếu đến Luyện thi THPT Quốc Gia & Chuyên cấp 3.
+              </p>
+            </div>
+            <Link
+              to="/tim-gia-su"
+              className="relative z-10 whitespace-nowrap px-6 py-3 rounded-xl bg-white hover:bg-slate-100 text-slate-950 font-extrabold text-xs sm:text-sm transition-all shrink-0 active:scale-98 shadow-sm flex items-center gap-1.5"
+            >
+              <span>Mở bộ lọc chi tiết</span>
+              <ArrowRight className="w-4 h-4 text-slate-800" />
+            </Link>
           </div>
-          <Link
-            to="/tim-gia-su"
-            className="whitespace-nowrap px-5 py-2.5 rounded-lg bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs sm:text-sm transition-all shrink-0 active:scale-95 shadow-xs"
-          >
-            Mở bộ lọc chi tiết →
-          </Link>
         </div>
       </section>
 
       {/* Section 2: QUY TRÌNH KẾT NỐI & HỌC THỬ */}
-      <section className="py-16 md:py-24 bg-slate-100/70 border-y border-slate-200">
+      <section className="py-16 md:py-24 bg-white border-y border-slate-200/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-14">
-            <h2 className="text-3xl md:text-5xl font-extrabold text-slate-900 tracking-tight mb-4">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-extrabold uppercase tracking-widest border border-blue-100 mb-3">
+              Minh bạch & Trực quan
+            </div>
+            <h2 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight mb-4">
               Quy trình kết nối & Học thử
             </h2>
             <p className="text-slate-600 text-sm md:text-base leading-relaxed">
@@ -413,74 +439,82 @@ export function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Bước 1 */}
-            <div className="bg-white rounded-3xl p-7 border border-slate-200 shadow-sm relative flex flex-col justify-between hover:shadow-md transition-all duration-200">
-              <div>
-                <div className="w-10 h-10 rounded-xl bg-slate-900 text-white font-extrabold text-base flex items-center justify-center mb-5">
-                  1
+            <div className="group relative p-1.5 rounded-3xl bg-slate-900/[0.03] border border-slate-900/[0.06] hover:border-slate-900/[0.14] transition-all duration-300 flex flex-col hover:shadow-md">
+              <div className="rounded-[calc(1.5rem-0.375rem)] bg-white p-6 sm:p-7 shadow-[inset_0_1px_1px_rgba(255,255,255,1),0_2px_12px_-2px_rgba(15,23,42,0.03)] flex-1 flex flex-col justify-between">
+                <div>
+                  <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-slate-950 to-slate-800 text-white font-black text-base flex items-center justify-center mb-5 shadow-sm ring-1 ring-white/20 group-hover:scale-105 transition-transform duration-300">
+                    1
+                  </div>
+                  <h3 className="font-black text-lg sm:text-xl text-slate-900 mb-2.5">
+                    Lựa chọn Giáo viên
+                  </h3>
+                  <p className="text-sm text-slate-600 leading-relaxed">
+                    Tìm kiếm giáo viên phù hợp theo môn học và khu vực tại Hà Nội. Xem hồ sơ bằng cấp, video bài giảng mẫu đã qua kiểm định KYC.
+                  </p>
                 </div>
-                <h3 className="font-extrabold text-lg sm:text-xl text-slate-900 mb-2.5">
-                  Lựa chọn Giáo viên
-                </h3>
-                <p className="text-sm text-slate-600 leading-relaxed">
-                  Tìm kiếm giáo viên phù hợp theo môn học và khu vực tại Hà Nội. Xem hồ sơ bằng cấp, video bài giảng mẫu đã qua kiểm định KYC.
-                </p>
-              </div>
-              <div className="pt-4 mt-6 border-t border-slate-100 text-xs font-semibold text-slate-500">
-                Bước 1: Tra cứu hồ sơ
+                <div className="pt-4 mt-6 border-t border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  Bước 1: Tra cứu hồ sơ
+                </div>
               </div>
             </div>
 
             {/* Bước 2 */}
-            <div className="bg-white rounded-3xl p-7 border border-slate-200 shadow-sm relative flex flex-col justify-between hover:shadow-md transition-all duration-200">
-              <div>
-                <div className="w-10 h-10 rounded-xl bg-slate-900 text-white font-extrabold text-base flex items-center justify-center mb-5">
-                  2
+            <div className="group relative p-1.5 rounded-3xl bg-slate-900/[0.03] border border-slate-900/[0.06] hover:border-slate-900/[0.14] transition-all duration-300 flex flex-col hover:shadow-md">
+              <div className="rounded-[calc(1.5rem-0.375rem)] bg-white p-6 sm:p-7 shadow-[inset_0_1px_1px_rgba(255,255,255,1),0_2px_12px_-2px_rgba(15,23,42,0.03)] flex-1 flex flex-col justify-between">
+                <div>
+                  <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-slate-950 to-slate-800 text-white font-black text-base flex items-center justify-center mb-5 shadow-sm ring-1 ring-white/20 group-hover:scale-105 transition-transform duration-300">
+                    2
+                  </div>
+                  <h3 className="font-black text-lg sm:text-xl text-slate-900 mb-2.5">
+                    Bấm "Liên hệ ngay"
+                  </h3>
+                  <p className="text-sm text-slate-600 leading-relaxed">
+                    Hệ thống cung cấp Số điện thoại và Zalo trực tiếp của giáo viên để hai bên trao đổi chi tiết và sắp xếp lịch học thử 1-1 miễn phí.
+                  </p>
                 </div>
-                <h3 className="font-extrabold text-lg sm:text-xl text-slate-900 mb-2.5">
-                  Bấm "Liên hệ ngay"
-                </h3>
-                <p className="text-sm text-slate-600 leading-relaxed">
-                  Hệ thống cung cấp Số điện thoại và Zalo trực tiếp của giáo viên để hai bên trao đổi chi tiết và sắp xếp lịch học thử 1-1 miễn phí.
-                </p>
-              </div>
-              <div className="pt-4 mt-6 border-t border-slate-100 text-xs font-semibold text-slate-500">
-                Bước 2: Kết nối trực tiếp
+                <div className="pt-4 mt-6 border-t border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  Bước 2: Kết nối trực tiếp
+                </div>
               </div>
             </div>
 
             {/* Bước 3 */}
-            <div className="bg-white rounded-3xl p-7 border border-slate-200 shadow-sm relative flex flex-col justify-between hover:shadow-md transition-all duration-200">
-              <div>
-                <div className="w-10 h-10 rounded-xl bg-slate-900 text-white font-extrabold text-base flex items-center justify-center mb-5">
-                  3
+            <div className="group relative p-1.5 rounded-3xl bg-slate-900/[0.03] border border-slate-900/[0.06] hover:border-slate-900/[0.14] transition-all duration-300 flex flex-col hover:shadow-md">
+              <div className="rounded-[calc(1.5rem-0.375rem)] bg-white p-6 sm:p-7 shadow-[inset_0_1px_1px_rgba(255,255,255,1),0_2px_12px_-2px_rgba(15,23,42,0.03)] flex-1 flex flex-col justify-between">
+                <div>
+                  <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-slate-950 to-slate-800 text-white font-black text-base flex items-center justify-center mb-5 shadow-sm ring-1 ring-white/20 group-hover:scale-105 transition-transform duration-300">
+                    3
+                  </div>
+                  <h3 className="font-black text-lg sm:text-xl text-slate-900 mb-2.5">
+                    Buổi học thử 1-1
+                  </h3>
+                  <p className="text-sm text-slate-600 leading-relaxed">
+                    Học sinh trải nghiệm thực tế phương pháp giảng dạy cùng giáo viên để đánh giá mức độ phù hợp và tiếp thu kiến thức.
+                  </p>
                 </div>
-                <h3 className="font-extrabold text-lg sm:text-xl text-slate-900 mb-2.5">
-                  Buổi học thử 1-1
-                </h3>
-                <p className="text-sm text-slate-600 leading-relaxed">
-                  Học sinh trải nghiệm thực tế phương pháp giảng dạy cùng giáo viên để đánh giá mức độ phù hợp và tiếp thu kiến thức.
-                </p>
-              </div>
-              <div className="pt-4 mt-6 border-t border-slate-100 text-xs font-semibold text-slate-500">
-                Bước 3: Trải nghiệm 1 buổi miễn phí
+                <div className="pt-4 mt-6 border-t border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  Bước 3: Trải nghiệm 1 buổi miễn phí
+                </div>
               </div>
             </div>
 
             {/* Bước 4 */}
-            <div className="bg-white rounded-3xl p-7 border border-slate-200 shadow-sm relative flex flex-col justify-between hover:shadow-md transition-all duration-200">
-              <div>
-                <div className="w-10 h-10 rounded-xl bg-slate-900 text-white font-extrabold text-base flex items-center justify-center mb-5">
-                  4
+            <div className="group relative p-1.5 rounded-3xl bg-slate-900/[0.03] border border-slate-900/[0.06] hover:border-slate-900/[0.14] transition-all duration-300 flex flex-col hover:shadow-md">
+              <div className="rounded-[calc(1.5rem-0.375rem)] bg-white p-6 sm:p-7 shadow-[inset_0_1px_1px_rgba(255,255,255,1),0_2px_12px_-2px_rgba(15,23,42,0.03)] flex-1 flex flex-col justify-between">
+                <div>
+                  <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-slate-950 to-slate-800 text-white font-black text-base flex items-center justify-center mb-5 shadow-sm ring-1 ring-white/20 group-hover:scale-105 transition-transform duration-300">
+                    4
+                  </div>
+                  <h3 className="font-black text-lg sm:text-xl text-slate-900 mb-2.5">
+                    Đăng ký Học chính thức
+                  </h3>
+                  <p className="text-sm text-slate-600 leading-relaxed">
+                    Sau buổi học thử, học sinh ấn <strong>"Đăng ký học chính thức"</strong> để chốt khóa học. Trường hợp không đăng ký tiếp, <strong>tỷ lệ nhận lớp của giáo viên sẽ tự động giảm</strong> nhằm đảm bảo tính khách quan.
+                  </p>
                 </div>
-                <h3 className="font-extrabold text-lg sm:text-xl text-slate-900 mb-2.5">
-                  Đăng ký Học chính thức
-                </h3>
-                <p className="text-sm text-slate-600 leading-relaxed">
-                  Sau buổi học thử, học sinh ấn <strong>"Đăng ký học chính thức"</strong> để chốt khóa học. Trường hợp không đăng ký tiếp, <strong>tỷ lệ nhận lớp của giáo viên sẽ tự động giảm</strong> nhằm đảm bảo tính khách quan.
-                </p>
-              </div>
-              <div className="pt-4 mt-6 border-t border-slate-100 text-xs font-semibold text-slate-500">
-                Bước 4: Xác nhận chính thức
+                <div className="pt-4 mt-6 border-t border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  Bước 4: Xác nhận chính thức
+                </div>
               </div>
             </div>
           </div>
@@ -488,25 +522,35 @@ export function HomePage() {
       </section>
 
       {/* Section 3: Call to Action */}
-      <section className="py-16 md:py-20 bg-slate-900 text-white text-center">
-        <div className="max-w-4xl mx-auto px-4">
-          <h2 className="text-3xl md:text-5xl font-extrabold mb-4 tracking-tight">Kết nối với giáo viên và gia sư uy tín</h2>
-          <p className="text-slate-300 text-sm md:text-base mb-8 max-w-xl mx-auto">
-            Hơn 140+ giáo viên và gia sư đã qua kiểm định chuyên môn tại Hà Nội. Bắt đầu học thử ngay hôm nay.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              to="/tim-gia-su"
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3.5 rounded-2xl shadow-sm transition-all text-sm md:text-base"
-            >
-              Tìm kiếm Giáo viên & Gia sư
-            </Link>
-            <button
-              onClick={() => openAuthModal('register', 'teacher')}
-              className="bg-slate-800 hover:bg-slate-700 text-white font-bold px-8 py-3.5 rounded-2xl border border-slate-700 transition-all text-sm md:text-base cursor-pointer"
-            >
-              Đăng ký Giảng dạy
-            </button>
+      <section className="py-16 md:py-24 bg-[#FAF9F6] border-t border-slate-200/60">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <div className="p-2 rounded-3xl bg-slate-900/[0.03] border border-slate-900/[0.06] shadow-xl">
+            <div className="rounded-[calc(1.5rem-0.25rem)] bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white p-8 sm:p-14 text-center relative overflow-hidden">
+              <div className="absolute -top-24 -left-24 w-80 h-80 bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
+              <div className="relative z-10 max-w-3xl mx-auto space-y-4">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-white">
+                  Kết nối với giáo viên và gia sư uy tín
+                </h2>
+                <p className="text-slate-300 text-sm md:text-base max-w-xl mx-auto leading-relaxed">
+                  Hơn 140+ giáo viên và gia sư đã qua kiểm định chuyên môn tại Hà Nội. Bắt đầu học thử 1-1 ngay hôm nay.
+                </p>
+                <div className="pt-4 flex flex-col sm:flex-row gap-3.5 justify-center">
+                  <Link
+                    to="/tim-gia-su"
+                    className="bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-extrabold px-8 py-3.5 rounded-xl shadow-sm hover:shadow-md transition-all text-sm md:text-base flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <span>Tìm kiếm Giáo viên & Gia sư</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                  <button
+                    onClick={() => openAuthModal('register', 'teacher')}
+                    className="bg-white/10 hover:bg-white/15 active:scale-[0.98] text-white font-bold px-8 py-3.5 rounded-xl border border-white/20 transition-all text-sm md:text-base cursor-pointer"
+                  >
+                    Đăng ký Giảng dạy
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>

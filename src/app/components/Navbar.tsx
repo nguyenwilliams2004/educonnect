@@ -90,7 +90,7 @@ export function Navbar() {
       : 'Học sinh');
 
   return (
-    <header className="sticky top-0 z-50 bg-white/98 backdrop-blur-md border-b border-slate-100 shadow-2xs">
+    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200/60 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
       {/* Hàng chính Navbar */}
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2">
         <Link to="/" className="flex items-center gap-2 shrink-0">
@@ -195,7 +195,7 @@ export function Navbar() {
 
               {/* VERTICAL DROPDOWN MENU */}
               {userDropdownOpen && (
-                <div className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-slate-200/80 py-1 z-50 animate-in fade-in duration-150">
+                <div className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-white rounded-2xl shadow-[0_16px_36px_-8px_rgba(15,23,42,0.12)] border border-slate-200/80 py-1.5 z-50 animate-in fade-in duration-150">
                   {/* Header tóm tắt tài khoản: Tối giản, không gradient */}
                   <div className="px-4 py-3 border-b border-slate-100">
                     <div className="flex items-center gap-3">
